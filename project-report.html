@@ -1,0 +1,259 @@
+<title>The Tiny Tummy Standard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy:#17455e; --navy-d:#0e3345; --navy-dd:#12394e;
+    --cream:#f8f4ea; --paper:#ffffff; --ink:#22333d; --soft:#64808e;
+    --gold:#f0b64b; --gold-d:#c98f1c; --teal:#0ea777; --teal-d:#226a58;
+    --red:#b23a48; --line:#e7e1d2;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Quicksand','Segoe UI',system-ui,sans-serif; background:var(--cream); color:var(--ink); line-height:1.65; font-size:16px; }
+  h1,h2,h3,h4 { font-family:'Baloo 2','Quicksand',sans-serif; color:var(--navy); text-wrap:balance; }
+  .wrap { max-width:880px; margin:0 auto; padding:0 24px; }
+
+  /* Cover */
+  .cover { background:linear-gradient(160deg,var(--navy-d) 0%,var(--navy) 70%,#1d5674 100%); color:#e9eef1; padding:72px 24px 64px; position:relative; overflow:hidden; }
+  .cover::after { content:''; position:absolute; right:-120px; top:-120px; width:380px; height:380px; border-radius:50%; background:rgba(240,182,75,.12); }
+  .cover .kicker { font-size:.8rem; font-weight:700; letter-spacing:.22em; color:var(--gold); text-transform:uppercase; }
+  .cover h1 { color:#fff; font-size:clamp(2.2rem,6vw,3.6rem); line-height:1.08; margin:14px 0 18px; max-width:16ch; }
+  .cover p.lead { max-width:58ch; color:#cfe0ea; font-size:1.08rem; }
+  .cover .badges { display:flex; gap:10px; flex-wrap:wrap; margin-top:26px; }
+  .cover .badge { border:1px solid rgba(255,255,255,.25); border-radius:999px; padding:6px 15px; font-size:.82rem; font-weight:700; color:#fff; background:rgba(255,255,255,.06); }
+  .cover .powered { margin-top:34px; font-size:.72rem; letter-spacing:.18em; text-transform:uppercase; color:#8fa8b4; }
+  .cover .powered b { color:var(--gold); }
+
+  section { padding:52px 0 8px; }
+  .num { font-family:'Baloo 2'; font-weight:800; font-size:.85rem; color:var(--gold-d); letter-spacing:.14em; }
+  h2 { font-size:clamp(1.5rem,3.4vw,2.1rem); margin:4px 0 14px; }
+  p { margin-bottom:14px; max-width:70ch; }
+  p.big { font-size:1.08rem; }
+  strong { color:var(--navy); }
+
+  .pull { border-left:4px solid var(--gold); background:var(--paper); border-radius:0 14px 14px 0; padding:18px 22px; margin:22px 0; font-size:1.05rem; font-weight:600; color:var(--navy); max-width:64ch; box-shadow:0 4px 18px rgba(23,69,94,.07); }
+  .pull small { display:block; font-weight:600; color:var(--soft); font-size:.85rem; margin-top:6px; }
+
+  .cards { display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:14px; margin:20px 0; }
+  .card { background:var(--paper); border:1px solid var(--line); border-radius:14px; padding:18px 20px; box-shadow:0 4px 18px rgba(23,69,94,.06); }
+  .card .ico { font-size:1.5rem; }
+  .card h4 { margin:6px 0 4px; font-size:1.02rem; }
+  .card p { font-size:.9rem; color:var(--soft); margin:0; }
+
+  table { width:100%; border-collapse:collapse; background:var(--paper); border:1px solid var(--line); border-radius:14px; overflow:hidden; font-size:.92rem; margin:20px 0; }
+  th { background:var(--navy); color:#fff; text-align:left; padding:10px 14px; font-size:.78rem; letter-spacing:.06em; text-transform:uppercase; }
+  td { padding:10px 14px; border-bottom:1px solid var(--line); vertical-align:top; }
+  tr:last-child td { border-bottom:none; }
+  tr:nth-child(even) td { background:#fdfbf6; }
+  .tblwrap { overflow-x:auto; }
+
+  .chip { display:inline-block; font-size:.72rem; font-weight:700; border-radius:999px; padding:2px 10px; white-space:nowrap; }
+  .chip.ok { background:#e6f4ef; color:var(--teal-d); }
+  .chip.warn { background:#fdf3e3; color:#a3720d; }
+  .chip.bad { background:#fde7e7; color:var(--red); }
+
+  .flow { display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin:20px 0; }
+  .flow .step { background:var(--paper); border:1.5px solid var(--navy); border-radius:12px; padding:9px 15px; font-weight:700; font-size:.86rem; color:var(--navy); }
+  .flow .step small { display:block; font-weight:600; color:var(--soft); font-size:.72rem; }
+  .flow .arr { color:var(--gold-d); font-weight:800; }
+
+  .diagram { background:var(--paper); border:1px solid var(--line); border-radius:16px; padding:22px; margin:24px 0; box-shadow:0 4px 18px rgba(23,69,94,.06); overflow-x:auto; }
+  .diagram svg { display:block; width:100%; max-width:780px; height:auto; margin:0 auto; }
+  .cap { text-align:center; font-size:.82rem; color:var(--soft); margin-top:10px; }
+
+  .dark { background:var(--navy-dd); color:#e9eef1; border-radius:20px; padding:36px 30px; margin:44px 0; }
+  .dark h2, .dark h3 { color:#fff; }
+  .dark p { color:#cfe0ea; }
+  .dark .num { color:var(--gold); }
+
+  ul.tick { list-style:none; margin:14px 0 18px; max-width:70ch; }
+  ul.tick li { padding:6px 0 6px 30px; position:relative; }
+  ul.tick li::before { content:'✔'; position:absolute; left:2px; color:var(--teal); font-weight:800; }
+
+  .foot { background:var(--navy-d); color:#8fa8b4; text-align:center; padding:36px 24px; margin-top:60px; font-size:.85rem; }
+  .foot b { color:var(--gold); letter-spacing:.12em; }
+  .foot .logo { font-family:'Baloo 2'; font-size:1.3rem; color:#fff; margin-bottom:6px; }
+  @media print { .cover::after { display:none; } }
+</style>
+
+<div class="cover">
+  <div class="wrap">
+    <div class="kicker">Tiny Tummy · Operations Platform Report</div>
+    <h1>The Tiny Tummy Standard</h1>
+    <p class="lead">How a Lebanese kids-meal kitchen runs like a food factory: ISO 22000 discipline, lot-level traceability on every jar, quality gates with real temperature limits, a delivery protocol that tells parents before they ask — and a written trace behind every single action.</p>
+    <div class="badges">
+      <span class="badge">🛡 ISO 22000 aligned</span>
+      <span class="badge">🔍 Lot-to-spoon traceability</span>
+      <span class="badge">🌡 HACCP quality gates</span>
+      <span class="badge">🚚 Proactive delivery protocol</span>
+      <span class="badge">📜 Full audit trail</span>
+    </div>
+    <div class="powered">Powered by <b>IAN TRADING SAL</b></div>
+  </div>
+</div>
+
+<div class="wrap">
+
+<section>
+  <div class="num">01 · WHY THIS PLATFORM EXISTS</div>
+  <h2>We cook for the one customer who can't complain</h2>
+  <p class="big">A baby cannot tell you a jar tasted wrong, arrived warm, or came from a tired batch. Their parents can only trust — and trust is not a feeling we ask for, it is a system we can show. Every module in the Tiny Tummy platform exists to make one promise checkable: <strong>we can prove where every meal came from, how it was made, who made it, and when it reached your door.</strong></p>
+  <p>The platform is one operations dashboard covering the entire business: orders, kitchen production, inventory, purchasing, delivery, quality, customer care, and people. Nothing lives on paper alone, and nothing important lives in one person's memory.</p>
+</section>
+
+<section>
+  <div class="num">02 · FOOD SAFETY BY DESIGN — ISO 22000</div>
+  <h2>The standard is built into the screens, not filed in a drawer</h2>
+  <p>ISO 22000 is the international framework for food safety management. Most small kitchens treat it as a binder they open before an audit. We inverted that: <strong>the requirements live inside the dashboard as a working checklist</strong> — clause by clause (context, leadership, planning, support, operation, evaluation, improvement), with the PRPs (cleaning, pest control, supplier approval, hygiene, water) and the full HACCP chain (flow diagrams, hazard analysis, CCPs with critical limits, monitoring records).</p>
+  <ul class="tick">
+    <li>Every requirement carries a flag — <span class="chip ok">done</span> <span class="chip warn">in progress</span> <span class="chip bad">not done</span> — plus a named owner and an evidence reference.</li>
+    <li>A readiness bar shows the whole company one honest number, reviewed monthly by management.</li>
+    <li>Several requirements are not documents at all — they are the software itself: FEFO rotation, lot traceability and complaint-to-lot linking are ticked off by the way the system works.</li>
+    <li>Twice a year we run a traceability drill: pick a delivered order, trace back to every ingredient lot in under 30 minutes.</li>
+  </ul>
+  <div class="pull">For a kitchen feeding babies, food safety is not a department. It is the operating system.
+    <small>The checklist is our working summary; certification work follows the official standard text.</small></div>
+</section>
+
+<section>
+  <div class="num">03 · WHY LOT = STOCK</div>
+  <h2>Nothing enters our kitchen anonymously</h2>
+  <p class="big">In our inventory there is no such thing as "12 kg of carrots." There is <strong>lot CAR-240825 — 8 kg, expiring on a known date, sitting on a named shelf</strong> — and lot CAR-240818 next to it. Stock is not a number; stock is a set of lots. That single design decision powers everything below:</p>
+  <div class="cards">
+    <div class="card"><div class="ico">⏳</div><h4>FEFO, enforced</h4><p>Picking always takes the First-Expired, First-Out lot. The screen shows which lot is next; fresher stock physically cannot jump the queue unnoticed.</p></div>
+    <div class="card"><div class="ico">🧾</div><h4>Invoice = receiving</h4><p>Posting a supplier invoice IS the stock entry: each line (ingredient, quantity, cost, lot number, expiry) becomes a lot instantly. No separate receiving step to forget, no unlabeled delivery accepted at the door.</p></div>
+    <div class="card"><div class="ico">🚨</div><h4>Recall in minutes</h4><p>If a supplier lot is ever suspect, we know exactly which production batches used it and exactly which customers received those batches — before the end of the phone call.</p></div>
+    <div class="card"><div class="ico">💰</div><h4>Honest stock value</h4><p>Every lot carries its own purchase cost, so stock value, food cost and margins are computed from reality, not averages.</p></div>
+  </div>
+
+  <h3 style="margin-top:26px">…and why every product carries a lot number too</h3>
+  <p>When an order is packed, the system prints a <strong>batch lot label</strong> (e.g. <code>B-2026-040-0828</code>) onto it. That label is the knot that ties both directions of the chain together:</p>
+  <div class="diagram">
+    <svg viewBox="0 0 780 190" role="img" aria-label="Two-way traceability chain from supplier lot to customer">
+      <defs>
+        <marker id="a1" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#c98f1c"/></marker>
+        <marker id="a2" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#0ea777"/></marker>
+      </defs>
+      <g font-family="Quicksand,sans-serif">
+        <rect x="10" y="55" width="160" height="62" rx="12" fill="#17455e"/>
+        <text x="90" y="81" text-anchor="middle" fill="#fff" font-size="13" font-weight="700">Supplier lot</text>
+        <text x="90" y="100" text-anchor="middle" fill="#cfe0ea" font-size="11">CAR-240825 · exp · cost</text>
+
+        <rect x="215" y="55" width="160" height="62" rx="12" fill="#1d5674"/>
+        <text x="295" y="81" text-anchor="middle" fill="#fff" font-size="13" font-weight="700">Recipe (BOM)</text>
+        <text x="295" y="100" text-anchor="middle" fill="#cfe0ea" font-size="11">FEFO pick, logged</text>
+
+        <rect x="420" y="55" width="160" height="62" rx="12" fill="#0e3345"/>
+        <text x="500" y="81" text-anchor="middle" fill="#fff" font-size="13" font-weight="700">Batch lot</text>
+        <text x="500" y="100" text-anchor="middle" fill="#f0b64b" font-size="11" font-weight="700">B-2026-040-0828</text>
+
+        <rect x="625" y="55" width="145" height="62" rx="12" fill="#0ea777"/>
+        <text x="697" y="81" text-anchor="middle" fill="#fff" font-size="13" font-weight="700">Customer</text>
+        <text x="697" y="100" text-anchor="middle" fill="#e6f4ef" font-size="11">order · door · date</text>
+
+        <line x1="172" y1="72" x2="212" y2="72" stroke="#c98f1c" stroke-width="2.5" marker-end="url(#a1)"/>
+        <line x1="377" y1="72" x2="417" y2="72" stroke="#c98f1c" stroke-width="2.5" marker-end="url(#a1)"/>
+        <line x1="582" y1="72" x2="622" y2="72" stroke="#c98f1c" stroke-width="2.5" marker-end="url(#a1)"/>
+        <text x="390" y="40" text-anchor="middle" font-size="11.5" font-weight="700" fill="#c98f1c">FORWARD — where did this lot go?</text>
+
+        <line x1="622" y1="100" x2="582" y2="100" stroke="#0ea777" stroke-width="2.5" marker-end="url(#a2)" opacity="0"/>
+        <path d="M660 122 C 560 165, 220 165, 120 122" stroke="#0ea777" stroke-width="2.5" fill="none" marker-end="url(#a2)"/>
+        <text x="390" y="172" text-anchor="middle" font-size="11.5" font-weight="700" fill="#0ea777">BACKWARD — what exactly went into this meal?</text>
+      </g>
+    </svg>
+    <div class="cap">One label, two directions: any complaint finds its ingredients; any ingredient finds its customers.</div>
+  </div>
+</section>
+
+<section>
+  <div class="num">04 · QUALITY CONTROL AT THE LINE</div>
+  <h2>Every meal passes gates a person must sign</h2>
+  <p>Production is not a checklist of good intentions — it is a sequence of <strong>signed, timed, measured steps</strong>. Two of them are HACCP Critical Control Points with hard limits the software refuses to bend:</p>
+  <div class="tblwrap"><table>
+    <tr><th>Gate</th><th>Test</th><th>Limit</th><th>If it fails</th></tr>
+    <tr><td><b>🔥 Cooking</b></td><td>Core temperature measured and recorded</td><td>≥ 85 °C</td><td>The step cannot close. Re-cook, measure again; the failure is logged and the manager alerted.</td></tr>
+    <tr><td><b>❄️ Blast chill</b></td><td>Temperature after chilling, within 90 min</td><td>≤ 5 °C</td><td>Same — the step stays open until the food is safely cold, and the excursion is on record.</td></tr>
+    <tr><td><b>⚖️ Portioning</b></td><td>Actual portions and average weight vs the product's target</td><td>± 5 %</td><td>Recorded anyway; outside tolerance alerts the manager — short portions and giveaways both show up in margin.</td></tr>
+    <tr><td><b>✅ Final QC</b></td><td>Label vs order, seal, weight sample, cold chain</td><td>Pass required</td><td>Nothing reaches dispatch without the QC signature.</td></tr>
+  </table></div>
+  <p>Each step also carries a <strong>planned time from the recipe</strong>. Starting a step starts a timer; when the planned minutes are up, a buzzer sounds in the kitchen and the step turns red until it is handled. Overdue production is never silent.</p>
+</section>
+
+<div class="dark"><div class="wrap" style="padding:0">
+  <div class="num">05 · THE BOM — ONE RECIPE, THE WHOLE TRUTH</div>
+  <h2>The recipe card is also the cost sheet and the production plan</h2>
+  <p>Every product's Bill of Materials holds three kinds of lines, and together they run the factory:</p>
+  <p><b style="color:#f0b64b">Ingredient lines</b> — exact quantity per portion, in the unit the kitchen actually uses (grams, kilograms, liters, pieces — converted automatically to the stocked unit). These lines drive FEFO stock consumption the moment an order enters the kitchen.</p>
+  <p><b style="color:#f0b64b">Process steps</b> — every named step of production ("Carrot cooking", "Meat preparation", portioning, chilling, packing…), each with its planned minutes and its own labor rate. These minutes drive the kitchen clock, the alarms, the station workload chart — and the labor cost.</p>
+  <p><b style="color:#f0b64b">The full cost</b> — materials plus labor, per portion and per batch, with food-cost % flagged when it crosses target. Margins everywhere in the platform use this full cost, so a product is never "profitable" only because nobody counted the hands that made it.</p>
+</div></div>
+
+<section>
+  <div class="num">06 · THE CUSTOMER'S VOICE — FEEDBACK &amp; COMPLAINTS REGISTER</div>
+  <h2>Every message becomes a numbered case that cannot be lost</h2>
+  <p>Complaints, questions, suggestions and praise all land in one register as typed records — <code>CF-2026-006</code> — with a category, a priority up to <span class="chip bad">critical</span>, a named responsible person, a follow-up date, and a status that only moves through a real workflow: new → in progress → escalated → resolved.</p>
+  <ul class="tick">
+    <li><strong>Nothing waits unseen.</strong> The moment a team member opens the dashboard, a "records waiting for you" panel greets them with their open cases.</li>
+    <li><strong>Pass the ball.</strong> A case can be handed to another person or a whole role with a note; the previous owner stays visible on the record and the handover is logged — responsibility moves, accountability never disappears.</li>
+    <li><strong>A complaint is a quality instrument.</strong> A food-quality case links the order and its batch lot — so one parent's message about one jar automatically becomes a check on an entire lot. That is how a complaint register protects every other customer.</li>
+    <li><strong>Category analytics</strong> show where problems cluster (delivery, billing, food quality…), reviewed weekly against lots.</li>
+  </ul>
+</section>
+
+<section>
+  <div class="num">07 · THE DELIVERY PROTOCOL</div>
+  <h2>The customer hears from us before they need to ask</h2>
+  <p class="big">Most "where is my order?" calls are not complaints — they are uncertainty. Our protocol removes the uncertainty, which removes the calls, which removes effort from both the family and the team:</p>
+  <div class="flow">
+    <span class="step">🚚 Left the kitchen<small>push with ETA from road distance</small></span><span class="arr">›</span>
+    <span class="step">🗺 On the road<small>live map, agent GPS, cold-chain boxes</small></span><span class="arr">›</span>
+    <span class="step">🚪 Arriving soon<small>push minutes before the door</small></span><span class="arr">›</span>
+    <span class="step">📦 Delivered<small>timestamped confirmation</small></span>
+  </div>
+  <p>The estimated arrival is computed honestly — road distance at real city speed, not wishful thinking — and the one rule that builds the most trust: <strong>if we are going to be late, the customer's phone knows before the customer does.</strong> A delay, whether reported by the agent or detected automatically when the promised time passes, immediately sends a new arrival time. Order before 3:00 PM, delivered next day; every stage of the pipeline is timestamped so the promise is measurable, not aspirational.</p>
+  <div class="pull">Confidence is the product of predictability. A parent who was told about a 15-minute delay trusts us more than one whose order arrived on time in silence.</div>
+</section>
+
+<section>
+  <div class="num">08 · EVERY ACTION LEAVES A TRACE</div>
+  <h2>The log file behind every transaction</h2>
+  <p>Every object in the platform — an order, a case, an invoice, a requisition, a lot — carries its own <strong>history log: who did what, and exactly when</strong>. A single order's file reads like a flight recorder:</p>
+  <div class="tblwrap"><table>
+    <tr><th>Time</th><th>Entry</th></tr>
+    <tr><td>10:02</td><td>Order placed on website — customer, items, address</td></tr>
+    <tr><td>10:14</td><td>Confirmed by Sara · customer pushed</td></tr>
+    <tr><td>10:31</td><td>Sent to kitchen · stock consumed FEFO: 0.36 kg carrots ← lot CAR-240825</td></tr>
+    <tr><td>10:58</td><td>CCP · Cook: 88 °C ✓ within limit — Chef Nadim</td></tr>
+    <tr><td>11:20</td><td>Portioned 3/3 · avg 121 g (target 120 g, +1 %) ✓ — Chef Nadim</td></tr>
+    <tr><td>11:41</td><td>Batch lot label printed: B-2026-040-0828 · QC passed ✓</td></tr>
+    <tr><td>12:05</td><td>Dispatched with Ali · 6.2 km · ETA 12:22 — customer pushed</td></tr>
+    <tr><td>12:24</td><td>Delivered ✓</td></tr>
+  </table></div>
+  <p>Above the per-object files sits the <strong>central Activity Log</strong>: one register of every action in the platform — per user, per module, with date and time — filterable by person, searchable, exportable, and append-only. One screen answers “who touched this, and when?” for the whole company.</p>
+  <p>The same discipline covers the sensitive actions: marking an invoice paid, writing off an expired lot (reason required), granting a kitchen station, escalating a case, a super-admin working as another user — all logged with both identities. When something goes wrong, we do not reconstruct events from memory; <strong>we read them.</strong> That is what makes errors traceable, fixes fast, and disputes short.</p>
+</section>
+
+<section>
+  <div class="num">09 · PEOPLE, ROLES &amp; STATIONS</div>
+  <h2>The right hands on the right task — by permission, not habit</h2>
+  <p>Access follows one key per capability, resolved per person → role → super admin, and enforced in the database itself, not only on the screen. In the kitchen it goes one level finer: every person holds <strong>station grants</strong> — 🔪 prep, 🔥 cooking, 🥣 assembly, ⚖️ portioning, ❄️ chilling, 📦 packaging, ✅ QC. A new helper granted only assembly and packaging simply cannot start a cooking step; the system offers each task only to the people qualified for it, and can auto-assign a whole order's steps to the least-loaded eligible hands.</p>
+</section>
+
+<section>
+  <div class="num">10 · WHAT THIS ADDS UP TO</div>
+  <h2>Less effort, more proof, calmer customers</h2>
+  <div class="cards">
+    <div class="card"><div class="ico">👨‍👩‍👧</div><h4>For families</h4><p>Meals with a traceable history, honest arrival times, and a complaint channel where every message has a number, an owner and a deadline.</p></div>
+    <div class="card"><div class="ico">👩‍🍳</div><h4>For the team</h4><p>No double entry — an invoice is the stock entry, a step signature is the record, a status change is the notification. The system does the clerical work.</p></div>
+    <div class="card"><div class="ico">🏢</div><h4>For the business</h4><p>True costs on every product, payables that age visibly, an ISO readiness number reviewed monthly, and a recall capability measured in minutes.</p></div>
+    <div class="card"><div class="ico">🛡</div><h4>For the auditor</h4><p>Traceability, CCP records, corrective actions and complaint-to-lot links are not prepared for the audit — they are the daily tool.</p></div>
+  </div>
+</section>
+
+</div>
+
+<div class="foot">
+  <div class="logo">🥕 Tiny Tummy</div>
+  Operations Platform Report · Version 1.0 · August 2026<br>
+  Powered by <b>IAN TRADING SAL</b>
+</div>
