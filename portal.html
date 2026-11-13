@@ -519,7 +519,7 @@ function confetti() {
   for (var i = 0; i < 18; i++) dots += '<circle cx="' + ((i * 37) % 160) + '" cy="' + ((i * 53) % 120) + '" r="' + (2 + i % 3) + '" fill="' + cols[i % 5] + '"/>';
   return '<svg class="conf" viewBox="0 0 160 120" aria-hidden="true">' + dots + '</svg>';
 }
-function waOrder(msg) { return 'https://wa.me/96171008604?text=' + encodeURIComponent(msg); }
+function waOrder(msg) { return 'https://wa.me/96170341002?text=' + encodeURIComponent(msg); }
 function vaccinesFor(c) { return S.vaccines.filter(function (v) { return v.child === c.id; }).sort(function (a, b) { return a.due < b.due ? -1 : 1; }); }
 function growthFor(c) { return S.growth.filter(function (g) { return g.child === c.id; }).sort(function (a, b) { return a.date < b.date ? -1 : 1; }); }
 
