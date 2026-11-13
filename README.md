@@ -59,7 +59,7 @@ orders arrive.
 
 - Prices are `null` until you set them (the site just hides the price tag);
   set them in the dashboard or in `products-data.js`.
-- Ordering currently goes through WhatsApp (+961 71 008 604). The `orders`
+- Ordering currently goes through WhatsApp (+961 70 341 002). The `orders`
   table and dashboard are already in place if you later add a real cart.
 - The dashboard page is `noindex` and useless without a valid staff login —
   RLS in Supabase is what actually protects the data.
