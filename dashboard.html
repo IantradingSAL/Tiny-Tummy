@@ -362,6 +362,60 @@ button.dk.on { box-shadow:0 0 0 3px color-mix(in srgb, var(--sc) 30%, transparen
 .lt-i { display:inline-grid; place-items:center; width:26px; height:26px; border-radius:8px; background:var(--cream); color:var(--pea-dark); margin-right:8px; vertical-align:middle; }
 .lotc { font-family:ui-monospace,monospace; font-size:.78rem; background:#f4f1e8; border-radius:6px; padding:2px 6px; }
 .loc { display:inline-flex; align-items:center; gap:4px; font-size:.8rem; font-weight:600; }
+
+/* ── Unified look for every remaining page ── */
+.pagehead h1 .i { display:none; }
+.btn { display:inline-flex; align-items:center; justify-content:center; gap:5px; }
+.kpis { grid-template-columns:repeat(auto-fit,minmax(175px,1fr)); }
+.kpi { display:flex; align-items:center; gap:12px; border-top:4px solid var(--sc,#17455e) !important; border-radius:14px; padding:12px 14px; }
+.kpi .oi { width:40px; height:40px; border-radius:11px; display:grid; place-items:center; color:var(--sc,#17455e); background:color-mix(in srgb, var(--sc,#17455e) 12%, #fff); font-size:1.2rem; flex-shrink:0; }
+.kpi .kt { min-width:0; }
+.kpi .v { font-size:1.4rem; line-height:1.15; color:var(--ink) !important; }
+.kpi .l { font-size:.7rem; }
+.kpi .l .i { display:none; }
+.kpi.click:hover .l::after { content:''; }
+.chan { display:inline-flex; flex-wrap:wrap; background:#ece6d6; border-radius:999px; padding:4px; gap:2px; margin-bottom:0; }
+.chan button { border:none !important; background:transparent; color:var(--soft); border-radius:999px; padding:6px 14px; font-weight:700; font-size:.82rem; display:inline-flex; align-items:center; gap:5px; }
+.chan button:hover { color:var(--ink); }
+.chan button.active { background:var(--paper); color:var(--ink); box-shadow:0 2px 8px rgba(23,69,94,.14); }
+.toolbar { gap:12px; }
+.toolbar .chan { margin-bottom:0; }
+.panel h3 .i { color:var(--gold-dark); }
+td.pill-row { display:table-cell; white-space:nowrap; }
+td.pill-row > * { margin:2px 4px 2px 0; vertical-align:middle; }
+table.t thead th { background:transparent; }
+table.t tbody tr:hover td { background:#fffaf0; }
+.search-in { border-radius:999px; padding:8px 14px; }
+@media (max-width:640px){ .kpis { grid-template-columns:repeat(2,1fr); gap:8px; } .kpi { padding:9px 10px; gap:8px; } .kpi .oi { width:32px; height:32px; font-size:1rem; } .kpi .v { font-size:1.1rem; } .kpi .l { font-size:.58rem; } }
+
+/* Recipes · BOM fold-out cards */
+.bc-tools { display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:12px; }
+details.bomc { padding:0; }
+details.bomc > summary { list-style:none; cursor:pointer; display:flex; align-items:center; gap:14px; flex-wrap:wrap; padding:14px 18px; border-radius:var(--radius); }
+details.bomc > summary::-webkit-details-marker { display:none; }
+details.bomc > summary:hover { background:#fffaf0; }
+details.bomc[open] > summary { border-bottom:1px solid var(--line); border-radius:var(--radius) var(--radius) 0 0; margin-bottom:12px; }
+details.bomc > :not(summary) { margin-left:18px; margin-right:18px; }
+details.bomc > .stat-line { margin-bottom:18px; }
+.bc-name { display:flex; align-items:center; gap:8px; min-width:200px; } .bc-name b { font-family:'Baloo 2'; font-size:1.08rem; }
+.bc-stats { display:flex; gap:16px; flex-wrap:wrap; font-size:.8rem; color:var(--soft); flex:1; } .bc-stats b { color:var(--ink); }
+.bc-chev { color:var(--soft); transition:transform .15s; display:flex; } details.bomc[open] .bc-chev { transform:rotate(90deg); }
+/* ISO 22000 */
+.iso-h { display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:10px; } .iso-h h3 { margin:0; } .iso-h .stp-bar { width:140px; }
+select.flag { font-weight:700; border-radius:999px; }
+select.flag.f-done { background:#e6f4ef; color:var(--ok); border-color:#bfe0d4; }
+select.flag.f-progress { background:#fdf3e3; color:#a3720d; border-color:#f0dcae; }
+select.flag.f-todo { background:#fde7e7; color:var(--bad); border-color:#f1c4c9; }
+/* Overview advisor */
+ul.advice { list-style:none; margin:8px 0 0; padding:0; font-size:.86rem; }
+ul.advice li { position:relative; padding:9px 0 9px 42px; border-bottom:1px solid var(--line); min-height:44px; }
+ul.advice li:last-child { border-bottom:none; }
+ul.advice li > .i:first-child { position:absolute; left:0; top:7px; width:30px; height:30px; padding:7px; border-radius:9px; background:#fdf3e3; color:#a3720d; }
+.kpis { display:flex; flex-wrap:wrap; } .kpis > .kpi { flex:1 1 200px; }
+@media (max-width:640px){ .kpis > .kpi { flex:1 1 40%; } }
+.grid2 > *, .frm .row > *, .frm > * { min-width:0; }
+.frm select, .frm input:not([type=checkbox]):not([type=radio]), .frm textarea { max-width:100%; width:100%; }
+@media (max-width:640px){ .frm .row { grid-template-columns:1fr; } }
 /* ── Dashboard-wide icon layer ── */
 aside nav a > span { display:flex; width:20px; justify-content:center; font-size:1.05rem; }
 aside nav a > span .i { stroke-width:1.8; }
@@ -1084,6 +1138,7 @@ function render() {
   var blocked = guard(current);
   host.innerHTML = blocked || RENDER[current]();
   if (!blocked && AFTER[current]) AFTER[current]();
+  decorateKpis(host);
   var u = currentUser();
   document.getElementById('modebar').innerHTML = CONNECTED
     ? '🟢 <b>Connected to Supabase.</b> Data shown is stored in this browser until the tt_* tables wiring is enabled in Settings.'
@@ -1176,7 +1231,7 @@ function adviseHtml() {
   var stuck = orders.filter(function (o) { return o.status === 'new'; });
   if (stuck.length) tips.push('🛒 ' + stuck.length + ' order(s) still unconfirmed — confirm before the 3 PM cutoff to keep the next-day promise.');
   if (!tips.length) tips.push('✅ Nothing urgent — stock, margins, cases and ISO are all inside their limits.');
-  return '<ul style="margin:6px 0 0 18px;font-size:.86rem;display:grid;gap:6px">' +
+  return '<ul class="advice">' +
     tips.slice(0, 6).map(function (t) { return '<li>' + t + '</li>'; }).join('') + '</ul>';
 }
 
@@ -1778,6 +1833,8 @@ function kitchenDetail(o) {
 }
 
 /* ── BOM / Recipes — full editor ── */
+var BOM_OPEN = {};
+function bomAll(on) { store('products').all().forEach(function (p) { BOM_OPEN[p.id] = on; }); render(); }
 RENDER.bom = function () {
   var products = store('products').all().map(normProd), bom = store('bom').all(), ings = store('ingredients').all();
   var cards = products.map(function (p) {
@@ -1810,7 +1867,12 @@ RENDER.bom = function () {
     var fullPct = p.price ? Math.round((p.price - fullCost) / p.price * 100) : 0;
     var batchCost = fullCost * (p.batch_portions || 1);
     var costPer100 = p.portion_g ? cost / p.portion_g * 100 : 0;
-    return '<div class="panel"><h3>' + esc(p.name) + ' <span class="chip fefo">' + esc(p.age) + '</span></h3>' +
+    return '<details class="panel bomc"' + (BOM_OPEN[p.id] ? ' open' : '') + ' ontoggle="BOM_OPEN[\'' + p.id + '\']=this.open">' +
+      '<summary><span class="bc-name"><b>' + esc(p.name) + '</b><span class="chip fefo">' + esc(p.age) + '</span></span>' +
+      '<span class="bc-stats"><span>Price <b>' + money(p.price) + '</b></span><span>Full cost <b>' + money(fullCost) + '</b></span>' +
+      '<span>Margin <b style="color:' + (fullPct < 40 ? 'var(--bad)' : 'var(--ok)') + '">' + fullPct + '%</b></span>' +
+      '<span>' + (lines.split('<tr>').length - 1) + ' ingredients · ' + p.steps.length + ' steps · ' + tBatch + ' min</span></span>' +
+      '<span class="bc-chev">' + ic('chev') + '</span></summary>' +
       '<div class="bom-head">' +
       '<span class="kv">Sell price $<input class="inline-num" type="number" step="0.5" value="' + p.price + '" onchange="prodSet(\'' + p.id + '\',\'price\',this.value)"></span>' +
       '<span class="kv">Portion <input class="inline-num" type="number" step="5" value="' + (p.portion_g || 0) + '" onchange="prodSet(\'' + p.id + '\',\'portion_g\',this.value)"> g</span>' +
@@ -1840,11 +1902,12 @@ RENDER.bom = function () {
       '<span>Full margin <b style="color:' + (fullPct < 40 ? 'var(--bad)' : 'var(--ok)') + '">' + money(p.price - fullCost) + ' · ' + fullPct + '%</b></span>' +
       '<span>Batch (' + (p.batch_portions || 1) + ' p.) <b>' + money(batchCost) + '</b></span>' +
       '<span>Cost / 100g <b>' + money(costPer100) + '</b></span>' +
-      '</div></div>';
+      '</div></details>';
   }).join('');
   return '<div class="pagehead"><div><h1>🍽️ Recipes · BOM</h1><div class="sub">Bill of materials per portion + process times per step. Materials drive FEFO consumption; step minutes drive the kitchen clock, the ⏰ alarm and the time cost. Full cost = materials + kitchen time.</div></div>' +
     '<span class="pill-row"><span class="kv" style="display:flex;align-items:center;gap:6px;font-size:.82rem;font-weight:700;color:var(--soft)">⏱ Kitchen time rate $<input class="inline-num" type="number" step="0.5" value="' + kitchenRate() + '" onchange="setKitchenRate(this.value)"> /hour</span>' +
-    '<button class="btn p" onclick="newProduct()">＋ New product</button></span></div>' + cards;
+    '<button class="btn p" onclick="newProduct()">＋ New product</button></span></div>' +
+    '<div class="bc-tools"><span class="muted">Tap a recipe to open its ingredients, steps and costs.</span><span class="pill-row"><button class="btn o s" onclick="bomAll(true)">Open all</button><button class="btn o s" onclick="bomAll(false)">Close all</button></span></div>' + cards;
 };
 function bomSet(id, field, value) {
   var bom = store('bom').all(); var b = byId(bom, id); if (!b) return;
@@ -2624,7 +2687,7 @@ RENDER.iso = function () {
     var d = mine.filter(function (i) { return i.status === 'done'; }).length;
     var rows = mine.map(function (i) {
       return '<tr><td>' + esc(i.item) + '</td>' +
-        '<td><select onchange="isoSet(\'' + i.id + '\',\'status\',this.value)">' +
+        '<td><select class="flag f-' + i.status + '" onchange="isoSet(\'' + i.id + '\',\'status\',this.value)">' +
         ['done', 'progress', 'todo'].map(function (s) {
           var lbl = s === 'done' ? '✅ done' : s === 'progress' ? '🟡 in progress' : '🔴 not done';
           return '<option value="' + s + '"' + (i.status === s ? ' selected' : '') + '>' + lbl + '</option>';
@@ -2632,7 +2695,7 @@ RENDER.iso = function () {
         '<td><input value="' + esc(i.owner) + '" placeholder="owner" style="width:110px" onchange="isoSet(\'' + i.id + '\',\'owner\',this.value)"></td>' +
         '<td><input value="' + esc(i.evidence) + '" placeholder="evidence / doc ref" style="width:150px" onchange="isoSet(\'' + i.id + '\',\'evidence\',this.value)"></td></tr>';
     }).join('');
-    return '<div class="panel"><h3>' + esc(c) + ' <span class="muted" style="font-family:Quicksand;font-size:.8rem">' + d + '/' + mine.length + '</span></h3>' +
+    return '<div class="panel"><div class="iso-h"><h3>' + esc(c) + '</h3><span class="stp-bar"><i style="width:' + Math.round(d / mine.length * 100) + '%"></i></span><span class="muted">' + d + ' of ' + mine.length + ' done</span></div>' +
       '<div class="tbl-scroll"><table class="t"><thead><tr><th>Requirement</th><th>Flag</th><th>Owner</th><th>Evidence</th></tr></thead><tbody>' + rows + '</tbody></table></div></div>';
   }).join('');
   return '<div class="pagehead"><div><h1>🛡️ ISO 22000 checklist</h1><div class="sub">Food safety management readiness sheet, clause by clause — flag each item done / in progress / not done. (Working summary; certification uses the official standard text.)</div></div>' +
@@ -3359,6 +3422,7 @@ function closeDlg() { document.getElementById('dlg').close(); }
     undo: '<path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/>',
     refresh: '<path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/>',
     forward: '<path d="m15 17 5-5-5-5"/><path d="M4 18v-2a4 4 0 0 1 4-4h12"/>',
+    chev: '<path d="m9 18 6-6-6-6"/>',
     milk: '<path d="M8 2h8"/><path d="M9 2v2.789a4 4 0 0 1-.672 2.219l-.656.984A4 4 0 0 0 7 10.212V20a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2v-9.789a4 4 0 0 0-.672-2.219l-.656-.984A4 4 0 0 1 15 4.788V2"/><path d="M7 15a6.472 6.472 0 0 1 5 0 6.47 6.47 0 0 0 5 0"/>',
     wheat: '<path d="M2 22 16 8"/><path d="M3.47 12.53 5 11l1.53 1.53a3.5 3.5 0 0 1 0 4.94L5 19l-1.53-1.53a3.5 3.5 0 0 1 0-4.94Z"/><path d="M7.47 8.53 9 7l1.53 1.53a3.5 3.5 0 0 1 0 4.94L9 15l-1.53-1.53a3.5 3.5 0 0 1 0-4.94Z"/><path d="M11.47 4.53 13 3l1.53 1.53a3.5 3.5 0 0 1 0 4.94L13 11l-1.53-1.53a3.5 3.5 0 0 1 0-4.94Z"/><path d="M20 2h2v2a4 4 0 0 1-4 4h-2V6a4 4 0 0 1 4-4Z"/>',
     cherry: '<path d="M2 17a5 5 0 0 0 10 0c0-2.76-2.5-5-5-3-2.5-2-5 .24-5 3Z"/><path d="M12 17a5 5 0 0 0 10 0c0-2.76-2.5-5-5-3-2.5-2-5 .24-5 3Z"/><path d="M7 14c3.22-2.91 4.29-8.75 5-12 1.66 2.38 4.94 9 5 12"/><path d="M22 9c-4.29 0-7.14-2.33-10-7 5.71 0 10 4.67 10 7Z"/>'
@@ -3431,6 +3495,33 @@ function iconText(t) {
   }).observe(document.body, { childList: true, subtree: true, characterData: true, attributes: true, attributeFilter: ['title', 'placeholder', 'aria-label'] });
 })();
 
+/* Every older-style KPI tile gets the same look as the redesigned pages:
+   an icon chip chosen from its label, and a colour from its state. */
+var KPI_ICON = [
+  [/expir/i, 'hourglass'], [/low stock|below/i, 'alert'], [/overdue/i, 'alarm'], [/complaint/i, 'megaphone'],
+  [/iso/i, 'shield'], [/pipeline/i, 'forward'], [/revenue/i, 'cash'], [/margin/i, 'chart'], [/portion/i, 'bowl'],
+  [/production/i, 'chef'], [/work|queued/i, 'timer'], [/invoiced/i, 'receipt'], [/outstanding/i, 'wallet'],
+  [/provider|supplier/i, 'factory'], [/resolved/i, 'checkc'], [/positive|feedback/i, 'thumb'], [/record/i, 'clipboard'],
+  [/action/i, 'history'], [/user|team/i, 'users'], [/today/i, 'timer'], [/open/i, 'inbox'], [/order/i, 'cart'],
+  [/value|stock/i, 'wallet'], [/item/i, 'box'], [/requisition/i, 'receipt']
+];
+var KPI_COLORS = ['#17455e', '#2f6fb0', '#2e8770', '#7a4aa8', '#c98a1b', '#e08a2e', '#4a90c4'];
+function decorateKpis(root) {
+  [].forEach.call((root || document).querySelectorAll('.kpi'), function (k, i) {
+    if (k.querySelector('.oi')) return;
+    var l = k.querySelector('.l'), v = k.querySelector('.v'); if (!l || !v) return;
+    var txt = l.textContent, icon = 'bars';
+    for (var j = 0; j < KPI_ICON.length; j++) if (KPI_ICON[j][0].test(txt)) { icon = KPI_ICON[j][1]; break; }
+    var c = /\b(bad|b-red)\b/.test(k.className) ? '#b23a48' : /\b(warn|b-gold)\b/.test(k.className) ? '#c98a1b' :
+      /\b(good|b-green)\b/.test(k.className) ? '#2e8770' : /b-blue/.test(k.className) ? '#2f6fb0' :
+      /b-navy/.test(k.className) ? '#17455e' : KPI_COLORS[i % KPI_COLORS.length];
+    k.style.setProperty('--sc', c);
+    var wrap = document.createElement('span'); wrap.className = 'kt';
+    k.insertBefore(wrap, v); wrap.appendChild(v); wrap.appendChild(l);
+    var oi = document.createElement('span'); oi.className = 'oi'; oi.innerHTML = ic(icon);
+    k.insertBefore(oi, wrap);
+  });
+}
 /* ── boot ── */
 /* Super admin can take over any role: pick anyone in the act-as switcher,
    work as them (their permissions apply), and return with one click.
