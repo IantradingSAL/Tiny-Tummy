@@ -7,7 +7,7 @@
 <meta name="robots" content="noindex">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%2312394e'/%3E%3Ctext x='16' y='22' font-family='Arial' font-weight='700' font-size='16' text-anchor='middle' fill='%23f0b64b'%3ETT%3C/text%3E%3C/svg%3E">
+<link rel="icon" type="image/png" href="images/tt-logo-mark.png">
 <style>
 :root {
   /* Tiny Tummy brand: deep navy, warm cream, gold — from tinytummylb.com */
@@ -27,9 +27,12 @@ input,select,textarea { font-family:inherit; font-size:.92rem; padding:7px 10px;
 input:focus,select:focus,textarea:focus { outline:2px solid var(--carrot); border-color:var(--carrot); }
 
 .app { display:flex; min-height:100vh; }
-aside { width:225px; background:#12394e; color:#e9eef1; padding:16px 10px; position:sticky; top:0; height:100vh; overflow-y:auto; flex-shrink:0; }
-aside .logo { color:var(--gold); font-size:1.25rem; padding:4px 10px 14px; display:block; }
-aside .logo small { display:block; font-size:.6rem; color:#8fa8b4; letter-spacing:.1em; font-family:'Quicksand'; }
+aside { width:225px; background:#123c56; color:#e9eef1; padding:16px 10px; position:sticky; top:0; height:100vh; overflow-y:auto; flex-shrink:0; }
+aside .logo { display:block; padding:2px 6px 14px; text-decoration:none; }
+aside .logo .logo-full { display:block; width:100%; max-width:190px; height:auto; }
+aside .logo .logo-mark { display:none; width:40px; height:40px; border-radius:10px; margin:0 auto; }
+aside .logo small { display:block; font-size:.6rem; color:#8fa8b4; letter-spacing:.1em; font-family:'Quicksand'; padding-left:6px; margin-top:2px; }
+@media (max-width:900px){ aside .logo .logo-full { display:none; } aside .logo .logo-mark { display:block; } aside .logo { padding:2px 0 12px; } }
 aside nav a { display:flex; align-items:center; gap:9px; padding:8px 12px; border-radius:9px; font-weight:600; font-size:.88rem; text-decoration:none; cursor:pointer; margin-bottom:2px; }
 aside nav a:hover { background:rgba(255,255,255,.08); }
 aside nav a.active { background:var(--gold); color:#12394e; }
@@ -468,7 +471,7 @@ table.pm tfoot td { font-size:.74rem; font-weight:700; color:var(--soft); border
 
 <div class="app">
 <aside>
-  <span class="logo">🥕 Tiny Tummy <small>OPERATIONS DASHBOARD</small></span>
+  <a class="logo" href="index.html" title="Tiny Tummy — huge love in a plate"><img class="logo-full" src="images/tt-logo.png" alt="Tiny Tummy — huge love in a plate" width="169" height="59"><img class="logo-mark" src="images/tt-logo-mark.png" alt="Tiny Tummy" width="40" height="40"><small>OPERATIONS DASHBOARD</small></a>
   <nav id="sidenav">
     <a data-m="overview" class="active"><span>📊</span><em>Overview</em></a>
     <div class="grp">Sales</div>
