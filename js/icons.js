@@ -104,7 +104,8 @@ var ICONS = {
     '🎂': 'cake', '🔐': 'lock', '🔒': 'lock', '📞': 'phonecall', '✉': 'mail', '📷': 'camera', '👍': 'thumb', '🧊': 'snow',
     '🌈': 'rainbow', '💬': 'chat', '🥕': 'sprout', '✔': 'check', '✓': 'check', '✅': 'checkc', '🛡': 'shield', '🔍': 'search',
     '🌡': 'thermo', '📜': 'history', '🧾': 'receipt', '🚨': 'siren', '💰': 'wallet', '🔥': 'flame', '❄': 'snow', '⚖': 'scale',
-    '🗺': 'map', '🚪': 'logout', '📦': 'box', '🔪': 'utensils', '👨‍👩‍👧': 'family', '🏢': 'building'
+    '🗺': 'map', '🚪': 'logout', '📦': 'box', '🔪': 'utensils', '👨‍👩‍👧': 'family', '🏢': 'building',
+    '📋': 'clipboard', '📈': 'chart', '🎉': 'sparkles', '⏰': 'alarm', '🧑‍⚕': 'steth', '📸': 'camera'
   };
   var RE = new RegExp(Object.keys(MAP).sort(function (a, b) { return b.length - a.length; })
     .map(function (k) { return k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\uFE0F?'; }).join('|') +

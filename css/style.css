@@ -371,3 +371,30 @@ footer.site { background: var(--brand); }
 nav.links a.nav-portal { border:1.5px solid var(--gold); color:var(--gold); margin-left:6px; }
 nav.links a.nav-portal:hover { background:var(--gold); color:var(--brand); }
 @media (max-width:760px){ nav.links a.nav-portal { margin-left:0; text-align:center; } }
+
+/* Homepage: Family portal promotion */
+.btn-gold { background: var(--gold); color: var(--brand); }
+.portal-promo { background: linear-gradient(135deg, #123c56 0%, #17455e 60%, #1d5674 100%); color: #e2ebf0; }
+.promo-grid { display: grid; grid-template-columns: 1.1fr .9fr; gap: 44px; align-items: center; }
+@media (max-width: 820px) { .promo-grid { grid-template-columns: 1fr; } }
+.promo-kicker { display: inline-block; font-size: .75rem; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--brand); background: var(--gold); border-radius: 999px; padding: 4px 12px; margin-bottom: 12px; }
+.portal-promo h2 { color: #fff; font-size: clamp(1.6rem, 3.6vw, 2.3rem); margin-bottom: 10px; }
+.promo-lead { color: #c9d9e2; margin-bottom: 18px; max-width: 54ch; }
+.promo-list { list-style: none; display: grid; gap: 10px; margin-bottom: 24px; }
+.promo-list li { display: flex; gap: 10px; align-items: flex-start; }
+.promo-list li > .i { color: var(--gold); font-size: 1.15rem; margin-top: 2px; }
+.promo-list b { color: #fff; }
+.portal-promo .btn-outline { color: #fff; border-color: rgba(255,255,255,.6); }
+.portal-promo .btn-primary { background: var(--gold); color: var(--brand); }
+.promo-card { background: #fff; color: var(--ink); border-radius: 22px; padding: 20px; box-shadow: 0 24px 60px rgba(0,0,0,.3); display: grid; gap: 12px; transform: rotate(-1.5deg); }
+.pc-top { display: flex; align-items: center; gap: 12px; }
+.pc-top b { display: block; font-family: 'Baloo 2', sans-serif; font-size: 1.2rem; }
+.pc-top small { color: #226a58; font-weight: 700; }
+.pc-av { width: 48px; height: 48px; border-radius: 50%; background: #fde8ee; color: #d95d76; display: grid; place-items: center; font-family: 'Baloo 2', sans-serif; font-weight: 700; font-size: 1.2rem; }
+.pc-chip { margin-left: auto; font-size: .72rem; font-weight: 700; background: #e6f4ef; color: #226a58; border-radius: 999px; padding: 3px 10px; }
+.pc-bravo { background: linear-gradient(120deg, #e6f4ef, #fff8e7); border: 1px solid #bfe0d4; border-radius: 14px; padding: 12px 14px; }
+.pc-bravo b { display: block; } .pc-bravo small { color: var(--soft); }
+.pc-row { display: flex; justify-content: space-between; border-bottom: 1px solid var(--line); padding: 6px 2px; font-size: .9rem; }
+.pc-row span { color: var(--soft); }
+.pc-rem { background: #fff8e6; border: 1px solid #f3dca6; border-radius: 12px; padding: 10px 12px; font-weight: 700; font-size: .88rem; }
+.pc-rem .i { color: #c98f1c; }
