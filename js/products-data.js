@@ -88,8 +88,10 @@ const TT_CATEGORIES = [
 ];
 
 const TT_CONTACT = {
-  phone: '+96171008604',
-  phoneDisplay: '+961 71 008 604',
+  phone: '+96170341002',
+  phoneDisplay: '+961 70 341 002',
+  whatsapp: '+96170341002',      // WhatsApp ordering number
+  whatsappDisplay: '+961 70 341 002',
   email: 'tinytummylb@outlook.com',
   instagram: 'https://www.instagram.com/tinytummylb/',
   facebook: 'https://www.facebook.com/tinytummylb/'

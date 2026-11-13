@@ -8,18 +8,18 @@
    knowledge base as context, and show its reply in the same panel. */
 (function () {
   'use strict';
-  var WA = 'https://wa.me/96171008604';
+  var WA = 'https://wa.me/96170341002';
 
   /* ── knowledge base ──────────────────────────────────────────────────── */
   var SITE_COMMON = [
-    ['How do I order?', 'order buy purchase how whatsapp', 'Open the <a href="products.html">Menu</a>, choose a meal and tap <b>Order on WhatsApp</b> — your message is ready to send. You can also write to us directly on <a href="' + WA + '" target="_blank" rel="noopener">WhatsApp +961 71 008 604</a>.'],
+    ['How do I order?', 'order buy purchase how whatsapp', 'Open the <a href="products.html">Menu</a>, choose a meal and tap <b>Order on WhatsApp</b> — your message is ready to send. You can also write to us directly on <a href="' + WA + '" target="_blank" rel="noopener">WhatsApp +961 70 341 002</a>.'],
     ['When will my order arrive?', 'delivery deliver when arrive time next day sunday 3pm hours', 'Order before <b>3:00 PM</b> and it arrives the <b>next day</b>. Otherwise within <b>48 hours</b>. We deliver everywhere in Lebanon, except on Sundays.'],
     ['Which ages are the meals for?', 'age ages month months baby toddler old 6m 7m suitable', 'All <b>purees are suitable from 6 months</b> and all <b>meals from 7 months</b>. Each product on the Menu shows its age tag (for example 6M+, 12M+ or 24M+).'],
     ['What is in the food?', 'ingredients salt sugar preservatives healthy natural what inside contain', 'Real ingredients only: fresh produce and honest recipes designed by dietitians and cooked by chefs. <b>No added salt, no added sugar, no preservatives.</b> In the <a href="portal.html">Family portal</a> you can see every ingredient of every meal your child ate.'],
     ['My child has an allergy', 'allergy allergies allergic nut egg milk dairy gluten intolerance', 'Tell us when you order, and add the allergy to your child\'s profile in the <a href="portal.html">Family portal</a> — our kitchen then sees a red alert on every order for your child. For anything medical, please follow your doctor\'s advice.'],
     ['How do I store the meals?', 'store storage fridge refrigerate keep freeze freezer', 'Keep meals <b>refrigerated</b> as soon as they arrive, and follow the storage guidance printed on each label.'],
     ['What is the Family portal?', 'portal family record carnet diary account login doctor growth', 'Your child\'s food &amp; growth record: every meal and its ingredients, foods tried, weight and height, monthly photos, vaccine reminders and your doctor\'s notes. <a href="portal.html">Open the Family portal</a>.'],
-    ['How can I contact you?', 'contact phone call email instagram facebook reach talk human', 'WhatsApp or call <a href="' + WA + '" target="_blank" rel="noopener">+961 71 008 604</a>, email <b>tinytummylb@outlook.com</b>, or Instagram <b>@tinytummylb</b>.'],
+    ['How can I contact you?', 'contact phone call email instagram facebook reach talk human', 'WhatsApp or call <a href="' + WA + '" target="_blank" rel="noopener">+961 70 341 002</a>, email <b>tinytummylb@outlook.com</b>, or Instagram <b>@tinytummylb</b>.'],
     ['How much does it cost?', 'price prices cost how much pay payment money', 'Prices are shown on each product in the <a href="products.html">Menu</a> when available. For bundles, programs and payment options, ask us on <a href="' + WA + '" target="_blank" rel="noopener">WhatsApp</a>.'],
     ['Do you make birthday cakes?', 'cake cakes birthday party celebration', 'Yes — baby-friendly celebration cakes (12M+). Ask us on <a href="' + WA + '" target="_blank" rel="noopener">WhatsApp</a> about flavours and dates.']
   ];
@@ -201,7 +201,7 @@
     setTimeout(function () {
       if (hit) add(hit[2], 'bot');
       else if (pageId().indexOf('dash-') === 0) add('I don\'t have an answer for that yet. Try one of the suggestions above, or ask your manager in <b>Team chat</b>.', 'bot');
-      else add('I\'m not sure about that one. Our team will gladly help on <a href="' + WA + '" target="_blank" rel="noopener">WhatsApp +961 71 008 604</a>.', 'bot');
+      else add('I\'m not sure about that one. Our team will gladly help on <a href="' + WA + '" target="_blank" rel="noopener">WhatsApp +961 70 341 002</a>.', 'bot');
     }, 250);
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', build); else build();

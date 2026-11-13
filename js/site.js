@@ -25,7 +25,7 @@ function ttPlaceholder(name, bare) {
 
 function ttWaLink(productName) {
   var msg = 'Hello Tiny Tummy! I would like to order: ' + productName;
-  return 'https://wa.me/' + TT_CONTACT.phone.replace(/\D/g, '') + '?text=' + encodeURIComponent(msg);
+  return 'https://wa.me/' + (TT_CONTACT.whatsapp || TT_CONTACT.phone).replace(/\D/g, '') + '?text=' + encodeURIComponent(msg);
 }
 
 function ttPrice(p) {
