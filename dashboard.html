@@ -224,6 +224,12 @@ dialog::backdrop { background:rgba(61,50,41,.45); }
 .frm label { font-weight:700; font-size:.82rem; display:grid; gap:4px; }
 .frm .row { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
 /* ── Users · Roles (redesign) ── */
+.i { width:1em; height:1em; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; vertical-align:-.14em; flex-shrink:0; }
+.u-role .i, .u-meter .i, .u-id small .i { font-size:.95em; }
+.u-ib { color:var(--ink); }
+.u-ib.del { color:var(--bad); }
+.u-toast { display:flex; align-items:center; gap:8px; }
+.u-toast .i { color:var(--gold); }
 .u-tabs { display:inline-flex; background:#ece6d6; border-radius:999px; padding:4px; gap:4px; margin-bottom:16px; }
 .u-tabs button { border:none; background:transparent; color:var(--soft); font-weight:700; font-size:.88rem; padding:8px 18px; border-radius:999px; display:flex; align-items:center; gap:7px; }
 .u-tabs button.on { background:var(--paper); color:var(--ink); box-shadow:0 2px 8px rgba(23,69,94,.14); }
@@ -233,19 +239,19 @@ dialog::backdrop { background:rgba(61,50,41,.45); }
 .u-kpi { display:flex; align-items:center; gap:12px; background:var(--paper); border:1.5px solid var(--line); border-radius:var(--radius); padding:12px 14px; cursor:pointer; text-align:left; transition:transform .12s, border-color .12s, box-shadow .12s; }
 .u-kpi:hover { transform:translateY(-2px); box-shadow:var(--shadow); }
 .u-kpi.on { border-color:var(--gold); box-shadow:0 0 0 3px rgba(240,182,75,.25); }
-.u-kpi .e { font-size:1.5rem; width:44px; height:44px; border-radius:12px; display:grid; place-items:center; flex-shrink:0; }
+.u-kpi .e { color:var(--ic,#17455e); font-size:1.35rem; width:44px; height:44px; border-radius:12px; display:grid; place-items:center; flex-shrink:0; }
 .u-kpi .v { font-family:'Baloo 2'; font-size:1.4rem; font-weight:700; line-height:1; color:var(--ink); }
 .u-kpi .l { font-size:.72rem; font-weight:700; color:var(--soft); text-transform:uppercase; letter-spacing:.05em; }
 .u-bar { display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-bottom:14px; }
 .u-search { position:relative; flex:1; min-width:220px; max-width:380px; }
 .u-search input { width:100%; padding:10px 14px 10px 38px; border-radius:999px; font-size:.9rem; }
-.u-search span { position:absolute; left:14px; top:50%; transform:translateY(-50%); }
+.u-search span { position:absolute; left:14px; top:50%; transform:translateY(-50%); color:var(--soft); display:flex; }
 .u-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(min(310px,100%),1fr)); gap:14px; }
 .u-card { background:var(--paper); border:1px solid var(--line); border-radius:16px; box-shadow:var(--shadow); padding:16px; display:flex; flex-direction:column; gap:12px; border-top:4px solid var(--rc,#ccc); transition:box-shadow .15s, transform .15s; }
 .u-card:hover { box-shadow:0 10px 26px rgba(23,69,94,.16); transform:translateY(-2px); }
 .u-card.me { background:linear-gradient(180deg,#fffaf0,#fff 60%); }
 .u-top { display:flex; gap:12px; align-items:center; }
-.u-av { width:50px; height:50px; border-radius:50%; display:grid; place-items:center; font-size:1.55rem; flex-shrink:0; background:var(--rbg,#eee); position:relative; }
+.u-av { width:50px; height:50px; border-radius:50%; display:grid; place-items:center; font-family:'Baloo 2'; font-weight:700; font-size:1.1rem; letter-spacing:.02em; color:var(--rc); flex-shrink:0; background:var(--rbg,#eee); position:relative; }
 .u-av i { position:absolute; right:-2px; bottom:-2px; width:14px; height:14px; border-radius:50%; background:#2fbf71; border:2px solid #fff; }
 .u-id { min-width:0; flex:1; }
 .u-id b { display:block; font-size:1.02rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
@@ -254,10 +260,10 @@ dialog::backdrop { background:rgba(61,50,41,.45); }
 .u-lbl { font-size:.68rem; font-weight:700; color:var(--soft); text-transform:uppercase; letter-spacing:.07em; display:flex; justify-content:space-between; }
 .u-st { display:flex; flex-wrap:wrap; gap:6px; }
 .u-st button { border:1.5px dashed #cfd8dd; background:#fafbfb; color:#93a5ae; border-radius:10px; padding:5px 9px; font-size:.76rem; font-weight:700; display:flex; align-items:center; gap:4px; transition:all .12s; }
-.u-st button .ic { filter:grayscale(1); opacity:.55; }
+.u-st button .i { opacity:.6; }
 .u-st button:hover { border-color:var(--pea); color:var(--pea-dark); }
 .u-st button.on { border:1.5px solid #9fd2bd; background:#e6f4ef; color:#1d5e4d; }
-.u-st button.on .ic { filter:none; opacity:1; }
+.u-st button.on .i { opacity:1; }
 .u-st button:disabled { cursor:not-allowed; }
 .u-meter { display:flex; gap:14px; font-size:.78rem; color:var(--soft); font-weight:600; }
 .u-meter b { color:var(--ink); }
@@ -267,16 +273,16 @@ dialog::backdrop { background:rgba(61,50,41,.45); }
 .u-ib:hover { border-color:var(--gold); background:#fdf3e0; transform:scale(1.08); }
 .u-ib.del:hover { border-color:var(--bad); background:#fde7e7; }
 .u-empty { text-align:center; padding:40px; color:var(--soft); }
-.u-empty div { font-size:2.4rem; }
+.u-empty div { font-size:2rem; color:#b6c4cb; }
 .pm-wrap { overflow-x:auto; }
 table.pm { width:100%; border-collapse:separate; border-spacing:0; min-width:720px; }
 table.pm th { position:sticky; top:0; background:var(--paper); padding:12px 8px; font-size:.78rem; text-align:center; border-bottom:2px solid var(--line); }
-table.pm th .e { display:block; font-size:1.4rem; }
+table.pm th .e { display:block; font-size:1.25rem; margin-bottom:4px; }
 table.pm th:first-child, table.pm td:first-child { text-align:left; }
 table.pm td { padding:10px 8px; border-bottom:1px solid var(--line); text-align:center; }
 table.pm tr:hover td { background:#fffaf0; }
 table.pm td.k { display:flex; align-items:center; gap:10px; }
-table.pm td.k .e { font-size:1.2rem; width:34px; height:34px; border-radius:10px; background:var(--cream); display:grid; place-items:center; flex-shrink:0; }
+table.pm td.k .e { color:var(--ink); font-size:1.05rem; width:34px; height:34px; border-radius:10px; background:var(--cream); display:grid; place-items:center; flex-shrink:0; }
 table.pm td.k b { display:block; font-size:.88rem; }
 table.pm td.k small { color:var(--soft); font-size:.72rem; font-family:monospace; }
 table.pm tfoot td { font-size:.74rem; font-weight:700; color:var(--soft); border-bottom:none; }
@@ -289,7 +295,7 @@ table.pm tfoot td { font-size:.74rem; font-weight:700; color:var(--soft); border
 .sw input:disabled + span { background:#c9a85c; cursor:not-allowed; opacity:.8; }
 .sw input:focus-visible + span { outline:3px solid var(--carrot); outline-offset:2px; }
 .u-tip { display:flex; gap:10px; align-items:flex-start; background:#fff8e6; border:1px solid #f3dca6; border-radius:12px; padding:11px 14px; font-size:.84rem; margin-top:14px; }
-.u-tip > span { font-size:1.2rem; }
+.u-tip > span { font-size:1.15rem; color:var(--gold-dark); display:flex; padding-top:1px; }
 .u-toast { position:fixed; bottom:22px; left:50%; transform:translateX(-50%) translateY(20px); background:#12394e; color:#fff; padding:10px 18px; border-radius:999px; font-weight:700; font-size:.86rem; box-shadow:0 10px 30px rgba(0,0,0,.25); opacity:0; transition:.2s; z-index:999; pointer-events:none; }
 .u-toast.on { opacity:1; transform:translateX(-50%) translateY(0); }
 .st-pick { display:grid; grid-template-columns:repeat(auto-fill,minmax(130px,1fr)); gap:8px; }
@@ -297,7 +303,7 @@ table.pm tfoot td { font-size:.74rem; font-weight:700; color:var(--soft); border
 .st-pick label:has(input:checked) { border-color:#9fd2bd; background:#e6f4ef; }
 .role-pick { display:grid; grid-template-columns:repeat(auto-fill,minmax(120px,1fr)); gap:8px; }
 .role-pick label { display:flex !important; flex-direction:column; align-items:center; gap:2px; border:1.5px solid var(--line); border-radius:12px; padding:10px 6px; cursor:pointer; text-align:center; }
-.role-pick label span { font-size:1.6rem; }
+.role-pick label span { font-size:1.45rem; color:var(--rc); width:44px; height:44px; border-radius:12px; background:var(--rbg); display:grid; place-items:center; margin-bottom:4px; }
 .role-pick label small { font-weight:600; color:var(--soft); font-size:.7rem; }
 .role-pick input { display:none; }
 .role-pick label:has(input:checked) { border-color:var(--gold); background:#fff6e2; box-shadow:0 0 0 3px rgba(240,182,75,.25); }
@@ -2624,22 +2630,63 @@ function audCsv() {
 }
 
 /* ── Users ── */
+/* Professional line icons (stroke, currentColor) used on the Team & Access page */
+var ICONS = {
+  users: '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',
+  crown: '<path d="M3 17 2 7l5 4 5-7 5 7 5-4-1 10z"/><path d="M4 21h16"/>',
+  briefcase: '<rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/><path d="M2 13h20"/>',
+  chef: '<path d="M6 13.87A4 4 0 0 1 7.41 6a5.11 5.11 0 0 1 9.18 0A4 4 0 0 1 18 13.87V21H6z"/><path d="M6 17h12"/>',
+  truck: '<path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"/><path d="M15 18H9"/><path d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.62l-3.48-4.35A1 1 0 0 0 17.52 8H14"/><circle cx="17" cy="18" r="2"/><circle cx="7" cy="18" r="2"/>',
+  headset: '<path d="M3 14h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-7a9 9 0 0 1 18 0v7a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3"/>',
+  utensils: '<path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3zm0 0v7"/>',
+  flame: '<path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.07-2.14-.22-4.05 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.15.43-2.29 1-3a2.5 2.5 0 0 0 2.5 2.5z"/>',
+  bowl: '<path d="M2 11h20a10 10 0 0 1-20 0z"/><path d="M7 21h10"/><path d="M9 7c0-1 1-1 1-2s-1-1-1-2"/><path d="M14 7c0-1 1-1 1-2s-1-1-1-2"/>',
+  scale: '<path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1z"/><path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1z"/><path d="M7 21h10"/><path d="M12 3v18"/><path d="M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2"/>',
+  snow: '<path d="M12 2v20"/><path d="M2 12h20"/><path d="m4.93 4.93 14.14 14.14"/><path d="m19.07 4.93-14.14 14.14"/><path d="m9 4 3 3 3-3"/><path d="m9 20 3-3 3 3"/>',
+  box: '<path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/>',
+  shield: '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"/><path d="m9 12 2 2 4-4"/>',
+  cart: '<circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/>',
+  clipboard: '<rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11h4"/><path d="M12 16h4"/><path d="M8 11h.01"/><path d="M8 16h.01"/>',
+  factory: '<path d="M2 20a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8l-7 5V8l-7 5V4a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/><path d="M17 18h1"/><path d="M12 18h1"/><path d="M7 18h1"/>',
+  megaphone: '<path d="m3 11 18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/>',
+  baby: '<path d="M9 12h.01"/><path d="M15 12h.01"/><path d="M10 16c.5.3 1.2.5 2 .5s1.5-.2 2-.5"/><path d="M19 6.3a9 9 0 0 1 1.8 3.9 2 2 0 0 1 0 3.6 9 9 0 0 1-17.6 0 2 2 0 0 1 0-3.6A9 9 0 0 1 12 3c2 0 3.5 1.1 3.5 2.5s-.9 2.5-2 2.5c-.8 0-1.5-.4-1.5-1"/>',
+  chat: '<path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/>',
+  bell: '<path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>',
+  chart: '<path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/>',
+  history: '<path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/>',
+  search: '<circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>',
+  mail: '<rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>',
+  lock: '<rect width="18" height="11" x="3" y="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>',
+  eye: '<path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/>',
+  pencil: '<path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/>',
+  trash: '<path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>',
+  plus: '<path d="M5 12h14"/><path d="M12 5v14"/>',
+  check: '<path d="M20 6 9 17l-5-5"/>',
+  info: '<circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/>',
+  x: '<path d="M18 6 6 18"/><path d="m6 6 12 12"/>',
+  grid: '<rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/>',
+  save: '<path d="M15.2 3a2 2 0 0 1 1.4.6l3.8 3.8a2 2 0 0 1 .6 1.4V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M17 21v-7a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v7"/><path d="M7 3v4a1 1 0 0 0 1 1h7"/>'
+};
+function ic(n) { return '<svg class="i" viewBox="0 0 24 24" aria-hidden="true">' + (ICONS[n] || ICONS.info) + '</svg>'; }
+var STATION_SVG = { prep: 'utensils', cook: 'flame', assembly: 'bowl', portion: 'scale', chill: 'snow', pack: 'box', qc: 'shield' };
+function stLabel(k) { var s = STATIONS.find(function (x) { return x[0] === k; }); return s ? s[1].replace(STATION_ICON[k], '').trim() : k; }
+function initials(n) { var w = String(n || '').replace(/[^A-Za-z\u0600-\u06FF\s]/g, ' ').split(/\s+/).filter(Boolean); return (w.length ? w.slice(0, 2).map(function (t) { return t[0]; }).join('') : '?').toUpperCase(); }
 /* Role look & feel: emoji, label, one-line meaning, colour */
 var ROLE_META = {
-  super_admin: { e: '👑', l: 'Super admin', d: 'Everything, always', c: '#a36b00', bg: '#fff1d1' },
-  manager:     { e: '🧑‍💼', l: 'Manager',     d: 'Runs daily operations', c: '#3a5ba8', bg: '#e6edfb' },
-  kitchen:     { e: '👨‍🍳', l: 'Kitchen',     d: 'Cooks & prepares meals', c: '#b5531f', bg: '#fdeadf' },
-  delivery:    { e: '🚚', l: 'Delivery',    d: 'Delivers orders', c: '#1d6e5b', bg: '#e1f3ec' },
-  support:     { e: '🎧', l: 'Support',     d: 'Answers parents', c: '#7a4aa8', bg: '#f0e7fa' }
+  super_admin: { e: 'crown', l: 'Super admin', d: 'Everything, always', c: '#a36b00', bg: '#fff1d1' },
+  manager:     { e: 'briefcase', l: 'Manager',     d: 'Runs daily operations', c: '#3a5ba8', bg: '#e6edfb' },
+  kitchen:     { e: 'chef', l: 'Kitchen',     d: 'Cooks & prepares meals', c: '#b5531f', bg: '#fdeadf' },
+  delivery:    { e: 'truck', l: 'Delivery',    d: 'Delivers orders', c: '#1d6e5b', bg: '#e1f3ec' },
+  support:     { e: 'headset', l: 'Support',     d: 'Answers parents', c: '#7a4aa8', bg: '#f0e7fa' }
 };
 var PERM_ICON = {
-  orders_manage: '🛒', kitchen_manage: '👨‍🍳', inventory_manage: '📦', bom_manage: '🍽️',
-  delivery_manage: '🚚', suppliers_manage: '🏭', iso_manage: '🛡️', complaints_manage: '📣',
-  programs_manage: '👶', chat_use: '💬', push_send: '🔔', reports_view: '📈',
-  audit_view: '📜', users_manage: '👥'
+  orders_manage: 'cart', kitchen_manage: 'chef', inventory_manage: 'box', bom_manage: 'clipboard',
+  delivery_manage: 'truck', suppliers_manage: 'factory', iso_manage: 'shield', complaints_manage: 'megaphone',
+  programs_manage: 'baby', chat_use: 'chat', push_send: 'bell', reports_view: 'chart',
+  audit_view: 'history', users_manage: 'users'
 };
 var UV = { tab: 'team', role: 'all', q: '' };
-function roleMeta(r) { return ROLE_META[r] || { e: '👤', l: r, d: '', c: '#555', bg: '#eee' }; }
+function roleMeta(r) { return ROLE_META[r] || { e: 'users', l: r, d: '', c: '#555', bg: '#eee' }; }
 function rolePermCount(role) {
   if (role === 'super_admin') return PERM_KEYS.length;
   return store('role_perms').all().filter(function (x) { return x.role === role && x.allowed; }).length;
@@ -2647,7 +2694,7 @@ function rolePermCount(role) {
 function uToast(msg) {
   var t = document.getElementById('u-toast');
   if (!t) { t = document.createElement('div'); t.id = 'u-toast'; t.className = 'u-toast'; document.body.appendChild(t); }
-  t.textContent = msg; t.classList.add('on');
+  t.innerHTML = ic('check') + '<span>' + esc(msg) + '</span>'; t.classList.add('on');
   clearTimeout(t._h); t._h = setTimeout(function () { t.classList.remove('on'); }, 1800);
 }
 function uTab(t) { UV.tab = t; render(); }
@@ -2672,11 +2719,11 @@ RENDER.users = function () {
 
   /* KPI tiles double as role filters */
   var kpis = '<button class="u-kpi' + (UV.role === 'all' ? ' on' : '') + '" onclick="uRole(\'all\')">' +
-    '<span class="e" style="background:#e8eef1">👥</span><span><div class="v">' + staff.length + '</div><div class="l">Whole team</div></span></button>' +
+    '<span class="e" style="background:#e8eef1">' + ic('users') + '</span><span><div class="v">' + staff.length + '</div><div class="l">Whole team</div></span></button>' +
     ROLES.map(function (r) {
       var m = roleMeta(r);
       return '<button class="u-kpi' + (UV.role === r ? ' on' : '') + '" onclick="uRole(\'' + r + '\')" title="Show only ' + m.l + '">' +
-        '<span class="e" style="background:' + m.bg + '">' + m.e + '</span><span><div class="v">' + (counts[r] || 0) + '</div><div class="l">' + m.l + '</div></span></button>';
+        '<span class="e" style="background:' + m.bg + ';--ic:' + m.c + '">' + ic(m.e) + '</span><span><div class="v">' + (counts[r] || 0) + '</div><div class="l">' + m.l + '</div></span></button>';
     }).join('');
 
   var list = staff.filter(function (u) { return UV.role === 'all' || u.role === UV.role; });
@@ -2686,45 +2733,45 @@ RENDER.users = function () {
     var fullKitchen = u.role === 'super_admin' || u.role === 'manager';
     var roleOpts = ROLES.map(function (r) {
       var rm = roleMeta(r);
-      return '<option value="' + r + '"' + (u.role === r ? ' selected' : '') + '>' + rm.e + ' ' + rm.l + '</option>';
+      return '<option value="' + r + '"' + (u.role === r ? ' selected' : '') + '>' + rm.l + '</option>';
     }).join('');
     var st = STATIONS.map(function (s) {
       var on = fullKitchen || (u.stations || []).indexOf(s[0]) >= 0;
-      var ic = STATION_ICON[s[0]], lbl = s[1].replace(ic, '').trim();
+      var lbl = stLabel(s[0]);
       return '<button class="' + (on ? 'on' : '') + '"' + (fullKitchen || !admin ? ' disabled' : '') +
         ' onclick="stationToggle(\'' + u.id + '\',\'' + s[0] + '\')" title="' + (on ? 'Tap to remove ' : 'Tap to give ') + lbl + '">' +
-        '<span class="ic">' + ic + '</span>' + lbl + '</button>';
+        ic(STATION_SVG[s[0]]) + lbl + '</button>';
     }).join('');
     var nSt = fullKitchen ? STATIONS.length : (u.stations || []).length;
     return '<div class="u-card' + (isMe ? ' me' : '') + '" style="--rc:' + m.c + ';--rbg:' + m.bg + '" data-s="' + esc((u.name + ' ' + u.email + ' ' + m.l).toLowerCase()) + '">' +
-      '<div class="u-top"><div class="u-av">' + m.e + (isMe ? '<i title="Signed in now"></i>' : '') + '</div>' +
-        '<div class="u-id"><b>' + esc(u.name) + '</b><small>✉️ ' + esc(u.email || '—') + '</small></div>' +
-        '<span class="u-role">' + m.e + ' ' + m.l + '</span></div>' +
-      '<div class="u-meter"><span>🔐 <b>' + rolePermCount(u.role) + '</b>/' + PERM_KEYS.length + ' permissions</span>' +
-        '<span>🍳 <b>' + nSt + '</b>/' + STATIONS.length + ' stations</span></div>' +
-      '<div><div class="u-lbl"><span>Kitchen stations</span><span>' + (fullKitchen ? '✨ all, by role' : (admin ? 'tap to switch' : '')) + '</span></div>' +
+      '<div class="u-top"><div class="u-av">' + initials(u.name) + (isMe ? '<i title="Signed in now"></i>' : '') + '</div>' +
+        '<div class="u-id"><b>' + esc(u.name) + '</b><small>' + ic('mail') + ' ' + esc(u.email || '—') + '</small></div>' +
+        '<span class="u-role">' + ic(m.e) + ' ' + m.l + '</span></div>' +
+      '<div class="u-meter"><span>' + ic('lock') + ' <b>' + rolePermCount(u.role) + '</b>/' + PERM_KEYS.length + ' permissions</span>' +
+        '<span>' + ic('grid') + ' <b>' + nSt + '</b>/' + STATIONS.length + ' stations</span></div>' +
+      '<div><div class="u-lbl"><span>Kitchen stations</span><span>' + (fullKitchen ? 'all, by role' : (admin ? 'tap to switch' : '')) + '</span></div>' +
         '<div class="u-st" style="margin-top:6px">' + st + '</div></div>' +
       '<div class="u-acts">' +
-        (isOwner ? '<select disabled title="The owner always stays super admin"><option>👑 Super admin · owner</option></select>'
+        (isOwner ? '<select disabled title="The owner always stays super admin"><option>Super admin · owner</option></select>'
                  : '<select ' + (admin ? '' : 'disabled ') + 'onchange="setRole(\'' + u.id + '\',this.value)" title="Change role">' + roleOpts + '</select>') +
-        (isMe ? '' : '<button class="u-ib" onclick="actAs(\'' + u.id + '\')" title="🎭 Act as ' + esc(u.name) + ' — see exactly what they see">🎭</button>') +
-        (admin ? '<button class="u-ib" onclick="editEmployee(\'' + u.id + '\')" title="✏️ Edit name & email">✏️</button>' : '') +
-        (admin && !isOwner && !isMe ? '<button class="u-ib del" onclick="removeEmployee(\'' + u.id + '\')" title="🗑️ Remove from team">🗑️</button>' : '') +
+        (isMe ? '' : '<button class="u-ib" onclick="actAs(\'' + u.id + '\')" title="View as ' + esc(u.name) + ' — see exactly what they see" aria-label="View as">' + ic('eye') + '</button>') +
+        (admin ? '<button class="u-ib" onclick="editEmployee(\'' + u.id + '\')" title="Edit name & email" aria-label="Edit">' + ic('pencil') + '</button>' : '') +
+        (admin && !isOwner && !isMe ? '<button class="u-ib del" onclick="removeEmployee(\'' + u.id + '\')" title="Remove from team" aria-label="Remove">' + ic('trash') + '</button>' : '') +
       '</div></div>';
   }).join('');
 
   var team = '<div class="u-kpis">' + kpis + '</div>' +
-    '<div class="u-bar"><div class="u-search"><span>🔎</span><input placeholder="Search by name, email or role…" value="' + esc(UV.q) + '" oninput="uSearch(this.value)"></div>' +
-      (UV.role !== 'all' ? '<button class="btn o s" onclick="uRole(\'all\')">✕ ' + roleMeta(UV.role).e + ' ' + roleMeta(UV.role).l + ' only</button>' : '') + '</div>' +
+    '<div class="u-bar"><div class="u-search"><span>' + ic('search') + '</span><input placeholder="Search by name, email or role…" value="' + esc(UV.q) + '" oninput="uSearch(this.value)"></div>' +
+      (UV.role !== 'all' ? '<button class="btn o s" onclick="uRole(\'all\')">' + ic('x') + ' ' + roleMeta(UV.role).l + ' only</button>' : '') + '</div>' +
     '<div class="u-grid">' + cards + '</div>' +
-    '<div class="u-empty" id="u-none" style="display:' + (list.length ? 'none' : '') + '"><div>🔍</div>No one matches. <a href="#" onclick="UV.role=\'all\';UV.q=\'\';render();return false">Show everyone</a></div>' +
-    '<div class="u-tip"><span>💡</span><div><b>Try it:</b> press 🎭 on <b>Karim — Helper</b>, then open 👨‍🍳 Kitchen and start a 🔥 cooking step — he is refused, while 🥣 assembly works. Press <b>↩ Back to super admin</b> (bottom-left) to return.</div></div>';
+    '<div class="u-empty" id="u-none" style="display:' + (list.length ? 'none' : '') + '"><div>' + ic('search') + '</div>No one matches. <a href="#" onclick="UV.role=\'all\';UV.q=\'\';render();return false">Show everyone</a></div>' +
+    '<div class="u-tip"><span>' + ic('info') + '</span><div><b>Try it:</b> press the ' + ic('eye') + ' <b>View as</b> button on <b>Karim — Helper</b>, open Kitchen and start a Cooking step — he is refused, while Assembly works. Press <b>Back to super admin</b> (bottom-left) to return.</div></div>';
 
   /* Permission matrix with toggle switches */
   var rp = store('role_perms').all();
   var head = ROLES.map(function (r) {
     var m = roleMeta(r);
-    return '<th style="color:' + m.c + '"><span class="e">' + m.e + '</span>' + m.l + '</th>';
+    return '<th style="color:' + m.c + '"><span class="e">' + ic(m.e) + '</span>' + m.l + '</th>';
   }).join('');
   var body = PERM_KEYS.map(function (pk) {
     var cells = ROLES.map(function (r) {
@@ -2735,56 +2782,56 @@ RENDER.users = function () {
         '<input type="checkbox" ' + (on ? 'checked' : '') + (lock || !admin ? ' disabled' : '') +
         ' onchange="setPerm(\'' + r + '\',\'' + pk[0] + '\',this.checked)" aria-label="' + roleMeta(r).l + ': ' + esc(pk[1]) + '"><span></span></label></td>';
     }).join('');
-    return '<tr><td class="k"><span class="e">' + (PERM_ICON[pk[0]] || '🔑') + '</span><span><b>' + esc(pk[1]) + '</b><small>' + pk[0] + '</small></span></td>' + cells + '</tr>';
+    return '<tr><td class="k"><span class="e">' + ic(PERM_ICON[pk[0]] || 'lock') + '</span><span><b>' + esc(pk[1]) + '</b><small>' + pk[0] + '</small></span></td>' + cells + '</tr>';
   }).join('');
   var foot = ROLES.map(function (r) { return '<td>' + rolePermCount(r) + ' / ' + PERM_KEYS.length + '</td>'; }).join('');
   var perms = '<div class="panel"><div class="pm-wrap"><table class="pm"><thead><tr><th>What they can do</th>' + head + '</tr></thead>' +
     '<tbody>' + body + '</tbody><tfoot><tr><td>Total switched on</td>' + foot + '</tr></tfoot></table></div>' +
-    '<div class="u-tip"><span>🔐</span><div>Switch a permission on or off for a whole role — it applies to everyone in that role instantly. 👑 Super admin always has everything (gold switches are locked).</div></div></div>';
+    '<div class="u-tip"><span>' + ic('info') + '</span><div>Switch a permission on or off for a whole role — it applies to everyone in that role instantly. Super admin always has everything (gold switches are locked).</div></div></div>';
 
-  return '<div class="pagehead"><div><h1>👥 Team &amp; Access</h1><div class="sub">Who is on the team, what they are allowed to do, and which kitchen stations they can work.</div></div>' +
-    (admin ? '<button class="btn p" onclick="newEmployee()">➕ Add team member</button>' : '') + '</div>' +
-    '<div class="u-tabs"><button class="' + (UV.tab === 'team' ? 'on' : '') + '" onclick="uTab(\'team\')">👥 Team <span class="n">' + staff.length + '</span></button>' +
-      '<button class="' + (UV.tab === 'perms' ? 'on' : '') + '" onclick="uTab(\'perms\')">🔐 Role permissions <span class="n">' + PERM_KEYS.length + '</span></button></div>' +
+  return '<div class="pagehead"><div><h1>Team &amp; Access</h1><div class="sub">Who is on the team, what they are allowed to do, and which kitchen stations they can work.</div></div>' +
+    (admin ? '<button class="btn p" onclick="newEmployee()">' + ic('plus') + ' Add team member</button>' : '') + '</div>' +
+    '<div class="u-tabs"><button class="' + (UV.tab === 'team' ? 'on' : '') + '" onclick="uTab(\'team\')">' + ic('users') + ' Team <span class="n">' + staff.length + '</span></button>' +
+      '<button class="' + (UV.tab === 'perms' ? 'on' : '') + '" onclick="uTab(\'perms\')">' + ic('lock') + ' Role permissions <span class="n">' + PERM_KEYS.length + '</span></button></div>' +
     (UV.tab === 'team' ? team : perms);
 };
 function setRole(id, role) {
-  if (!can('users_manage')) { alert('🔒 users_manage permission required'); return; }
+  if (!can('users_manage')) { alert('users_manage permission required'); return; }
   var staff = store('staff').all().map(normStaff); var u = byId(staff, id);
   if (u) {
     u.role = role; logAct('Users', 'role change', u.name + ' → ' + role); store('staff').save(staff);
-    rebuildWhoami(); render(); uToast(roleMeta(role).e + ' ' + u.name + ' is now ' + roleMeta(role).l);
+    rebuildWhoami(); render(); uToast(u.name + ' is now ' + roleMeta(role).l);
   }
 }
 function stationToggle(id, station) {
-  if (!can('users_manage')) { alert('🔒 users_manage permission required'); return; }
+  if (!can('users_manage')) { alert('users_manage permission required'); return; }
   var staff = store('staff').all().map(normStaff); var u = byId(staff, id); if (!u) return;
   var i = u.stations.indexOf(station);
   if (i >= 0) u.stations.splice(i, 1); else u.stations.push(station);
   logAct('Users', (i >= 0 ? 'station revoked' : 'station granted'), u.name + ' · ' + station);
   store('staff').save(staff); render();
-  uToast(STATION_ICON[station] + ' ' + (i >= 0 ? 'Removed from ' : 'Given to ') + u.name);
+  uToast(stLabel(station) + (i >= 0 ? ' removed from ' : ' given to ') + u.name);
 }
 function actAs(id) {
   localStorage.setItem('ttops_whoami', id);
   var sel = document.getElementById('whoami'); if (sel) sel.value = id;
   var u = byId(store('staff').all(), id);
   logAct('Users', 'act-as', 'Super admin now acting as ' + (u ? u.name : id));
-  syncActAs(); render(); uToast('🎭 You are now seeing what ' + (u ? u.name : '') + ' sees');
+  syncActAs(); render(); uToast('You are now seeing what ' + (u ? u.name : '') + ' sees');
 }
 function removeEmployee(id) {
   var staff = store('staff').all().map(normStaff); var u = byId(staff, id); if (!u) return;
-  if (!confirm('🗑️ Remove ' + u.name + ' from the team?\nThey will lose all access.')) return;
+  if (!confirm('Remove ' + u.name + ' from the team?\nThey will lose all access.')) return;
   store('staff').save(staff.filter(function (x) { return x.id !== id; }));
   logAct('Users', 'employee removed', u.name);
-  rebuildWhoami(); render(); uToast('🗑️ ' + u.name + ' removed');
+  rebuildWhoami(); render(); uToast(u.name + ' removed from the team');
 }
 function editEmployee(id) {
   var u = byId(store('staff').all(), id); if (!u) return;
-  showDlg('<h3>✏️ Edit ' + esc(u.name) + '</h3><div class="frm" style="margin-top:10px">' +
-    '<div class="row"><label>👤 Name<input id="ee-name" value="' + esc(u.name) + '"></label>' +
-    '<label>✉️ Email<input id="ee-email" value="' + esc(u.email || '') + '"></label></div>' +
-    '<button class="btn p" onclick="saveEdit(\'' + id + '\')">💾 Save changes</button></div>');
+  showDlg('<h3>' + ic('pencil') + ' Edit ' + esc(u.name) + '</h3><div class="frm" style="margin-top:10px">' +
+    '<div class="row"><label>Name<input id="ee-name" value="' + esc(u.name) + '"></label>' +
+    '<label>Email<input id="ee-email" value="' + esc(u.email || '') + '"></label></div>' +
+    '<button class="btn p" onclick="saveEdit(\'' + id + '\')">' + ic('save') + ' Save changes</button></div>');
 }
 function saveEdit(id) {
   var name = document.getElementById('ee-name').value.trim();
@@ -2792,23 +2839,23 @@ function saveEdit(id) {
   var staff = store('staff').all(); var u = byId(staff, id); if (!u) return;
   u.name = name; u.email = document.getElementById('ee-email').value.trim();
   store('staff').save(staff); logAct('Users', 'employee edited', u.name);
-  rebuildWhoami(); closeDlg(); render(); uToast('✅ Saved');
+  rebuildWhoami(); closeDlg(); render(); uToast('Changes saved');
 }
 function newEmployee() {
   var roles = ROLES.filter(function (r) { return r !== 'super_admin'; }).map(function (r) {
     var m = roleMeta(r);
-    return '<label><input type="radio" name="ne-role" value="' + r + '"' + (r === 'kitchen' ? ' checked' : '') + '><span>' + m.e + '</span><b>' + m.l + '</b><small>' + m.d + '</small></label>';
+    return '<label><input type="radio" name="ne-role" value="' + r + '"' + (r === 'kitchen' ? ' checked' : '') + '><span style="--rc:' + m.c + ';--rbg:' + m.bg + '">' + ic(m.e) + '</span><b>' + m.l + '</b><small>' + m.d + '</small></label>';
   }).join('');
   var boxes = STATIONS.map(function (st) {
-    return '<label><input type="checkbox" class="ne-st" value="' + st[0] + '">' + st[1] + '</label>';
+    return '<label><input type="checkbox" class="ne-st" value="' + st[0] + '">' + ic(STATION_SVG[st[0]]) + stLabel(st[0]) + '</label>';
   }).join('');
-  showDlg('<h3>➕ Add team member</h3><div class="frm" style="margin-top:10px">' +
-    '<div class="row"><label>👤 Name<input id="ne-name" placeholder="e.g. Karim — Helper"></label>' +
-    '<label>✉️ Email<input id="ne-email" placeholder="name@tinytummy"></label></div>' +
-    '<label>1️⃣ Pick a role</label><div class="role-pick">' + roles + '</div>' +
-    '<label>2️⃣ Kitchen stations they may work <span class="muted" style="font-weight:600">(optional)</span></label>' +
+  showDlg('<h3>' + ic('plus') + ' Add team member</h3><div class="frm" style="margin-top:10px">' +
+    '<div class="row"><label>Name<input id="ne-name" placeholder="e.g. Karim — Helper"></label>' +
+    '<label>Email<input id="ne-email" placeholder="name@tinytummy"></label></div>' +
+    '<label>Step 1 · Role</label><div class="role-pick">' + roles + '</div>' +
+    '<label>Step 2 · Kitchen stations they may work <span class="muted" style="font-weight:600">(optional)</span></label>' +
     '<div class="st-pick">' + boxes + '</div>' +
-    '<button class="btn p" onclick="saveEmployee()">✅ Add to team</button>' +
+    '<button class="btn p" onclick="saveEmployee()">' + ic('check') + ' Add to team</button>' +
     '<p class="muted">In production this also creates the Supabase login; role and stations apply the moment they sign in.</p></div>');
 }
 function saveEmployee() {
@@ -2822,7 +2869,7 @@ function saveEmployee() {
   logAct('Users', 'employee added', u.name + ' (' + u.role + ') · ' + stations.join('/'));
   store('staff').save(staff);
   rebuildWhoami();
-  closeDlg(); render(); uToast('🎉 ' + u.name + ' joined the team');
+  closeDlg(); render(); uToast(u.name + ' added to the team');
 }
 function rebuildWhoami() {
   var sel = document.getElementById('whoami'); if (!sel) return;
@@ -2841,7 +2888,7 @@ function setPerm(role, key, allowed) {
   if (row) row.allowed = allowed; else rp.push({ role: role, key: key, allowed: allowed });
   store('role_perms').save(rp);
   logAct('Users', allowed ? 'permission granted' : 'permission revoked', role + ' · ' + key);
-  render(); uToast((allowed ? '✅ ' : '⛔ ') + roleMeta(role).l + (allowed ? ' can now: ' : ' can no longer: ') + ((PERM_KEYS.find(function (k) { return k[0] === key; }) || [])[1] || key));
+  render(); uToast(roleMeta(role).l + (allowed ? ' can now: ' : ' can no longer: ') + ((PERM_KEYS.find(function (k) { return k[0] === key; }) || [])[1] || key));
 }
 
 /* ── Settings ── */
