@@ -416,6 +416,11 @@ ul.advice li > .i:first-child { position:absolute; left:0; top:7px; width:30px; 
 .grid2 > *, .frm .row > *, .frm > * { min-width:0; }
 .frm select, .frm input:not([type=checkbox]):not([type=radio]), .frm textarea { max-width:100%; width:100%; }
 @media (max-width:640px){ .frm .row { grid-template-columns:1fr; } }
+
+/* Family Portal link on orders */
+.kid-for { display:flex; gap:10px; align-items:flex-start; background:#eef4fb; border:1px solid #c9dcf0; color:#1d4568; border-radius:12px; padding:9px 12px; font-size:.84rem; margin:8px 0; }
+.kid-for .i { font-size:1.1rem; margin-top:1px; color:#2f6fb0; }
+.kid-for.bad { background:#fde7e7; border-color:#f1c4c9; color:#7d2230; } .kid-for.bad .i { color:var(--bad); }
 /* ── Dashboard-wide icon layer ── */
 aside nav a > span { display:flex; width:20px; justify-content:center; font-size:1.05rem; }
 aside nav a > span .i { stroke-width:1.8; }
@@ -567,6 +572,7 @@ table.pm tfoot td { font-size:.74rem; font-weight:700; color:var(--soft); border
 <dialog id="dlg"></dialog>
 
 <script src="js/supabase-config.js"></script>
+<script src="js/portal-seed.js"></script>
 <script>
 'use strict';
 /* ════════════════════════════════════════════════════════════════════
@@ -1087,6 +1093,8 @@ function consumeFEFO(order) {
 
 /* ── central activity log: every user action, with person + date + time ── */
 SEED.audit = [];
+/* Family Portal data (shared with portal.html through the same ttops_* storage) */
+['families', 'children', 'order_child', 'vaccines', 'greetings'].forEach(function (n) { SEED[n] = (window.TT_SEED && TT_SEED[n]) || []; });
 function logAct(module, action, detail) {
   try {
     var rows = store('audit').all();
@@ -1230,6 +1238,7 @@ function adviseHtml() {
   });
   var stuck = orders.filter(function (o) { return o.status === 'new'; });
   if (stuck.length) tips.push('🛒 ' + stuck.length + ' order(s) still unconfirmed — confirm before the 3 PM cutoff to keep the next-day promise.');
+  tips = familyAlerts().concat(tips);
   if (!tips.length) tips.push('✅ Nothing urgent — stock, margins, cases and ISO are all inside their limits.');
   return '<ul class="advice">' +
     tips.slice(0, 6).map(function (t) { return '<li>' + t + '</li>'; }).join('') + '</ul>';
@@ -1380,7 +1389,7 @@ function openOrder(id) {
   if (o.status !== 'delivered' && o.status !== 'cancelled')
     actions += ' <button class="btn r s" onclick="orderAct(\'' + o.id + '\',\'cancel\')">✕ Cancel</button>';
 
-  showDlg('<h3>' + esc(o.code) + ' — ' + esc(o.customer) + ' <span class="chip ' + o.status + '">' + o.status + '</span></h3>' +
+  showDlg('<h3>' + esc(o.code) + ' — ' + esc(o.customer) + ' <span class="chip ' + o.status + '">' + o.status + '</span></h3>' + childBlock(o) +
     '<p class="muted">' + esc(o.phone) + ' · ' + esc(o.address) + '</p>' +
     pipelineStrip(o) +
     '<div class="tbl-scroll" style="margin:12px 0"><table class="t"><thead><tr><th>Item</th><th class="num">Qty</th><th class="num">Price</th><th class="num">Cost (BOM)</th><th class="num">Margin</th></tr></thead>' +
@@ -1794,7 +1803,7 @@ RENDER.kitchen = function () {
     return '<div class="panel"><div class="toolbar"><h3>' + esc(o.code) + ' <span class="chip ' + o.status + '">' + o.status + '</span>' +
       (o.batch_lot ? ' <span class="chip fefo">lot ' + esc(o.batch_lot) + '</span>' : '') + '</h3>' +
       '<span class="pill-row"><button class="btn o s" title="Steps are assigned automatically. Re-balance re-assigns every step not yet started, spreading work evenly." onclick="autoAssignSteps(\'' + o.id + '\')">↺ Re-balance</button>' + (cur ? '<span class="chip progress">▶ now: ' + esc(cur) + '</span>' : '<span class="chip done">all steps complete</span>') + '</span></div>' +
-      '<p class="muted">' + esc(items) + ' · ' + esc(o.customer) + '</p>' +
+      '<p class="muted">' + esc(items) + ' · ' + esc(o.customer) + '</p>' + childBlock(o) +
       pipelineStrip(o) +
       stepTimeline(o, products) +
       kitchenClock(o, products) +
@@ -3521,6 +3530,77 @@ function decorateKpis(root) {
     var oi = document.createElement('span'); oi.className = 'oi'; oi.innerHTML = ic(icon);
     k.insertBefore(oi, wrap);
   });
+}
+/* ── Family Portal link: which child an order is for, allergy checks,
+   birthdays (cupcake!), milestones and vaccine reminders ── */
+function orderChild(o) {
+  var oc = store('order_child').all().find(function (x) { return x.id === o.id; });
+  return oc ? byId(store('children').all(), oc.child) : null;
+}
+function childAgeText(dob) {
+  var a = new Date(dob + 'T00:00:00'), b = new Date();
+  var m = (b.getFullYear() - a.getFullYear()) * 12 + (b.getMonth() - a.getMonth()); if (b.getDate() < a.getDate()) m--;
+  return m < 24 ? m + ' months' : Math.floor(m / 12) + ' years';
+}
+function orderAllergens(o, child) {
+  if (!child || !(child.allergies || []).length) return [];
+  var bom = store('bom').all(), ings = store('ingredients').all(), hits = {};
+  (o.items || []).forEach(function (it) {
+    bom.filter(function (b) { return b.product === it.product; }).forEach(function (b) {
+      var g = byId(ings, b.ing); if (!g) return;
+      child.allergies.forEach(function (al) {
+        var x = String(al).toLowerCase().replace(/s$/, ''), n = g.name.toLowerCase();
+        if (x && (n.indexOf(x) >= 0 || x.indexOf(n.replace(/s$/, '')) >= 0)) hits[g.name] = 1;
+      });
+    });
+  });
+  return Object.keys(hits);
+}
+function childBlock(o) {
+  var c = orderChild(o); if (!c) return '';
+  var hits = orderAllergens(o, c);
+  return '<div class="kid-for' + (hits.length ? ' bad' : '') + '">' + ic(hits.length ? 'alert' : 'user') + '<div><b>For ' + esc(c.name) + '</b> · ' + childAgeText(c.dob) +
+    ((c.allergies || []).length ? ' · allergies: <b>' + esc(c.allergies.join(', ')) + '</b>' : ' · no known allergies') +
+    (hits.length ? '<br><b>STOP — this order contains ' + esc(hits.join(', ')) + '.</b> Call the parent before cooking.' : '') + '</div></div>';
+}
+function isBirthdayToday(dob) { var a = new Date(dob + 'T00:00:00'), b = new Date(); return a.getMonth() === b.getMonth() && a.getDate() === b.getDate() && b.getFullYear() > a.getFullYear(); }
+function familyAlerts() {
+  var kids = store('children').all(); if (!kids.length) return [];
+  var fams = store('families').all(), seen = store('greetings').all(), vac = store('vaccines').all(), changed = false, tips = [];
+  var yr = new Date().getFullYear();
+  function once(key, fn) { if (seen.some(function (g) { return g.key === key; })) return; seen.push({ key: key, at: nowTs() }); changed = true; fn(); }
+  kids.forEach(function (c) {
+    var f = byId(fams, c.family) || {}, parent = f.parent || 'the family';
+    var tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate() + 1);
+    var a = new Date(c.dob + 'T00:00:00');
+    if (isBirthdayToday(c.dob)) {
+      var turns = yr - a.getFullYear();
+      var allergy = (c.allergies || []).length ? ' — make it ' + c.allergies.map(function (x) { return x.toLowerCase().replace(/s$/, '') + '-free'; }).join(', ') : '';
+      tips.push('🎂 <b>' + esc(c.name) + '</b> (' + esc(parent) + ') turns ' + turns + ' today — send a birthday cupcake' + esc(allergy) + (f.address ? ' to ' + esc(f.address) : '') + '.');
+      once('bday-' + c.id + '-' + yr, function () {
+        pushDemo('Happy birthday, ' + c.name + '! 🎂', c.name + ' turns ' + turns + ' today — huge love from Tiny Tummy. A little cupcake is on its way!', 'Customer · ' + parent);
+        pushDemo('Birthday cupcake to send 🎂', c.name + ' (' + parent + ') turns ' + turns + ' today' + allergy + (f.address ? ' · ' + f.address : ''), 'Role · manager');
+        logAct('Family', 'birthday', c.name + ' turns ' + turns + ' — cupcake alert');
+      });
+    } else if (a.getMonth() === tomorrow.getMonth() && a.getDate() === tomorrow.getDate()) {
+      tips.push('🎂 <b>' + esc(c.name) + '</b> (' + esc(parent) + ') has a birthday tomorrow — prepare the cupcake' + ((c.allergies || []).length ? ' (' + esc(c.allergies.map(function (x) { return x.toLowerCase().replace(/s$/, ''); }).join('-free, ')) + '-free)' : '') + '.');
+    }
+    [6, 7, 9, 12, 18, 24, 36].forEach(function (m) {
+      var d = new Date(a); d.setMonth(d.getMonth() + m);
+      var since = Math.floor((Date.now() - d.getTime()) / 86400000);
+      if (since >= 0 && since <= 14) once('mile-' + c.id + '-' + m, function () {
+        pushDemo('Bravo! ' + c.name + ' is ' + (m >= 24 ? m / 12 + ' years' : m + ' months') + ' 🎉', 'A new food stage starts — see what\'s next in your Tiny Tummy portal.', 'Customer · ' + parent);
+      });
+    });
+    vac.filter(function (v) { return v.child === c.id && !v.given; }).forEach(function (v) {
+      var dd = Math.round((new Date(v.due + 'T00:00:00') - new Date(today(0) + 'T00:00:00')) / 86400000);
+      if (dd >= 0 && dd <= 2) once('vac-' + v.id, function () {
+        pushDemo('Reminder: ' + v.name + ' ⏰', c.name + ' · ' + (dd === 0 ? 'today' : 'in ' + dd + ' day' + (dd === 1 ? '' : 's')) + (v.by ? ' · set by ' + v.by : ''), 'Customer · ' + parent);
+      });
+    });
+  });
+  if (changed) store('greetings').save(seen);
+  return tips;
 }
 /* ── boot ── */
 /* Super admin can take over any role: pick anyone in the act-as switcher,
