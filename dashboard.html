@@ -285,6 +285,42 @@ dialog::backdrop { background:rgba(61,50,41,.45); }
 .stp-acts .btn { white-space:nowrap; display:inline-flex; align-items:center; gap:4px; }
 .stp-wait { font-size:.72rem; font-weight:700; color:#9aabb3; text-transform:uppercase; letter-spacing:.05em; }
 @media (max-width:560px){ .stp { grid-template-columns:36px 1fr; } .stp-side { grid-column:1/-1; flex-direction:row; justify-content:space-between; align-items:center; } }
+
+/* ── Dispatch & Delivery ── */
+.dkpis { display:grid; grid-template-columns:repeat(auto-fit,minmax(170px,1fr)); gap:12px; margin-bottom:16px; }
+.dk { display:flex; align-items:center; gap:12px; background:var(--paper); border:1px solid var(--line); border-top:4px solid var(--sc); border-radius:14px; padding:12px 14px; box-shadow:var(--shadow); }
+.dk .oi { width:40px; height:40px; border-radius:11px; display:grid; place-items:center; color:var(--sc); background:color-mix(in srgb, var(--sc) 12%, #fff); font-size:1.2rem; flex-shrink:0; }
+.dk b { display:block; font-family:'Baloo 2'; font-size:1.4rem; line-height:1.1; }
+.dk small { font-size:.7rem; font-weight:700; color:var(--soft); text-transform:uppercase; letter-spacing:.05em; }
+.dgrid { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:18px; align-items:start; }
+@media (max-width:1100px){ .dgrid { grid-template-columns:1fr; } }
+.dh { display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:10px; }
+.dh h3 { margin:0; }
+.dcount { background:var(--cream); border-radius:999px; padding:0 9px; font-size:.78rem; font-family:'Quicksand'; }
+.dcard { border:1px solid var(--line); border-left:4px solid var(--sc); border-radius:12px; padding:11px 13px; margin-bottom:9px; display:grid; gap:6px; background:var(--paper); transition:box-shadow .12s, border-color .12s; }
+.dcard:hover { box-shadow:0 6px 18px rgba(23,69,94,.12); }
+.dtel { color:var(--sky); text-decoration:none; font-size:.78rem; font-weight:700; margin-left:6px; white-space:nowrap; }
+.dtel:hover { text-decoration:underline; }
+.dprog { display:flex; align-items:center; gap:10px; }
+.dprog .stp-bar { flex:1; width:auto; height:8px; }
+.dprog small { font-size:.76rem; color:var(--soft); white-space:nowrap; }
+.dact { display:flex; align-items:center; gap:8px; flex-wrap:wrap; border-top:1px solid var(--line); padding-top:8px; }
+.dact .stp-sel { max-width:230px; }
+.dact .btn { display:inline-flex; align-items:center; gap:5px; }
+.dname { font-weight:700; font-size:.84rem; }
+.dbtns { margin-left:auto; display:flex; gap:6px; align-items:center; }
+.dbtns .u-ib { width:32px; height:32px; font-size:.95rem; }
+.dagent { display:flex; align-items:center; gap:12px; padding:10px 4px; border-bottom:1px solid var(--line); }
+.dagent:last-child { border-bottom:none; }
+.dagent.off { opacity:.6; }
+.stp-av.big { width:42px; height:42px; font-size:.9rem; position:relative; }
+.stp-av.big i { position:absolute; right:-1px; bottom:-1px; width:12px; height:12px; border-radius:50%; background:#2fbf71; border:2px solid #fff; }
+.dagent-id { flex:1; min-width:0; display:grid; gap:1px; }
+.dagent-id .dtel { margin-left:0; }
+.dagent-id small { font-size:.76rem; color:var(--soft); }
+@media (max-width:640px){ .dkpis { grid-template-columns:repeat(2,1fr); gap:8px; } .dk { padding:9px 10px; gap:8px; } .dk .oi { width:32px; height:32px; font-size:1rem; } .dk b { font-size:1.15rem; } .dk small { font-size:.58rem; display:block; line-height:1.3; } .dbtns { margin-left:0; width:100%; justify-content:flex-end; } }
+.dlegend { display:flex; gap:16px; flex-wrap:wrap; margin-top:8px; font-size:.76rem; font-weight:700; color:var(--soft); }
+.dlegend i { display:inline-block; width:11px; height:11px; border-radius:3px; margin-right:5px; vertical-align:-1px; box-sizing:border-box; }
 /* ── Dashboard-wide icon layer ── */
 aside nav a > span { display:flex; width:20px; justify-content:center; font-size:1.05rem; }
 aside nav a > span .i { stroke-width:1.8; }
@@ -1237,7 +1273,7 @@ function openOrder(id) {
   var hist = o.history.map(function (h) { return '<li><b>' + esc(h.what) + '</b><span>' + esc(h.at) + '</span></li>'; }).join('');
   var steps = stepControls(o);
   var agentOpts = agents.filter(function (a) { return a.active; })
-    .map(function (a) { return '<option value="' + a.id + '"' + (o.agent === a.id ? ' selected' : '') + '>' + esc(a.name) + '</option>'; }).join('');
+    .map(function (a) { return '<option value="' + a.id + '"' + ((o.agent || suggestAgent(orders)) === a.id ? ' selected' : '') + '>' + esc(a.name) + '</option>'; }).join('');
   var actions = '';
   if (o.status === 'new') actions = '<button class="btn p" onclick="orderAct(\'' + o.id + '\',\'confirm\')">✓ Confirm order</button>';
   else if (o.status === 'confirmed') actions = '<button class="btn p" onclick="orderAct(\'' + o.id + '\',\'tokitchen\')">👨‍🍳 Send to kitchen (consume stock FEFO)</button>';
@@ -1514,7 +1550,7 @@ function orderAct(oid, act) {
   if (act === 'qcpass') { o.status = 'dispatch'; log('QC passed ✓ ready for dispatch'); }
   if (act === 'dispatch') {
     var sel = document.getElementById('dl-agent');
-    o.agent = sel ? sel.value : null;
+    o.agent = DISPATCH_AGENT || (sel ? sel.value : null) || suggestAgent(orders);
     var agents = store('agents').all(); var a = byId(agents, o.agent);
     var km = roadKm(o.code); var eta = etaMin(km);
     o.track = { p: 0, km: km, eta_min: eta, started: Date.now(), promised: Date.now() + eta * 60000, delayed: false };
@@ -2071,10 +2107,10 @@ function deliveryMap(out, agents) {
     var ay = KITCHEN_XY.y + (d.y - KITCHEN_XY.y) * p;
     var a = byId(agents, o.agent);
     return '<g class="mapmark" onclick="openOrder(\'' + o.id + '\')"><line x1="' + KITCHEN_XY.x + '" y1="' + KITCHEN_XY.y + '" x2="' + d.x + '" y2="' + d.y + '" stroke="#d9731f" stroke-width="2" stroke-dasharray="6 5" opacity=".55"/>' +
-      '<circle cx="' + d.x + '" cy="' + d.y + '" r="7" fill="#d95d76"/>' +
+      '<circle cx="' + d.x + '" cy="' + d.y + '" r="7" fill="#fff" stroke="#d95d76" stroke-width="3"/>' +
       '<text x="' + (d.x + 11) + '" y="' + (d.y + 4) + '" font-size="11" fill="#3d3229" font-weight="700">' + esc(o.code.slice(-3)) + ' · ' + esc(o.customer.split(' ')[0]) + '</text>' +
-      '<g transform="translate(' + ax + ',' + ay + ')"><circle r="11" fill="#f28c38" stroke="#fff" stroke-width="2.5"/>' +
-      '<text y="4" x="0" text-anchor="middle" font-size="11">🛵</text>' +
+      '<g transform="translate(' + ax + ',' + ay + ')"><circle r="12" fill="' + (o.track && o.track.delayed ? '#c98a1b' : '#17455e') + '" stroke="#fff" stroke-width="2.5"/>' +
+      '<g transform="translate(-7,-7) scale(.58)" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">' + ICONS.truck + '</g>' +
       '<text y="-15" x="0" text-anchor="middle" font-size="10" font-weight="700" fill="#d9731f">' + esc(a ? a.name.split(' ')[0] : '') + '</text></g></g>';
   }).join('');
   return '<svg viewBox="0 0 640 400" role="img" aria-label="Live delivery map" style="width:100%;height:auto;border-radius:12px;background:#f6efe4">' +
@@ -2085,45 +2121,130 @@ function deliveryMap(out, agents) {
     '<path d="M320 30 L 360 390" stroke="#e6d9c6" stroke-width="8" fill="none"/>' +
     '<path d="M480 20 L 520 390" stroke="#e6d9c6" stroke-width="8" fill="none"/>' +
     marks +
-    '<g transform="translate(' + KITCHEN_XY.x + ',' + KITCHEN_XY.y + ')"><rect x="-13" y="-13" width="26" height="26" rx="7" fill="#3d3229"/><text y="5" text-anchor="middle" font-size="13">🥕</text>' +
+    '<g transform="translate(' + KITCHEN_XY.x + ',' + KITCHEN_XY.y + ')"><rect x="-14" y="-14" width="28" height="28" rx="8" fill="#12394e"/><g transform="translate(-8,-8) scale(.67)" fill="none" stroke="#f0b64b" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">' + ICONS.chef + '</g>' +
     '<text y="27" text-anchor="middle" font-size="10" font-weight="700" fill="#3d3229">KITCHEN</text></g>' +
     '</svg>';
 }
+
+/* Least-busy active agent: suggested (auto-selected) for every ready order. */
+var DISPATCH_AGENT = null;
+function suggestAgent(orders) {
+  var agents = store('agents').all().filter(function (a) { return a.active; });
+  if (!agents.length) return null;
+  var load = {};
+  (orders || store('orders').all()).forEach(function (o) { if (o.status === 'delivering' && o.agent) load[o.agent] = (load[o.agent] || 0) + 1; });
+  agents.sort(function (a, b) { return (load[a.id] || 0) - (load[b.id] || 0); });
+  return agents[0].id;
+}
+function dispatchTo(oid, agentId) {
+  if (!agentId) { alert('No active delivery agent — switch one on below.'); return; }
+  DISPATCH_AGENT = agentId;
+  try { orderAct(oid, 'dispatch'); } finally { DISPATCH_AGENT = null; }
+  var a = byId(store('agents').all(), agentId);
+  uToast('Dispatched with ' + (a ? a.name : 'agent'));
+}
+function dispatchAll() {
+  var ready = store('orders').all().filter(function (o) { return o.status === 'dispatch'; });
+  if (!ready.length) return;
+  ready.forEach(function (o) { var ag = suggestAgent(); if (ag) { DISPATCH_AGENT = ag; try { orderAct(o.id, 'dispatch'); } finally { DISPATCH_AGENT = null; } } });
+  uToast(ready.length + ' order(s) dispatched');
+}
+function agentToggle(id, on) {
+  var agents = store('agents').all(); var a = byId(agents, id); if (!a) return;
+  a.active = on; store('agents').save(agents);
+  logAct('Delivery', on ? 'agent on duty' : 'agent off duty', a.name);
+  render(); uToast(a.name + (on ? ' is on duty' : ' is off duty'));
+}
+function newAgent() {
+  showDlg('<h3>' + ic('plus') + ' Add delivery agent</h3><div class="frm" style="margin-top:10px">' +
+    '<div class="row"><label>Name<input id="na-name" placeholder="e.g. Rami K."></label>' +
+    '<label>Phone<input id="na-phone" placeholder="+961 …"></label></div>' +
+    '<button class="btn p" onclick="saveAgent()">' + ic('check') + ' Add agent</button></div>');
+}
+function saveAgent() {
+  var name = document.getElementById('na-name').value.trim();
+  if (!name) { alert('Name required'); return; }
+  var agents = store('agents').all();
+  agents.push({ id: uid(), name: name, phone: document.getElementById('na-phone').value.trim(), active: true });
+  store('agents').save(agents); logAct('Delivery', 'agent added', name);
+  closeDlg(); render(); uToast(name + ' added');
+}
+function dayStart() { var d = new Date(); d.setHours(0, 0, 0, 0); return d.getTime(); }
 
 RENDER.delivery = function () {
   checkDelays();
   var agents = store('agents').all(), orders = store('orders').all();
   var ready = orders.filter(function (o) { return o.status === 'dispatch'; });
   var out = orders.filter(function (o) { return o.status === 'delivering'; });
-  var agentRows = agents.map(function (a) {
-    var mine = out.filter(function (o) { return o.agent === a.id; }).map(function (o) { return o.code; }).join(', ') || '—';
-    return '<tr><td><b>' + esc(a.name) + '</b></td><td>' + esc(a.phone) + '</td>' +
-      '<td>' + (a.active ? '<span class="chip done">active</span>' : '<span class="chip todo">off</span>') + '</td>' +
-      '<td>' + esc(mine) + '</td></tr>';
-  }).join('');
-  var readyRows = ready.map(function (o) {
-    return '<tr><td><b>' + esc(o.code) + '</b></td><td>' + esc(o.customer) + '</td><td>' + esc(o.address) + '</td>' +
-      '<td><button class="btn p s" onclick="openOrder(\'' + o.id + '\')">Assign & dispatch</button></td></tr>';
-  }).join('') || '<tr><td colspan="4" class="muted">Nothing waiting for dispatch.</td></tr>';
-  var outRows = out.map(function (o) {
+  var delayed = out.filter(function (o) { return o.track && o.track.delayed; });
+  var doneToday = orders.filter(function (o) { return o.status === 'delivered' && (o.stage_times && o.stage_times.delivered ? o.stage_times.delivered >= dayStart() : o.created === today(0)); });
+  var onDuty = agents.filter(function (a) { return a.active; });
+  var load = {}; out.forEach(function (o) { if (o.agent) load[o.agent] = (load[o.agent] || 0) + 1; });
+  var sugg = suggestAgent(orders);
+
+  function kpi(icon, val, lbl, color) {
+    return '<div class="dk" style="--sc:' + color + '"><span class="oi">' + ic(icon) + '</span><span><b>' + val + '</b><small>' + lbl + '</small></span></div>';
+  }
+  var kpis = '<div class="dkpis">' +
+    kpi('box', ready.length, 'Ready to dispatch', '#2f6fb0') +
+    kpi('truck', out.length, 'On the road', '#17455e') +
+    kpi('alarm', delayed.length, 'Delayed', delayed.length ? '#b23a48' : '#8a979e') +
+    kpi('flag', doneToday.length, 'Delivered today', '#2e8770') +
+    kpi('users', onDuty.length + '/' + agents.length, 'Agents on duty', '#7a4aa8') + '</div>';
+
+  var agentOpts = function (sel) {
+    return onDuty.map(function (a) { return '<option value="' + a.id + '"' + (sel === a.id ? ' selected' : '') + '>' + esc(a.name) + ' · ' + (load[a.id] || 0) + ' on road</option>'; }).join('');
+  };
+  var readyCards = ready.map(function (o) {
+    var km = roadKm(o.code), eta = etaMin(km);
+    var since = o.stage_times && o.stage_times.dispatch;
+    return '<div class="dcard" style="--sc:#2f6fb0">' +
+      '<div class="oc-top"><b>' + esc(o.code) + '</b>' + (since ? '<small>' + ic('timer') + ' waiting ' + ago(since) + '</small>' : '') + '</div>' +
+      '<div class="oc-cust">' + ic('user') + ' ' + esc(o.customer) + ' <a class="dtel" href="tel:' + esc(o.phone) + '" onclick="event.stopPropagation()">' + ic('phone') + ' ' + esc(o.phone) + '</a></div>' +
+      '<div class="oc-items">' + ic('pin') + ' ' + esc(o.address) + ' · ' + km + ' km · ~' + eta + ' min</div>' +
+      '<div class="dact">' + (onDuty.length
+        ? '<select id="dsel-' + o.id + '" class="stp-sel">' + agentOpts(sugg) + '</select><span class="stp-auto" title="Least busy agent, picked automatically">' + ic('zap') + ' Auto</span>' +
+          '<button class="btn p s" onclick="dispatchTo(\'' + o.id + '\',document.getElementById(\'dsel-' + o.id + '\').value)">' + ic('truck') + ' Dispatch</button>'
+        : '<span class="chip open">No agent on duty</span>') + '</div></div>';
+  }).join('') || '<div class="ocol-empty">' + ic('checkc') + ' Nothing waiting — every ready order is on its way.</div>';
+
+  var outCards = out.map(function (o) {
     var a = byId(agents, o.agent);
     var t = o.track || { p: 0, km: roadKm(o.code), promised: Date.now() + etaMin(roadKm(o.code)) * 60000, delayed: false };
     var remainMin = Math.max(0, Math.round((t.promised - Date.now()) / 60000));
-    return '<tr' + (t.delayed ? ' style="background:#fdf3e3"' : '') + '><td><b>' + esc(o.code) + '</b><br><span class="muted">' + esc(o.customer) + '</span></td>' +
-      '<td class="wrap">' + esc(o.address) + '<br><span class="muted">' + t.km + ' km by road</span></td>' +
-      '<td>🛵 ' + esc(a ? a.name : '') + '</td>' +
-      '<td style="min-width:130px"><div class="bar-wrap"><div class="bar-fill" style="width:' + t.p + '%"></div></div>' +
-      '<span class="muted">' + t.p + '% · ETA ' + fmtClock(t.promised) + ' (' + remainMin + ' min)' + (t.delayed ? ' <span class="chip exp">delayed</span>' : '') + '</span></td>' +
-      '<td class="pill-row"><button class="btn o s" onclick="trackPing(\'' + o.id + '\')">📍 Agent ping</button>' +
-      '<button class="btn o s" onclick="trackDelay(\'' + o.id + '\')">⏱ +15 min</button>' +
-      (t.p >= 100 ? '<button class="btn g s" onclick="orderAct(\'' + o.id + '\',\'delivered\')">Delivered ✓</button>' : '') + '</td></tr>';
-  }).join('') || '<tr><td colspan="5" class="muted">No orders on the road.</td></tr>';
-  return '<div class="pagehead"><div><h1>🚚 Dispatch · Delivery tracking</h1><div class="sub">Live map of every agent on the road — ETA computed from road distance (' + CITY_SPEED_KMH + ' km/h city average, road factor ×' + ROAD_FACTOR + '). The customer is pushed when the order leaves, when it\'s near, and on any delay with the new ETA.</div></div></div>' +
-    '<div class="panel"><h3>🗺️ Live map</h3>' + deliveryMap(out, agents) +
-    '<p class="muted" style="margin-top:8px">Demo positions — in production each 📍 ping is the agent\'s phone GPS posting to <code>tt_agent_pings</code>, and the marker moves on its own.</p></div>' +
-    '<div class="panel"><h3>📦 Ready for dispatch</h3><div class="tbl-scroll"><table class="t"><thead><tr><th>Order</th><th>Customer</th><th>Address</th><th></th></tr></thead><tbody>' + readyRows + '</tbody></table></div></div>' +
-    '<div class="panel"><h3>🛵 Out for delivery</h3><div class="tbl-scroll"><table class="t reg"><thead><tr><th>Order</th><th>Destination</th><th>Agent</th><th>Progress · ETA</th><th></th></tr></thead><tbody>' + outRows + '</tbody></table></div></div>' +
-    '<div class="panel"><h3>👤 Agents</h3><div class="tbl-scroll"><table class="t"><thead><tr><th>Name</th><th>Phone</th><th>Status</th><th>Carrying</th></tr></thead><tbody>' + agentRows + '</tbody></table></div></div>';
+    var sc = t.delayed ? '#c98a1b' : '#17455e';
+    return '<div class="dcard" style="--sc:' + sc + '">' +
+      '<div class="oc-top"><b>' + esc(o.code) + '</b>' + (t.delayed ? '<span class="chip exp">' + ic('alarm') + ' delayed</span>' : '<small>' + ic('timer') + ' ' + remainMin + ' min left</small>') + '</div>' +
+      '<div class="oc-cust">' + ic('user') + ' ' + esc(o.customer) + ' <a class="dtel" href="tel:' + esc(o.phone) + '">' + ic('phone') + ' ' + esc(o.phone) + '</a></div>' +
+      '<div class="oc-items">' + ic('pin') + ' ' + esc(o.address) + ' · ' + t.km + ' km</div>' +
+      '<div class="dprog"><span class="stp-bar"><i style="width:' + t.p + '%;background:' + (t.delayed ? 'var(--gold)' : 'var(--pea)') + '"></i></span><small>' + t.p + '% · ETA <b>' + fmtClock(t.promised) + '</b></small></div>' +
+      '<div class="dact"><span class="stp-av" title="' + esc(a ? a.name : '') + '">' + initials(a ? a.name : '?') + '</span><span class="dname">' + esc(a ? a.name : 'No agent') + '</span>' +
+        '<span class="dbtns"><button class="u-ib" title="Update location (agent GPS ping)" onclick="trackPing(\'' + o.id + '\')">' + ic('pin') + '</button>' +
+        '<button class="u-ib" title="Report a 15 min delay — the customer is told" onclick="trackDelay(\'' + o.id + '\')">' + ic('alarm') + '</button>' +
+        '<button class="btn g s" onclick="orderAct(\'' + o.id + '\',\'delivered\')"' + (t.p >= 100 ? '' : ' title="Mark delivered"') + '>' + ic('check') + ' Delivered</button></span></div></div>';
+  }).join('') || '<div class="ocol-empty">' + ic('truck') + ' No orders on the road.</div>';
+
+  var agentCards = agents.map(function (a) {
+    var mine = out.filter(function (o) { return o.agent === a.id; });
+    var dn = doneToday.filter(function (o) { return o.agent === a.id; }).length;
+    return '<div class="dagent' + (a.active ? '' : ' off') + '">' +
+      '<span class="stp-av big">' + initials(a.name) + (a.active ? '<i></i>' : '') + '</span>' +
+      '<div class="dagent-id"><b>' + esc(a.name) + '</b><a class="dtel" href="tel:' + esc(a.phone) + '">' + ic('phone') + ' ' + esc(a.phone) + '</a>' +
+        '<small>' + (mine.length ? ic('truck') + ' Carrying ' + mine.map(function (o) { return esc(o.code); }).join(', ') : a.active ? 'Free — next in line' : 'Off duty') + ' · ' + dn + ' delivered today</small></div>' +
+      '<label class="sw" title="' + (a.active ? 'On duty — switch off' : 'Off duty — switch on') + '"><input type="checkbox"' + (a.active ? ' checked' : '') + ' onchange="agentToggle(\'' + a.id + '\',this.checked)"><span></span></label></div>';
+  }).join('');
+
+  return '<div class="pagehead"><div><h1>Dispatch &amp; Delivery</h1><div class="sub">Ready orders get the least-busy agent automatically — one tap dispatches. Track every delivery live; customers are notified on dispatch, near arrival and on any delay.</div></div>' +
+    '<span class="pill-row">' + (ready.length > 1 && onDuty.length ? '<button class="btn o" onclick="dispatchAll()">' + ic('zap') + ' Dispatch all ready</button>' : '') +
+    '<button class="btn p" onclick="newAgent()">' + ic('plus') + ' Add agent</button></span></div>' + kpis +
+    '<div class="dgrid"><div>' +
+      '<div class="panel"><div class="dh"><h3>' + ic('box') + ' Ready to dispatch <span class="dcount">' + ready.length + '</span></h3></div>' + readyCards + '</div>' +
+      '<div class="panel"><div class="dh"><h3>' + ic('truck') + ' On the road <span class="dcount">' + out.length + '</span></h3></div>' + outCards + '</div>' +
+    '</div><div>' +
+      '<div class="panel"><div class="dh"><h3>' + ic('map') + ' Live map</h3><span class="muted">' + CITY_SPEED_KMH + ' km/h city average · road ×' + ROAD_FACTOR + '</span></div>' + deliveryMap(out, agents) +
+        '<div class="dlegend"><span><i style="background:#12394e"></i>Kitchen</span><span><i style="background:#17455e;border-radius:50%"></i>Agent</span><span><i style="background:#fff;border:3px solid #d95d76;border-radius:50%"></i>Customer</span></div></div>' +
+      '<div class="panel"><div class="dh"><h3>' + ic('users') + ' Delivery agents</h3><span class="muted">switch = on duty</span></div>' + (agentCards || '<p class="muted">No agents yet.</p>') + '</div>' +
+    '</div></div>';
 };
 
 /* ── Suppliers · Payables ─────────────────────────────────────────────
