@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Family Portal — Tiny Tummy</title>
+<meta name="description" content="Your child's Tiny Tummy food and growth record: every meal and its ingredients, foods tried, growth, photos, vaccines and doctor notes.">
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="icon" type="image/png" href="images/tt-logo-mark.png">
+<style>
+:root {
+  --brand:#123c56; --navy:#17455e; --navy-d:#0e3345; --cream:#f8f4ea; --paper:#fff; --ink:#17455e; --soft:#64808e;
+  --gold:#f0b64b; --gold-d:#c98f1c; --pea:#2e8770; --pea-d:#226a58; --berry:#d95d76; --sky:#2f6fb0; --plum:#7a4aa8;
+  --line:#e7e1d2; --bad:#b23a48; --ok:#226a58; --radius:16px; --shadow:0 4px 18px rgba(23,69,94,.10);
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+html, body { overflow-x:hidden; }
+body { font-family:'Quicksand','Segoe UI',system-ui,sans-serif; background:var(--cream); color:var(--ink); line-height:1.5; font-size:15px; }
+h1,h2,h3,h4 { font-family:'Baloo 2','Quicksand',sans-serif; line-height:1.2; }
+a { color:inherit; }
+button { font-family:inherit; cursor:pointer; }
+input,select,textarea { font-family:inherit; font-size:.92rem; padding:9px 12px; border-radius:11px; border:1.5px solid var(--line); background:var(--paper); color:var(--ink); width:100%; }
+input:focus,select:focus,textarea:focus { outline:2px solid var(--navy); border-color:var(--navy); }
+.i { width:1em; height:1em; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; vertical-align:-.14em; flex-shrink:0; }
+
+/* header */
+.top { background:var(--brand); color:#e2ebf0; position:sticky; top:0; z-index:40; box-shadow:0 2px 14px rgba(14,51,69,.25); }
+.top-in { max-width:1120px; margin:0 auto; padding:6px 20px; display:flex; align-items:center; gap:14px; }
+.top img.logo { height:52px; width:auto; display:block; }
+.top .tag { font-size:.68rem; font-weight:700; letter-spacing:.14em; text-transform:uppercase; color:var(--gold); border-left:1px solid rgba(255,255,255,.18); padding-left:14px; }
+.top .sp { flex:1; }
+.top .who { font-size:.84rem; font-weight:600; display:flex; align-items:center; gap:10px; }
+.top .who button { background:rgba(255,255,255,.1); color:#fff; border:none; border-radius:999px; padding:7px 14px; font-weight:700; font-size:.8rem; display:inline-flex; align-items:center; gap:6px; }
+.top .who button:hover { background:rgba(255,255,255,.18); }
+@media (max-width:640px){ .top .tag, .top .who span.nm { display:none; } .top img.logo { height:44px; } }
+
+.wrap { max-width:1120px; margin:0 auto; padding:22px 20px 70px; }
+.btn { display:inline-flex; align-items:center; justify-content:center; gap:6px; text-decoration:none; font-weight:700; border-radius:999px; padding:9px 18px; border:none; font-size:.86rem; transition:transform .12s, box-shadow .12s; white-space:nowrap; }
+.btn:hover { transform:translateY(-1px); box-shadow:var(--shadow); }
+.btn.p { background:var(--navy); color:#fff; } .btn.o { background:transparent; color:var(--navy-d); border:2px solid var(--navy); }
+.btn.g { background:var(--pea); color:#fff; } .btn.w { background:#25d366; color:#fff; } .btn.gold { background:var(--gold); color:var(--brand); }
+.btn.s { padding:6px 12px; font-size:.78rem; }
+.muted { color:var(--soft); font-size:.84rem; }
+.panel { background:var(--paper); border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow); padding:18px; margin-bottom:16px; }
+.ph { display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:12px; }
+.ph h3 { display:flex; align-items:center; gap:8px; font-size:1.08rem; }
+.ph h3 .i { color:var(--gold-d); }
+.chip { display:inline-flex; align-items:center; gap:4px; font-size:.72rem; font-weight:700; border-radius:999px; padding:3px 10px; white-space:nowrap; }
+.chip.ok { background:#e6f4ef; color:var(--ok); } .chip.warn { background:#fdf3e3; color:#a3720d; } .chip.bad { background:#fde7e7; color:var(--bad); }
+.chip.info { background:#e8f0fb; color:var(--sky); } .chip.plum { background:#f0e7fa; color:var(--plum); } .chip.grey { background:#eef1f3; color:var(--soft); }
+
+/* sign in */
+.signin { max-width:440px; margin:40px auto; text-align:center; }
+.signin .panel { padding:30px 26px; text-align:left; }
+.signin h1 { font-size:1.8rem; margin-bottom:6px; text-align:center; }
+.signin p.lead { color:var(--soft); text-align:center; margin-bottom:18px; }
+.signin label { display:grid; gap:6px; font-weight:700; font-size:.86rem; margin-bottom:12px; }
+.signin .or { text-align:center; color:var(--soft); font-size:.8rem; margin:12px 0; }
+.feat { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:10px; margin-top:22px; text-align:left; }
+.feat div { background:var(--paper); border:1px solid var(--line); border-radius:12px; padding:10px 12px; font-size:.8rem; font-weight:600; display:flex; gap:8px; align-items:center; }
+.feat .i { color:var(--gold-d); font-size:1.1rem; }
+
+/* child switcher */
+.kids { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:14px; align-items:center; }
+.kid { display:flex; align-items:center; gap:9px; background:var(--paper); border:1.5px solid var(--line); border-radius:999px; padding:5px 14px 5px 5px; font-weight:700; font-size:.88rem; color:var(--ink); }
+.kid.on { border-color:var(--gold); box-shadow:0 0 0 3px rgba(240,182,75,.25); }
+.kid small { color:var(--soft); font-weight:600; font-size:.74rem; }
+.av { width:34px; height:34px; border-radius:50%; display:grid; place-items:center; font-weight:700; font-size:.8rem; background:#e8f0fb; color:var(--sky); overflow:hidden; flex-shrink:0; font-family:'Baloo 2'; }
+.av.girl { background:#fde8ee; color:var(--berry); } .av.boy { background:#e8f0fb; color:var(--sky); }
+.av img { width:100%; height:100%; object-fit:cover; }
+.kid.add { padding:7px 14px; border-style:dashed; color:var(--soft); }
+
+/* hero */
+.hero { display:grid; grid-template-columns:auto 1fr auto; gap:20px; align-items:center; background:linear-gradient(135deg,#fffaf0 0%,#fff 60%,#eef4f6 100%); border:1px solid var(--line); border-radius:20px; padding:20px 22px; box-shadow:var(--shadow); margin-bottom:16px; }
+.hero .av { width:84px; height:84px; font-size:1.7rem; box-shadow:0 0 0 4px #fff, 0 0 0 6px var(--line); }
+.hero h1 { font-size:1.9rem; }
+.hero .age { font-size:1.02rem; font-weight:700; color:var(--pea-d); }
+.hero .meta { display:flex; flex-wrap:wrap; gap:6px 14px; margin-top:6px; font-size:.82rem; color:var(--soft); font-weight:600; }
+.hero .meta span { display:inline-flex; align-items:center; gap:5px; }
+.hero .acts { display:flex; flex-direction:column; gap:8px; align-items:stretch; }
+@media (max-width:760px){ .hero { grid-template-columns:auto 1fr; } .hero .acts { grid-column:1/-1; flex-direction:row; flex-wrap:wrap; } .hero .av { width:64px; height:64px; } .hero h1 { font-size:1.5rem; } }
+
+/* banners */
+.banner { display:flex; gap:16px; align-items:center; border-radius:18px; padding:18px 20px; margin-bottom:14px; position:relative; overflow:hidden; }
+.banner .bi { width:56px; height:56px; border-radius:16px; display:grid; place-items:center; font-size:1.7rem; flex-shrink:0; }
+.banner h3 { font-size:1.2rem; margin-bottom:2px; }
+.banner p { font-size:.9rem; }
+.banner.mile { background:linear-gradient(120deg,#e6f4ef,#f6fbf8 60%,#fff8e7); border:1px solid #bfe0d4; }
+.banner.mile .bi { background:var(--pea); color:#fff; }
+.banner.bday { background:linear-gradient(120deg,#fde8ee,#fff4f6 55%,#fff6dd); border:1px solid #f6c6d2; }
+.banner.bday .bi { background:var(--berry); color:#fff; }
+.banner.rem { background:#fff8e6; border:1px solid #f3dca6; padding:12px 16px; }
+.banner.rem .bi { width:40px; height:40px; font-size:1.2rem; background:var(--gold); color:var(--brand); border-radius:12px; }
+.banner.drv { background:#eef4fb; border:1px solid #c9dcf0; padding:12px 16px; }
+.banner.drv .bi { width:40px; height:40px; font-size:1.2rem; background:var(--sky); color:#fff; border-radius:12px; }
+.conf { position:absolute; right:-10px; top:-10px; width:160px; height:120px; opacity:.5; pointer-events:none; }
+
+/* tabs */
+.tabs { display:flex; gap:3px; background:#ece6d6; border-radius:999px; padding:4px; margin-bottom:16px; overflow-x:auto; scrollbar-width:none; }
+.tabs::-webkit-scrollbar { display:none; }
+.tabs button { border:none; background:transparent; color:var(--soft); font-weight:700; font-size:.86rem; padding:8px 15px; border-radius:999px; display:flex; align-items:center; gap:6px; white-space:nowrap; }
+.tabs button.on { background:var(--paper); color:var(--ink); box-shadow:0 2px 8px rgba(23,69,94,.14); }
+.tabs button .n { background:var(--cream); border-radius:999px; padding:0 7px; font-size:.7rem; }
+
+/* kpis */
+.kpis { display:grid; grid-template-columns:repeat(auto-fit,minmax(170px,1fr)); gap:12px; margin-bottom:16px; }
+.kpi { display:flex; gap:12px; align-items:center; background:var(--paper); border:1px solid var(--line); border-top:4px solid var(--sc); border-radius:14px; padding:12px 14px; box-shadow:var(--shadow); }
+.kpi .oi { width:40px; height:40px; border-radius:11px; display:grid; place-items:center; color:var(--sc); background:color-mix(in srgb, var(--sc) 12%, #fff); font-size:1.2rem; flex-shrink:0; }
+.kpi b { display:block; font-family:'Baloo 2'; font-size:1.35rem; line-height:1.1; }
+.kpi small { font-size:.68rem; font-weight:700; color:var(--soft); text-transform:uppercase; letter-spacing:.05em; }
+@media (max-width:640px){ .kpis { grid-template-columns:repeat(2,1fr); gap:8px; } .kpi { padding:9px 10px; gap:8px; } .kpi .oi { width:32px; height:32px; font-size:1rem; } .kpi b { font-size:1.1rem; } .kpi small { font-size:.58rem; } }
+.g2 { display:grid; grid-template-columns:1fr 1fr; gap:16px; } .g2 > * { min-width:0; }
+@media (max-width:860px){ .g2 { grid-template-columns:1fr; } }
+
+/* stage card */
+.stage { display:grid; gap:10px; }
+.stage .now { font-size:.92rem; }
+.stage .next { display:flex; align-items:center; gap:8px; font-size:.82rem; font-weight:700; color:var(--plum); background:#f6f0fc; border-radius:10px; padding:8px 12px; }
+.sugg { display:grid; gap:8px; }
+.sugg a { display:flex; align-items:center; gap:10px; text-decoration:none; border:1px solid var(--line); border-radius:12px; padding:8px 12px; transition:border-color .12s; }
+.sugg a:hover { border-color:var(--gold); }
+.sugg .si { width:34px; height:34px; border-radius:10px; background:var(--cream); color:var(--pea-d); display:grid; place-items:center; flex-shrink:0; }
+.sugg b { font-size:.88rem; } .sugg small { display:block; color:var(--soft); font-size:.74rem; }
+.sugg .go { margin-left:auto; color:#25a35a; font-size:.78rem; font-weight:700; display:flex; align-items:center; gap:4px; }
+
+/* diary */
+.month { font-family:'Baloo 2'; font-size:1rem; color:var(--soft); margin:16px 0 8px; display:flex; align-items:center; gap:10px; }
+.month::after { content:''; flex:1; height:1px; background:var(--line); }
+.meal { background:var(--paper); border:1px solid var(--line); border-left:4px solid var(--sc,#2e8770); border-radius:14px; margin-bottom:10px; box-shadow:0 1px 4px rgba(23,69,94,.06); }
+.meal > summary { list-style:none; cursor:pointer; display:flex; align-items:center; gap:12px; padding:12px 14px; flex-wrap:wrap; }
+.meal > summary::-webkit-details-marker { display:none; }
+.meal .md { width:46px; text-align:center; flex-shrink:0; }
+.meal .md b { display:block; font-family:'Baloo 2'; font-size:1.3rem; line-height:1; }
+.meal .md small { font-size:.68rem; font-weight:700; color:var(--soft); text-transform:uppercase; }
+.meal .mt { flex:1; min-width:180px; }
+.meal .mt b { font-size:.94rem; } .meal .mt small { display:block; color:var(--soft); font-size:.76rem; }
+.meal .chev { color:var(--soft); transition:transform .15s; display:flex; }
+.meal[open] .chev { transform:rotate(90deg); }
+.meal .body { padding:0 14px 14px; border-top:1px solid var(--line); }
+.ing { width:100%; border-collapse:collapse; font-size:.84rem; margin-top:10px; }
+.ing th { text-align:left; font-size:.68rem; color:var(--soft); text-transform:uppercase; letter-spacing:.05em; padding:6px 8px; border-bottom:1px solid var(--line); }
+.ing td { padding:7px 8px; border-bottom:1px solid #f1ece0; vertical-align:middle; }
+.ing td.num, .ing th.num { text-align:right; font-variant-numeric:tabular-nums; }
+.ing tr.prod td { background:#faf7ef; font-weight:700; }
+.ing tr.alg td { background:#fdecee; }
+.alert { display:flex; gap:10px; align-items:flex-start; background:#fde7e7; border:1px solid #f1c4c9; color:#7d2230; border-radius:12px; padding:10px 12px; font-size:.84rem; margin-top:10px; }
+.alert .i { font-size:1.1rem; margin-top:1px; }
+
+/* foods tried */
+.foods { display:grid; grid-template-columns:repeat(auto-fill,minmax(190px,1fr)); gap:10px; }
+.food { background:var(--paper); border:1px solid var(--line); border-radius:14px; padding:12px; display:flex; gap:10px; align-items:center; }
+.food .fi { width:40px; height:40px; border-radius:12px; display:grid; place-items:center; background:#e6f4ef; color:var(--pea-d); font-size:1.15rem; flex-shrink:0; }
+.food.alg { border-color:#f1c4c9; background:#fff7f8; } .food.alg .fi { background:#fde7e7; color:var(--bad); }
+.food b { font-size:.9rem; display:block; } .food small { font-size:.74rem; color:var(--soft); display:block; }
+.food .new { margin-left:auto; }
+
+/* growth */
+.gchart { width:100%; height:auto; display:block; }
+.gform { display:grid; grid-template-columns:repeat(3,1fr) auto; gap:8px; align-items:end; }
+.gform label { font-size:.74rem; font-weight:700; color:var(--soft); display:grid; gap:4px; }
+@media (max-width:640px){ .gform { grid-template-columns:1fr 1fr; } }
+table.t { width:100%; border-collapse:collapse; font-size:.86rem; }
+table.t th { text-align:left; font-size:.68rem; color:var(--soft); text-transform:uppercase; letter-spacing:.05em; padding:7px 8px; border-bottom:1px solid var(--line); }
+table.t td { padding:8px; border-bottom:1px solid #f1ece0; }
+table.t td.num, table.t th.num { text-align:right; font-variant-numeric:tabular-nums; }
+.ib { width:30px; height:30px; border-radius:50%; border:1.5px solid var(--line); background:var(--paper); display:inline-grid; place-items:center; color:var(--soft); }
+.ib:hover { border-color:var(--bad); color:var(--bad); }
+
+/* photos */
+.album { display:grid; grid-template-columns:repeat(auto-fill,minmax(180px,1fr)); gap:12px; }
+.ph-card { background:var(--paper); border:1px solid var(--line); border-radius:14px; overflow:hidden; box-shadow:var(--shadow); position:relative; }
+.ph-card img { width:100%; aspect-ratio:1/1; object-fit:cover; display:block; }
+.ph-card .cap { padding:8px 10px; font-size:.78rem; }
+.ph-card .cap b { display:block; font-size:.82rem; }
+.ph-card .del { position:absolute; top:8px; right:8px; background:rgba(255,255,255,.92); }
+.upload { border:2px dashed #d8d0bd; border-radius:14px; display:grid; place-items:center; text-align:center; padding:20px; color:var(--soft); font-weight:700; font-size:.84rem; cursor:pointer; background:#fffdf8; min-height:180px; }
+.upload:hover { border-color:var(--gold); color:var(--ink); }
+.upload .i { font-size:1.8rem; display:block; margin:0 auto 6px; color:var(--gold-d); }
+
+/* health */
+.vac { display:flex; align-items:center; gap:12px; padding:10px 4px; border-bottom:1px solid var(--line); }
+.vac:last-child { border-bottom:none; }
+.vac .vi { width:38px; height:38px; border-radius:11px; display:grid; place-items:center; flex-shrink:0; font-size:1.1rem; }
+.vac.given .vi { background:#e6f4ef; color:var(--ok); } .vac.soon .vi { background:#fdf3e3; color:#a3720d; } .vac.over .vi { background:#fde7e7; color:var(--bad); } .vac.plan .vi { background:#e8f0fb; color:var(--sky); }
+.vac > div { flex:1; min-width:0; } .vac b { font-size:.9rem; } .vac small { display:block; color:var(--soft); font-size:.76rem; }
+.note { border-left:3px solid var(--sky); background:#f6f9fd; border-radius:0 12px 12px 0; padding:10px 14px; margin-bottom:10px; }
+.note .nh { display:flex; justify-content:space-between; gap:8px; font-size:.76rem; color:var(--soft); font-weight:700; margin-bottom:3px; }
+.note p { font-size:.88rem; }
+.frm { display:grid; gap:10px; }
+.frm label { display:grid; gap:4px; font-weight:700; font-size:.8rem; }
+.frm .row { display:grid; grid-template-columns:1fr 1fr; gap:10px; } .frm .row > * { min-width:0; }
+@media (max-width:640px){ .frm .row { grid-template-columns:1fr; } }
+
+/* share */
+.share { display:grid; gap:12px; }
+.linkbox { display:flex; gap:8px; } .linkbox input { font-family:ui-monospace,monospace; font-size:.78rem; }
+.empty { text-align:center; color:var(--soft); padding:26px 10px; font-size:.88rem; }
+.empty .i { font-size:2rem; display:block; margin:0 auto 6px; color:#b6c4cb; }
+
+dialog { border:none; border-radius:18px; box-shadow:0 12px 50px rgba(0,0,0,.25); padding:22px; max-width:560px; width:92vw; max-height:88vh; overflow-y:auto; }
+dialog::backdrop { background:rgba(14,51,69,.45); }
+.dlg-h { display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; }
+.toast { position:fixed; bottom:22px; left:50%; transform:translateX(-50%) translateY(20px); background:var(--brand); color:#fff; padding:10px 18px; border-radius:999px; font-weight:700; font-size:.86rem; box-shadow:0 10px 30px rgba(0,0,0,.25); opacity:0; transition:.2s; z-index:99; pointer-events:none; display:flex; gap:8px; align-items:center; }
+.toast.on { opacity:1; transform:translateX(-50%) translateY(0); } .toast .i { color:var(--gold); }
+.foot { text-align:center; color:var(--soft); font-size:.76rem; margin-top:30px; }
+@media (prefers-reduced-motion:reduce){ * { transition:none !important; } }
+@media (max-width:640px){
+  .wrap { padding:16px 14px 60px; }
+  .hero { grid-template-columns:1fr; gap:12px; padding:16px; }
+  .hero .av { width:58px; height:58px; font-size:1.3rem; }
+  .hero .acts .btn { flex:1; }
+  .banner { padding:14px; gap:12px; align-items:flex-start; }
+  .banner .bi { width:42px; height:42px; font-size:1.25rem; border-radius:12px; }
+  .banner h3 { font-size:1.05rem; } .banner p { font-size:.86rem; }
+  .conf { opacity:.25; width:110px; }
+  .kid { font-size:.82rem; } .kid small { display:none; }
+}
+</style>
+</head>
+<body>
+<header class="top"><div class="top-in">
+  <a href="index.html"><img class="logo" src="images/tt-logo.png" alt="Tiny Tummy — huge love in a plate" width="169" height="59"></a>
+  <span class="tag" id="toptag">Family Portal</span>
+  <span class="sp"></span>
+  <span class="who" id="who"></span>
+</div></header>
+<main class="wrap" id="app"></main>
+<dialog id="dlg"></dialog>
+<div class="toast" id="toast"></div>
+
+<script src="js/portal-seed.js"></script>
+<script src="js/icons.js"></script>
+<script>
+'use strict';
+/* ═══════════════════════════════════════════════════════════════════════
+   Tiny Tummy Family Portal — a "carnet de santé" for every child.
+   Same storage as the operations dashboard (ttops_*), so orders, recipes
+   and ingredients are the real ones. Demo: saved in this browser.
+   Production: Supabase Auth (phone OTP) + RLS per family; doctor links
+   are signed, expiring tokens scoped to one child.
+   ═══════════════════════════════════════════════════════════════════════ */
+var ic = function (n) { return window.ttIcon ? window.ttIcon(n) : ''; };
+function store(name) {
+  var key = 'ttops_' + name;
+  return {
+    all: function () {
+      try { var raw = localStorage.getItem(key); if (raw) return JSON.parse(raw); } catch (e) {}
+      return JSON.parse(JSON.stringify(TT_SEED[name] || []));
+    },
+    save: function (rows) {
+      try { localStorage.setItem(key, JSON.stringify(rows)); return true; }
+      catch (e) { alert('This browser is out of space for more photos. Delete a few, or connect Supabase storage.'); return false; }
+    }
+  };
+}
+function byId(a, id) { for (var i = 0; i < a.length; i++) if (a[i].id === id) return a[i]; return null; }
+function uid() { return Math.random().toString(36).slice(2, 10); }
+function esc(s) { var d = document.createElement('div'); d.textContent = s == null ? '' : String(s); return d.innerHTML; }
+function iso(d) { var z = new Date(d.getTime() - d.getTimezoneOffset() * 60000); return z.toISOString().slice(0, 10); }
+function today() { return iso(new Date()); }
+function toD(s) { return new Date(s + 'T00:00:00'); }
+function daysBetween(a, b) { return Math.round((toD(b) - toD(a)) / 86400000); }
+function fmtDate(s, opt) { return toD(s).toLocaleDateString('en-GB', opt || { day: 'numeric', month: 'short', year: 'numeric' }); }
+function addMonths(s, m) { var d = toD(s); d.setMonth(d.getMonth() + m); return iso(d); }
+function initials(n) { var w = String(n || '').replace(/[^A-Za-z؀-ۿ\s]/g, ' ').split(/\s+/).filter(Boolean); return (w.length ? w.slice(0, 2).map(function (t) { return t[0]; }).join('') : '?').toUpperCase(); }
+function toast(msg) { var t = document.getElementById('toast'); t.innerHTML = ic('check') + '<span>' + esc(msg) + '</span>'; t.classList.add('on'); clearTimeout(t._h); t._h = setTimeout(function () { t.classList.remove('on'); }, 2000); }
+function showDlg(html) { var d = document.getElementById('dlg'); d.innerHTML = html; if (!d.open) d.showModal(); }
+function closeDlg() { document.getElementById('dlg').close(); }
+
+/* ── age ── */
+function ageParts(dob, at) {
+  var a = toD(dob), b = toD(at || today());
+  var m = (b.getFullYear() - a.getFullYear()) * 12 + (b.getMonth() - a.getMonth());
+  if (b.getDate() < a.getDate()) m--;
+  var anniv = new Date(a); anniv.setMonth(a.getMonth() + m);
+  return { months: Math.max(0, m), days: Math.max(0, Math.round((b - anniv) / 86400000)) };
+}
+function ageText(dob, at) {
+  var p = ageParts(dob, at), y = Math.floor(p.months / 12), mo = p.months % 12;
+  if (p.months < 1) return p.days + ' day' + (p.days === 1 ? '' : 's');
+  if (y < 2) return p.months + ' month' + (p.months === 1 ? '' : 's') + (p.days ? ' ' + p.days + ' day' + (p.days === 1 ? '' : 's') : '');
+  return y + ' years' + (mo ? ' ' + mo + ' month' + (mo === 1 ? '' : 's') : '');
+}
+function ageMonthsAt(dob, at) { var p = ageParts(dob, at); return p.months + p.days / 30.44; }
+function isBirthday(dob) { var a = toD(dob), b = new Date(); return a.getMonth() === b.getMonth() && a.getDate() === b.getDate() && b.getFullYear() > a.getFullYear(); }
+function nextBirthday(dob) { var a = toD(dob), b = toD(today()), n = new Date(b.getFullYear(), a.getMonth(), a.getDate()); if (n < b) n.setFullYear(n.getFullYear() + 1); return { date: iso(n), inDays: Math.round((n - b) / 86400000), turns: n.getFullYear() - a.getFullYear() }; }
+
+/* ── feeding stages (general guidance; the child's doctor has the last word) ── */
+var STAGES = [
+  { m: 6, title: 'first tastes', icon: 'bowl', ages: ['6M+'],
+    text: 'Time for first foods: smooth, single-vegetable purees — one new taste every 3 days so you can spot any reaction.' },
+  { m: 7, title: 'thicker textures', icon: 'sprout', ages: ['6M+', '7M+'],
+    text: 'Move on to thicker, mashed textures and mixed vegetables, plus first soft finger foods to practise grabbing.' },
+  { m: 9, title: 'soft lumps & finger food', icon: 'utensils', ages: ['7M+'],
+    text: 'Soft lumps and small, soft pieces are welcome now — great for chewing skills and the pincer grip.' },
+  { m: 12, title: 'the family table', icon: 'heart', ages: ['7M+', '12M+'],
+    text: 'Happy first year! Little portions of family-style meals, three meals a day plus healthy snacks.' },
+  { m: 18, title: 'self-feeding', icon: 'sparkles', ages: ['7M+', '12M+'],
+    text: 'Let them lead: spoon and fork practice, varied colours and textures, and eating together as a family.' },
+  { m: 24, title: 'big-kid meals', icon: 'flag', ages: ['12M+', '24M+'],
+    text: 'Two years old! Bigger bites, lunchbox-friendly meals and fun energy snacks for busy days.' },
+  { m: 36, title: 'little chef', icon: 'chef', ages: ['24M+'],
+    text: 'Involve them in choosing and preparing food — curious eaters grow into adventurous ones.' }
+];
+function stageOf(dob) {
+  var m = ageMonthsAt(dob), cur = null, next = null;
+  STAGES.forEach(function (s) { if (s.m <= m) cur = s; else if (!next) next = s; });
+  return { cur: cur, next: next, reachedOn: cur ? addMonths(dob, cur.m) : null, nextOn: next ? addMonths(dob, next.m) : null };
+}
+
+/* ── data helpers ── */
+var S = {};
+function load() {
+  ['ingredients', 'products', 'bom', 'families', 'children', 'portal_history', 'order_child', 'growth', 'vaccines', 'dr_notes', 'photos', 'greetings'].forEach(function (n) { S[n] = store(n).all(); });
+  S.orders = (function () { try { var r = localStorage.getItem('ttops_orders'); return r ? JSON.parse(r) : []; } catch (e) { return []; } })();
+}
+function save(n) { return store(n).save(S[n]); }
+function prod(id) { return byId(S.products, id); }
+function ingOf(id) { return byId(S.ingredients, id); }
+function bomLines(pid) { return S.bom.filter(function (b) { return b.product === pid; }); }
+function lineGrams(b, g) {
+  var u = b.unit || (g ? g.unit : 'kg'), q = Number(b.qty) || 0;
+  if (u === 'kg') return { v: Math.round(q * 1000), u: 'g' };
+  if (u === 'L') return { v: Math.round(q * 1000), u: 'ml' };
+  return { v: Math.round(q * 100) / 100, u: u };
+}
+var STATUS_TXT = { 'new': ['Placed', 'grey'], confirmed: ['Confirmed', 'info'], kitchen: ['Being prepared', 'warn'], portioning: ['Being prepared', 'warn'], qc: ['Quality check', 'plum'], dispatch: ['Ready', 'info'], delivering: ['On the way', 'info'], delivered: ['Delivered', 'ok'], cancelled: ['Cancelled', 'grey'] };
+function mealsFor(child) {
+  var list = S.portal_history.filter(function (h) { return h.child === child.id; }).map(function (h) {
+    return { id: h.id, code: h.code, date: h.date, items: h.items, lot: h.lot, status: 'delivered' };
+  });
+  S.order_child.forEach(function (oc) {
+    if (oc.child !== child.id) return;
+    var o = byId(S.orders, oc.id); if (!o) return;
+    list.push({ id: o.id, code: o.code, date: o.created, items: o.items, lot: o.batch_lot || '', status: o.status, live: true });
+  });
+  return list.filter(function (m) { return m.status !== 'cancelled'; }).sort(function (a, b) { return a.date < b.date ? 1 : -1; });
+}
+function allergyHit(child, ingName) {
+  var n = String(ingName || '').toLowerCase();
+  return (child.allergies || []).filter(function (a) {
+    var x = String(a).toLowerCase().trim(); if (!x) return false;
+    var stem = x.replace(/s$/, '');
+    return n.indexOf(stem) >= 0 || stem.indexOf(n.replace(/s$/, '')) >= 0;
+  });
+}
+function mealAllergens(child, m) {
+  var hits = {};
+  m.items.forEach(function (it) { bomLines(it.product).forEach(function (b) { var g = ingOf(b.ing); if (g && allergyHit(child, g.name).length) hits[g.name] = 1; }); });
+  return Object.keys(hits);
+}
+function foodsTried(child) {
+  var map = {};
+  mealsFor(child).slice().reverse().forEach(function (m) {
+    if (m.status !== 'delivered' && m.status !== 'delivering') return;
+    m.items.forEach(function (it) {
+      bomLines(it.product).forEach(function (b) {
+        var g = ingOf(b.ing); if (!g) return;
+        if (!map[g.id]) map[g.id] = { g: g, first: m.date, last: m.date, times: 0 };
+        map[g.id].times += it.qty; map[g.id].last = m.date;
+      });
+    });
+  });
+  return Object.keys(map).map(function (k) { return map[k]; }).sort(function (a, b) { return a.first < b.first ? 1 : -1; });
+}
+var CAT_ICON = { 'Vegetables': 'sprout', 'Fruit': 'cherry', 'Dairy': 'milk', 'Dry goods': 'wheat', 'Bakery': 'wheat', 'Other': 'box' };
+
+/* ── session ── */
+var MODE = 'parent', FAMILY = null, CHILD = null, TAB = 'overview', DR = null;
+function kidsOf(fid) { return S.children.filter(function (c) { return c.family === fid; }); }
+function boot() {
+  load();
+  var q = new URLSearchParams(location.search), tok = q.get('dr');
+  if (tok) {
+    var c = S.children.find(function (x) { return x.doctor && x.doctor.token === tok; });
+    if (!c) { renderInvalidLink(); return; }
+    MODE = 'doctor'; CHILD = c.id; FAMILY = c.family; DR = c.doctor;
+    document.getElementById('toptag').textContent = 'Doctor access';
+  } else {
+    var f = null; try { f = localStorage.getItem('ttportal_family'); } catch (e) {}
+    if (!f || !byId(S.families, f)) { renderSignIn(); return; }
+    FAMILY = f;
+    var kids = kidsOf(f); CHILD = (kids[0] || {}).id || null;
+    try { var last = localStorage.getItem('ttportal_child'); if (last && byId(kids, last)) CHILD = last; } catch (e) {}
+  }
+  render();
+}
+
+function renderInvalidLink() {
+  document.getElementById('who').innerHTML = '';
+  document.getElementById('app').innerHTML = '<div class="signin"><div class="panel"><h1>Link not valid</h1><p class="lead">This doctor link was revoked or has expired. Please ask the family to send a new one from their Tiny Tummy portal.</p>' +
+    '<p class="muted" style="text-align:center">Demo note: doctor links currently open in the browser where the family portal was used. With Supabase connected they open on any device.</p></div></div>';
+}
+function renderSignIn() {
+  document.getElementById('who').innerHTML = '';
+  document.getElementById('app').innerHTML = '<div class="signin">' +
+    '<h1>Your child\'s food &amp; growth record</h1><p class="lead">Every meal and its ingredients, foods tried, growth, photos, vaccines and your doctor\'s notes — in one place.</p>' +
+    '<div class="panel"><label>Mobile number used for your orders<input id="si-phone" type="tel" placeholder="+961 …" autocomplete="tel"></label>' +
+    '<button class="btn p" style="width:100%" onclick="signIn()">' + ic('forward') + ' Send me a sign-in code</button>' +
+    '<div class="or">or</div><button class="btn o" style="width:100%" onclick="signInDemo()">' + ic('eye') + ' Explore the demo family</button>' +
+    '<p class="muted" style="margin-top:12px">Demo: the code step is skipped and data stays in this browser. In production this is a one-time SMS code.</p></div>' +
+    '<div class="feat"><div>' + ic('clipboard') + 'Food diary</div><div>' + ic('sprout') + 'Foods tried</div><div>' + ic('chart') + 'Growth chart</div><div>' + ic('camera') + 'Monthly photos</div><div>' + ic('shield') + 'Vaccine reminders</div><div>' + ic('steth') + 'Doctor access</div></div></div>';
+}
+function signIn() {
+  var ph = document.getElementById('si-phone').value.replace(/\D/g, '');
+  if (ph.length < 7) { alert('Please enter your mobile number.'); return; }
+  var f = S.families.find(function (x) { return x.phone.replace(/\D/g, '').slice(-8) === ph.slice(-8); });
+  if (!f) {
+    f = { id: uid(), parent: 'Tiny Tummy parent', phone: document.getElementById('si-phone').value, email: '', address: '' };
+    S.families.push(f); save('families');
+  }
+  enterFamily(f.id);
+}
+function signInDemo() { enterFamily('f1'); }
+function enterFamily(id) { try { localStorage.setItem('ttportal_family', id); } catch (e) {} boot(); }
+function signOut() { try { localStorage.removeItem('ttportal_family'); localStorage.removeItem('ttportal_child'); } catch (e) {} location.href = 'portal.html'; }
+function pickChild(id) { CHILD = id; TAB = 'overview'; try { localStorage.setItem('ttportal_child', id); } catch (e) {} render(); window.scrollTo(0, 0); }
+function goTab(t) { TAB = t; render(); }
+
+/* ── main render ── */
+function render() {
+  load();
+  var fam = byId(S.families, FAMILY);
+  var who = document.getElementById('who');
+  if (MODE === 'doctor') who.innerHTML = '<span class="nm">' + ic('steth') + ' ' + esc(DR.name) + '</span>';
+  else who.innerHTML = '<span class="nm">' + esc(fam ? fam.parent : '') + '</span><button onclick="signOut()">' + ic('logout') + ' Sign out</button>';
+  var kids = kidsOf(FAMILY), c = byId(S.children, CHILD);
+  var app = document.getElementById('app');
+  if (!c) {
+    app.innerHTML = '<div class="panel empty">' + ic('family') + 'Add your first child to start their Tiny Tummy record.<br><br><button class="btn p" onclick="editChild()">' + ic('plus') + ' Add a child</button></div>';
+    return;
+  }
+  var h = '';
+  if (MODE === 'doctor') {
+    h += '<div class="banner drv"><span class="bi">' + ic('steth') + '</span><div><b>Doctor access for ' + esc(c.name) + '</b><p class="muted">Shared by ' + esc(fam ? fam.parent.replace(/\.$/, '') : 'the family') + '. You can read the full record and add notes and vaccines — they appear as reminders for the family.</p></div></div>';
+  } else if (kids.length) {
+    h += '<div class="kids">' + kids.map(function (k) {
+      return '<button class="kid' + (k.id === CHILD ? ' on' : '') + '" onclick="pickChild(\'' + k.id + '\')">' + avatar(k) + '<span>' + esc(k.name) + ' <small>' + esc(ageText(k.dob)) + '</small></span></button>';
+    }).join('') + '<button class="kid add" onclick="editChild()">' + ic('plus') + ' Add child</button></div>';
+  }
+  h += hero(c) + banners(c);
+  var tabs = [['overview', 'bars', 'Overview'], ['diary', 'clipboard', 'Food diary', mealsFor(c).length], ['foods', 'sprout', 'Foods tried', foodsTried(c).length],
+    ['growth', 'chart', 'Growth'], ['photos', 'camera', 'Photos', S.photos.filter(function (p) { return p.child === c.id; }).length], ['health', 'shield', 'Health']];
+  if (MODE === 'parent') tabs.push(['profile', 'user', 'Profile']);
+  h += '<div class="tabs">' + tabs.map(function (t) {
+    return '<button class="' + (TAB === t[0] ? 'on' : '') + '" onclick="goTab(\'' + t[0] + '\')">' + ic(t[1]) + ' ' + t[2] + (t[3] != null ? ' <span class="n">' + t[3] + '</span>' : '') + '</button>';
+  }).join('') + '</div>';
+  h += (VIEW[TAB] || VIEW.overview)(c);
+  h += '<p class="foot">Tiny Tummy Family Portal · feeding guidance is general — always follow your child\'s doctor.</p>';
+  app.innerHTML = h;
+}
+function avatar(c, cls) {
+  return '<span class="av ' + (c.sex || '') + (cls ? ' ' + cls : '') + '">' + (c.avatar ? '<img src="' + c.avatar + '" alt="">' : esc(initials(c.name))) + '</span>';
+}
+function hero(c) {
+  var nb = nextBirthday(c.dob);
+  var acts = MODE === 'parent'
+    ? '<div class="acts"><button class="btn p" onclick="shareDoctor()">' + ic('steth') + ' Share with doctor</button><a class="btn w" href="' + waOrder('Hello Tiny Tummy! I would like to order for ' + c.name + ' (' + ageText(c.dob) + ').') + '" target="_blank" rel="noopener">' + ic('chat') + ' Order on WhatsApp</a></div>'
+    : '';
+  return '<div class="hero">' + avatar(c) + '<div><h1>' + esc(c.name) + '</h1><div class="age">' + esc(ageText(c.dob)) + ' old</div>' +
+    '<div class="meta"><span>' + ic('cake') + ' Born ' + fmtDate(c.dob) + '</span>' +
+    '<span>' + ic('sparkles') + (nb.inDays === 0 ? ' Birthday today!' : ' Turns ' + nb.turns + ' in ' + nb.inDays + ' days') + '</span>' +
+    (c.doctor && c.doctor.name ? '<span>' + ic('steth') + ' ' + esc(c.doctor.name) + '</span>' : '') + '</div>' +
+    '<div class="meta" style="margin-top:8px">' + ((c.allergies || []).length
+      ? c.allergies.map(function (a) { return '<span class="chip bad">' + ic('alert') + ' Allergy: ' + esc(a) + '</span>'; }).join('')
+      : '<span class="chip ok">' + ic('checkc') + ' No known allergies</span>') + '</div></div>' + acts + '</div>';
+}
+function banners(c) {
+  var h = '';
+  if (isBirthday(c.dob)) {
+    var turns = nextBirthday(c.dob).turns;
+    h += '<div class="banner bday">' + confetti() + '<span class="bi">' + ic('cake') + '</span><div><h3>Happy birthday, ' + esc(c.name) + '!</h3>' +
+      '<p>' + esc(c.name) + ' turns ' + turns + ' today. From all of us at Tiny Tummy: huge love in a plate — and a little cupcake is on its way to celebrate' +
+      ((c.allergies || []).length ? ' (made ' + c.allergies.map(function (a) { return esc(a).toLowerCase().replace(/s$/, '') + '-free'; }).join(', ') + ')' : '') + '.</p></div></div>';
+  }
+  var st = stageOf(c.dob);
+  if (st.cur && daysBetween(st.reachedOn, today()) <= 14) {
+    h += '<div class="banner mile">' + confetti() + '<span class="bi">' + ic(st.cur.icon) + '</span><div><h3>Bravo! ' + esc(c.name) + ' is ' + (st.cur.m >= 24 ? (st.cur.m / 12) + ' years' : st.cur.m + ' months') + ' old</h3>' +
+      '<p>It\'s time for <b>' + st.cur.title + '</b>. ' + st.cur.text + '</p></div></div>';
+  }
+  vaccinesFor(c).forEach(function (v) {
+    if (v.given) return;
+    var d = daysBetween(today(), v.due);
+    if (d <= 7) h += '<div class="banner rem"><span class="bi">' + ic('alarm') + '</span><div><b>' + (d < 0 ? 'Overdue: ' : 'Reminder: ') + esc(v.name) + '</b>' +
+      '<p class="muted">' + (d < 0 ? (-d) + ' days overdue' : d === 0 ? 'Today' : 'In ' + d + ' day' + (d === 1 ? '' : 's')) + ' · ' + fmtDate(v.due) + (v.by ? ' · set by ' + esc(v.by) : '') + '</p></div>' +
+      (MODE === 'parent' || MODE === 'doctor' ? '<button class="btn o s" style="margin-left:auto" onclick="vacGiven(\'' + v.id + '\')">' + ic('check') + ' Done</button>' : '') + '</div>';
+  });
+  return h;
+}
+function confetti() {
+  var dots = ''; var cols = ['#f0b64b', '#d95d76', '#2e8770', '#2f6fb0', '#7a4aa8'];
+  for (var i = 0; i < 18; i++) dots += '<circle cx="' + ((i * 37) % 160) + '" cy="' + ((i * 53) % 120) + '" r="' + (2 + i % 3) + '" fill="' + cols[i % 5] + '"/>';
+  return '<svg class="conf" viewBox="0 0 160 120" aria-hidden="true">' + dots + '</svg>';
+}
+function waOrder(msg) { return 'https://wa.me/96171008604?text=' + encodeURIComponent(msg); }
+function vaccinesFor(c) { return S.vaccines.filter(function (v) { return v.child === c.id; }).sort(function (a, b) { return a.due < b.due ? -1 : 1; }); }
+function growthFor(c) { return S.growth.filter(function (g) { return g.child === c.id; }).sort(function (a, b) { return a.date < b.date ? -1 : 1; }); }
+
+var VIEW = {};
+VIEW.overview = function (c) {
+  var meals = mealsFor(c), thisMonth = today().slice(0, 7);
+  var mm = meals.filter(function (m) { return m.date.slice(0, 7) === thisMonth; }).length;
+  var foods = foodsTried(c), gr = growthFor(c), last = gr[gr.length - 1];
+  var nextVac = vaccinesFor(c).filter(function (v) { return !v.given; })[0];
+  function kpi(icon, v, l, col, tab) { return '<div class="kpi" style="--sc:' + col + ';cursor:pointer" onclick="goTab(\'' + tab + '\')"><span class="oi">' + ic(icon) + '</span><span><b>' + v + '</b><small>' + l + '</small></span></div>'; }
+  var h = '<div class="kpis">' +
+    kpi('clipboard', mm, 'Meals this month', '#17455e', 'diary') +
+    kpi('sprout', foods.length, 'Foods tried', '#2e8770', 'foods') +
+    kpi('scale', last ? last.weight + ' kg' : '—', 'Latest weight', '#2f6fb0', 'growth') +
+    kpi('ruler', last ? last.height + ' cm' : '—', 'Latest height', '#7a4aa8', 'growth') +
+    kpi('alarm', nextVac ? fmtDate(nextVac.due, { day: 'numeric', month: 'short' }) : '—', 'Next reminder', '#c98a1b', 'health') + '</div>';
+  var st = stageOf(c.dob);
+  var ages = st.cur ? st.cur.ages : ['6M+'];
+  var sugg = S.products.filter(function (p) { return ages.indexOf(p.age) >= 0; }).filter(function (p) { return !mealAllergensForProduct(c, p.id).length; }).slice(0, 4);
+  h += '<div class="g2"><div class="panel"><div class="ph"><h3>' + ic('target') + ' ' + esc(c.name) + '\'s stage</h3>' + (st.cur ? '<span class="chip ok">' + st.cur.title + '</span>' : '') + '</div><div class="stage">' +
+    (st.cur ? '<p class="now">' + st.cur.text + '</p>' : '<p class="now">Before 6 months, breast milk or formula is all ' + esc(c.name) + ' needs. We\'ll tell you when it\'s time for first tastes.</p>') +
+    (st.next ? '<div class="next">' + ic('forward') + ' Next: ' + st.next.title + ' at ' + (st.next.m >= 24 ? st.next.m / 12 + ' years' : st.next.m + ' months') + ' — in ' + daysBetween(today(), st.nextOn) + ' days</div>' : '') +
+    (st.cur ? '<b style="font-size:.84rem;margin-top:4px">Suggested for this stage</b><div class="sugg">' + sugg.map(function (p) {
+      return '<a href="' + waOrder('Hello Tiny Tummy! I would like to order ' + p.name + ' for ' + c.name + '.') + '" target="_blank" rel="noopener"><span class="si">' + ic(p.category === 'purees' ? 'bowl' : p.category === 'cakes' ? 'cake' : 'utensils') + '</span><span><b>' + esc(p.name) + '</b><small>' + esc(p.age) + ' · $' + Number(p.price).toFixed(2) + '</small></span><span class="go">' + ic('chat') + ' Order</span></a>';
+    }).join('') + '</div>' : '') + '</div></div>';
+  var notes = S.dr_notes.filter(function (n) { return n.child === c.id; }).sort(function (a, b) { return a.date < b.date ? 1 : -1; });
+  h += '<div><div class="panel"><div class="ph"><h3>' + ic('steth') + ' Latest from the doctor</h3><button class="btn o s" onclick="goTab(\'health\')">All notes</button></div>' +
+    (notes[0] ? noteHtml(notes[0]) : '<div class="empty">' + ic('steth') + 'No notes yet. Share ' + esc(c.name) + '\'s record with your doctor to receive notes here.</div>') + '</div>' +
+    '<div class="panel"><div class="ph"><h3>' + ic('clipboard') + ' Last meals</h3><button class="btn o s" onclick="goTab(\'diary\')">Food diary</button></div>' +
+    (meals.slice(0, 3).map(function (m) { return mealLine(c, m); }).join('') || '<div class="empty">' + ic('bowl') + 'No meals yet.</div>') + '</div></div></div>';
+  return h;
+};
+function mealAllergensForProduct(c, pid) {
+  return bomLines(pid).map(function (b) { return ingOf(b.ing); }).filter(function (g) { return g && allergyHit(c, g.name).length; });
+}
+function mealLine(c, m) {
+  var st = STATUS_TXT[m.status] || ['', 'grey'];
+  return '<div style="display:flex;gap:10px;align-items:center;padding:7px 0;border-bottom:1px solid #f1ece0;font-size:.86rem"><b style="min-width:62px">' + fmtDate(m.date, { day: 'numeric', month: 'short' }) + '</b><span style="flex:1">' +
+    m.items.map(function (it) { var p = prod(it.product); return it.qty + '× ' + esc(p ? p.name : '?'); }).join(', ') + '</span><span class="chip ' + st[1] + '">' + st[0] + '</span></div>';
+}
+
+VIEW.diary = function (c) {
+  var meals = mealsFor(c);
+  if (!meals.length) return '<div class="panel empty">' + ic('clipboard') + 'No meals yet. Every Tiny Tummy order for ' + esc(c.name) + ' will appear here with its ingredients.</div>';
+  var h = '<div class="panel" style="padding-bottom:6px"><div class="ph"><h3>' + ic('clipboard') + ' Food diary</h3><span class="muted">Tap a meal to see exactly what was in it</span></div>', lastMonth = '';
+  meals.forEach(function (m) {
+    var mon = fmtDate(m.date, { month: 'long', year: 'numeric' });
+    if (mon !== lastMonth) { h += '<div class="month">' + mon + '</div>'; lastMonth = mon; }
+    var st = STATUS_TXT[m.status] || ['', 'grey'];
+    var alg = mealAllergens(c, m);
+    var rows = '';
+    m.items.forEach(function (it) {
+      var p = prod(it.product);
+      rows += '<tr class="prod"><td colspan="2">' + esc(p ? p.name : '?') + ' <span class="chip grey">' + esc(p ? p.age : '') + '</span></td><td class="num">' + it.qty + ' portion' + (it.qty === 1 ? '' : 's') + '</td></tr>';
+      bomLines(it.product).forEach(function (b) {
+        var g = ingOf(b.ing); if (!g) return;
+        var q = lineGrams(b, g), hit = allergyHit(c, g.name).length;
+        rows += '<tr' + (hit ? ' class="alg"' : '') + '><td>' + ic(CAT_ICON[g.cat] || 'box') + ' ' + esc(g.name) + (hit ? ' <span class="chip bad">' + ic('alert') + ' allergy</span>' : '') + '</td><td class="muted">' + esc(g.cat || '') + '</td><td class="num">' + q.v + ' ' + q.u + ' / portion</td></tr>';
+      });
+    });
+    h += '<details class="meal" style="--sc:' + (alg.length ? '#b23a48' : m.live ? '#c98a1b' : '#2e8770') + '"><summary>' +
+      '<span class="md"><b>' + toD(m.date).getDate() + '</b><small>' + fmtDate(m.date, { month: 'short' }) + '</small></span>' +
+      '<span class="mt"><b>' + m.items.map(function (it) { var p = prod(it.product); return it.qty + '× ' + esc(p ? p.name : '?'); }).join(', ') + '</b>' +
+      '<small>' + esc(m.code) + (m.lot ? ' · batch ' + esc(m.lot) : '') + ' · at ' + esc(ageText(c.dob, m.date)) + '</small></span>' +
+      (alg.length ? '<span class="chip bad">' + ic('alert') + ' Contains ' + esc(alg.join(', ')) + '</span>' : '') +
+      '<span class="chip ' + st[1] + '">' + st[0] + '</span><span class="chev">' + ic('chev') + '</span></summary>' +
+      '<div class="body">' + (alg.length ? '<div class="alert">' + ic('alert') + '<div><b>Contains ' + esc(alg.join(', ')) + '</b>, listed in ' + esc(c.name) + '\'s allergies. Our kitchen sees this alert on every new order.</div></div>' : '') +
+      '<table class="ing"><thead><tr><th>Ingredient</th><th>Group</th><th class="num">Amount</th></tr></thead><tbody>' + rows + '</tbody></table>' +
+      '<p class="muted" style="margin-top:8px">' + ic('shield') + ' Every ingredient is traced to its supplier lot' + (m.lot ? ' — batch <b>' + esc(m.lot) + '</b>' : '') + '. No added salt, no added sugar, no preservatives.</p></div></details>';
+  });
+  return h + '</div>';
+};
+
+VIEW.foods = function (c) {
+  var f = foodsTried(c);
+  if (!f.length) return '<div class="panel empty">' + ic('sprout') + 'Foods appear here automatically as ' + esc(c.name) + ' tries them in Tiny Tummy meals.</div>';
+  var recent = daysAgoIso(14);
+  return '<div class="panel"><div class="ph"><h3>' + ic('sprout') + ' ' + f.length + ' foods tried</h3><span class="muted">Built automatically from every delivered meal</span></div><div class="foods">' +
+    f.map(function (x) {
+      var hit = allergyHit(c, x.g.name).length;
+      return '<div class="food' + (hit ? ' alg' : '') + '"><span class="fi">' + ic(hit ? 'alert' : (CAT_ICON[x.g.cat] || 'box')) + '</span><span><b>' + esc(x.g.name) + '</b><small>First ' + fmtDate(x.first, { day: 'numeric', month: 'short' }) + ' · ' + x.times + ' portion' + (x.times === 1 ? '' : 's') + '</small>' +
+        (hit ? '<small style="color:var(--bad);font-weight:700">Listed allergy</small>' : '') + '</span>' + (x.first >= recent ? '<span class="chip warn new">New</span>' : '') + '</div>';
+    }).join('') + '</div><p class="muted" style="margin-top:12px">' + ic('bulb') + ' Introduce one new food every 3 days and note any reaction — share this list with your doctor at each visit.</p></div>';
+};
+function daysAgoIso(n) { var d = new Date(); d.setDate(d.getDate() - n); return iso(d); }
+
+VIEW.growth = function (c) {
+  var gr = growthFor(c);
+  var h = '<div class="panel"><div class="ph"><h3>' + ic('plus') + ' Add a measurement</h3><span class="muted">Weight and height from home or the clinic</span></div>' +
+    '<div class="gform"><label>Date<input id="gm-date" type="date" value="' + today() + '" max="' + today() + '"></label>' +
+    '<label>Weight (kg)<input id="gm-w" type="number" step="0.01" min="0" placeholder="e.g. 7.4"></label>' +
+    '<label>Height (cm)<input id="gm-h" type="number" step="0.1" min="0" placeholder="e.g. 66.5"></label>' +
+    '<button class="btn p" onclick="addGrowth()">' + ic('check') + ' Save</button></div></div>';
+  if (!gr.length) return h + '<div class="panel empty">' + ic('chart') + 'Add the first measurement to start the growth chart.</div>';
+  h += '<div class="g2"><div class="panel"><div class="ph"><h3>' + ic('scale') + ' Weight</h3><span class="muted">kg by age</span></div>' + lineChart(c, gr, 'weight', '#2f6fb0', 'kg') + '</div>' +
+    '<div class="panel"><div class="ph"><h3>' + ic('ruler') + ' Height</h3><span class="muted">cm by age</span></div>' + lineChart(c, gr, 'height', '#7a4aa8', 'cm') + '</div></div>';
+  h += '<div class="panel"><div class="ph"><h3>' + ic('clipboard') + ' All measurements</h3></div><div style="overflow-x:auto"><table class="t"><thead><tr><th>Date</th><th>Age</th><th class="num">Weight</th><th class="num">Height</th><th></th></tr></thead><tbody>' +
+    gr.slice().reverse().map(function (g) {
+      return '<tr><td>' + fmtDate(g.date) + '</td><td>' + esc(ageText(c.dob, g.date)) + '</td><td class="num"><b>' + (g.weight || '—') + '</b> kg</td><td class="num"><b>' + (g.height || '—') + '</b> cm</td>' +
+        '<td class="num">' + (MODE === 'parent' ? '<button class="ib" title="Delete" onclick="delGrowth(\'' + g.id + '\')">' + ic('trash') + '</button>' : '') + '</td></tr>';
+    }).join('') + '</tbody></table></div><p class="muted" style="margin-top:10px">' + ic('steth') + ' Your doctor compares these with the standard growth curves at each visit.</p></div>';
+  return h;
+};
+function lineChart(c, gr, key, color, unit) {
+  var pts = gr.filter(function (g) { return g[key]; }).map(function (g) { return { x: ageMonthsAt(c.dob, g.date), y: Number(g[key]), d: g.date }; });
+  if (!pts.length) return '<div class="empty">No data yet.</div>';
+  var W = 520, H = 230, L = 40, R = 14, T = 14, B = 30;
+  var maxX = Math.max(6, Math.ceil(Math.max.apply(null, pts.map(function (p) { return p.x; })) + 1));
+  var ys = pts.map(function (p) { return p.y; }), minY = Math.floor(Math.min.apply(null, ys) * 0.9), maxY = Math.ceil(Math.max.apply(null, ys) * 1.06);
+  if (maxY === minY) maxY = minY + 1;
+  function X(v) { return L + (W - L - R) * v / maxX; } function Y(v) { return H - B - (H - T - B) * (v - minY) / (maxY - minY); }
+  var grid = '', step = maxX > 24 ? 6 : maxX > 12 ? 3 : 1;
+  for (var m = 0; m <= maxX; m += step) grid += '<line x1="' + X(m) + '" y1="' + T + '" x2="' + X(m) + '" y2="' + (H - B) + '" stroke="#f1ece0"/><text x="' + X(m) + '" y="' + (H - B + 16) + '" font-size="10" fill="#64808e" text-anchor="middle">' + m + 'm</text>';
+  for (var k = 0; k <= 4; k++) { var v = minY + (maxY - minY) * k / 4; grid += '<line x1="' + L + '" y1="' + Y(v) + '" x2="' + (W - R) + '" y2="' + Y(v) + '" stroke="#f1ece0"/><text x="' + (L - 6) + '" y="' + (Y(v) + 3) + '" font-size="10" fill="#64808e" text-anchor="end">' + (Math.round(v * 10) / 10) + '</text>'; }
+  var path = pts.map(function (p, i) { return (i ? 'L' : 'M') + X(p.x).toFixed(1) + ' ' + Y(p.y).toFixed(1); }).join(' ');
+  var area = path + ' L' + X(pts[pts.length - 1].x).toFixed(1) + ' ' + (H - B) + ' L' + X(pts[0].x).toFixed(1) + ' ' + (H - B) + ' Z';
+  var dots = pts.map(function (p) { return '<circle cx="' + X(p.x).toFixed(1) + '" cy="' + Y(p.y).toFixed(1) + '" r="4.5" fill="#fff" stroke="' + color + '" stroke-width="2.5"><title>' + fmtDate(p.d) + ': ' + p.y + ' ' + unit + '</title></circle>'; }).join('');
+  var lastP = pts[pts.length - 1];
+  return '<svg class="gchart" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="' + key + ' chart">' + grid +
+    '<path d="' + area + '" fill="' + color + '" opacity=".08"/><path d="' + path + '" fill="none" stroke="' + color + '" stroke-width="2.5" stroke-linejoin="round"/>' + dots +
+    '<text x="' + Math.min(X(lastP.x) + 8, W - R - 40) + '" y="' + (Y(lastP.y) - 9) + '" font-size="12" font-weight="700" fill="' + color + '">' + lastP.y + ' ' + unit + '</text></svg>';
+}
+function addGrowth() {
+  var d = document.getElementById('gm-date').value, w = parseFloat(document.getElementById('gm-w').value), hh = parseFloat(document.getElementById('gm-h').value);
+  if (!d || (!w && !hh)) { alert('Enter a date and at least the weight or the height.'); return; }
+  if ((w && (w < 1 || w > 40)) || (hh && (hh < 30 || hh > 140))) { alert('Please check the numbers — weight in kg, height in cm.'); return; }
+  S.growth.push({ id: uid(), child: CHILD, date: d, weight: w || null, height: hh || null, by: MODE === 'doctor' ? DR.name : 'Parent' });
+  save('growth'); render(); toast('Measurement saved');
+}
+function delGrowth(id) { if (!confirm('Delete this measurement?')) return; S.growth = S.growth.filter(function (g) { return g.id !== id; }); save('growth'); render(); }
+
+VIEW.photos = function (c) {
+  var ph = S.photos.filter(function (p) { return p.child === c.id; }).sort(function (a, b) { return a.date < b.date ? 1 : -1; });
+  var up = MODE === 'parent' ? '<label class="upload">' + ic('camera') + 'Add this month\'s photo<br><span class="muted" style="font-weight:600">' + esc(c.name) + ' at ' + esc(ageText(c.dob)) + '</span><input type="file" accept="image/*" style="display:none" onchange="addPhoto(this)"></label>' : '';
+  return '<div class="panel"><div class="ph"><h3>' + ic('camera') + ' Monthly photos</h3><span class="muted">One photo a month makes a beautiful growing-up album</span></div><div class="album">' + up +
+    ph.map(function (p) {
+      return '<div class="ph-card"><img src="' + p.data + '" alt="' + esc(c.name) + ' at ' + esc(ageText(c.dob, p.date)) + '">' +
+        (MODE === 'parent' ? '<button class="ib del" title="Delete photo" onclick="delPhoto(\'' + p.id + '\')">' + ic('trash') + '</button>' : '') +
+        '<div class="cap"><b>' + esc(ageText(c.dob, p.date)) + '</b>' + fmtDate(p.date) + (p.caption ? ' · ' + esc(p.caption) : '') + '</div></div>';
+    }).join('') + (!ph.length && MODE !== 'parent' ? '<div class="empty">' + ic('camera') + 'No photos yet.</div>' : '') + '</div></div>';
+};
+function addPhoto(input) {
+  var f = input.files && input.files[0]; if (!f) return;
+  var reader = new FileReader();
+  reader.onload = function () {
+    var img = new Image();
+    img.onload = function () {
+      var max = 900, s = Math.min(1, max / Math.max(img.width, img.height));
+      var cv = document.createElement('canvas'); cv.width = Math.round(img.width * s); cv.height = Math.round(img.height * s);
+      cv.getContext('2d').drawImage(img, 0, 0, cv.width, cv.height);
+      var data = cv.toDataURL('image/jpeg', 0.82);
+      var cap = prompt('Add a caption (optional):', '') || '';
+      S.photos.push({ id: uid(), child: CHILD, date: today(), data: data, caption: cap.slice(0, 80) });
+      if (save('photos')) { render(); toast('Photo added to the album'); } else S.photos.pop();
+    };
+    img.src = reader.result;
+  };
+  reader.readAsDataURL(f);
+}
+function delPhoto(id) { if (!confirm('Delete this photo?')) return; S.photos = S.photos.filter(function (p) { return p.id !== id; }); save('photos'); render(); }
+
+VIEW.health = function (c) {
+  var vac = vaccinesFor(c), notes = S.dr_notes.filter(function (n) { return n.child === c.id; }).sort(function (a, b) { return a.date < b.date ? 1 : -1; });
+  var canDr = MODE === 'doctor';
+  var h = '<div class="g2"><div class="panel"><div class="ph"><h3>' + ic('shield') + ' Vaccines &amp; visits</h3>' + (canDr ? '<button class="btn p s" onclick="addVaccine()">' + ic('plus') + ' Add</button>' : '<span class="muted">Set by your doctor</span>') + '</div>' +
+    (vac.map(function (v) {
+      var d = daysBetween(today(), v.due);
+      var cls = v.given ? 'given' : d < 0 ? 'over' : d <= 7 ? 'soon' : 'plan';
+      var lbl = v.given ? '<span class="chip ok">Done ' + fmtDate(v.given, { day: 'numeric', month: 'short' }) + '</span>' : d < 0 ? '<span class="chip bad">' + (-d) + ' d overdue</span>' : d <= 7 ? '<span class="chip warn">' + (d === 0 ? 'Today' : 'In ' + d + ' d') + '</span>' : '<span class="chip info">' + fmtDate(v.due, { day: 'numeric', month: 'short' }) + '</span>';
+      return '<div class="vac ' + cls + '"><span class="vi">' + ic(v.given ? 'checkc' : 'alarm') + '</span><div><b>' + esc(v.name) + '</b><small>Due ' + fmtDate(v.due) + (v.by ? ' · ' + esc(v.by) : '') + (v.note ? ' · ' + esc(v.note) : '') + '</small></div>' + lbl +
+        (!v.given ? '<button class="btn o s" onclick="vacGiven(\'' + v.id + '\')">' + ic('check') + '</button>' : '') + '</div>';
+    }).join('') || '<div class="empty">' + ic('shield') + (canDr ? 'Add the next vaccine or visit — the family gets a reminder.' : 'Your doctor can add vaccines and visits here; you\'ll get reminders.') + '</div>') + '</div>';
+  h += '<div class="panel"><div class="ph"><h3>' + ic('steth') + ' Doctor notes</h3>' + (canDr ? '<button class="btn p s" onclick="addNote()">' + ic('plus') + ' Add note</button>' : '') + '</div>' +
+    (notes.map(noteHtml).join('') || '<div class="empty">' + ic('steth') + 'No notes yet.</div>') + '</div></div>';
+  if (!canDr && c.doctor && c.doctor.name) h += '<div class="panel"><div class="ph"><h3>' + ic('phonecall') + ' ' + esc(c.doctor.name) + '</h3><button class="btn p s" onclick="shareDoctor()">' + ic('steth') + ' Share record</button></div><p class="muted">' + esc(c.doctor.phone || '') + '</p></div>';
+  return h;
+};
+function noteHtml(n) { return '<div class="note"><div class="nh"><span>' + esc(n.by) + '</span><span>' + fmtDate(n.date) + '</span></div><p>' + esc(n.text) + '</p></div>'; }
+function addNote() {
+  showDlg('<div class="dlg-h"><h3>' + ic('steth') + ' Note for ' + esc(byId(S.children, CHILD).name) + '</h3><button class="ib" onclick="closeDlg()">' + ic('x') + '</button></div>' +
+    '<div class="frm"><label>Note<textarea id="dn-t" rows="5" placeholder="Observations, feeding advice, follow-up…"></textarea></label><button class="btn p" onclick="saveNote()">' + ic('check') + ' Save note</button></div>');
+}
+function saveNote() {
+  var t = document.getElementById('dn-t').value.trim(); if (!t) return;
+  S.dr_notes.push({ id: uid(), child: CHILD, date: today(), by: DR ? DR.name : 'Doctor', text: t });
+  save('dr_notes'); closeDlg(); render(); toast('Note shared with the family');
+}
+function addVaccine() {
+  showDlg('<div class="dlg-h"><h3>' + ic('shield') + ' Vaccine or visit</h3><button class="ib" onclick="closeDlg()">' + ic('x') + '</button></div>' +
+    '<div class="frm"><label>Name<input id="vc-n" placeholder="e.g. 9-month vaccine visit"></label><div class="row"><label>Due date<input id="vc-d" type="date" value="' + today() + '"></label>' +
+    '<label>Already given on (optional)<input id="vc-g" type="date"></label></div><label>Note for the family (optional)<input id="vc-note" placeholder="e.g. Bring the vaccination booklet"></label>' +
+    '<button class="btn p" onclick="saveVaccine()">' + ic('check') + ' Save — the family gets a reminder</button></div>');
+}
+function saveVaccine() {
+  var n = document.getElementById('vc-n').value.trim(), d = document.getElementById('vc-d').value;
+  if (!n || !d) { alert('Name and due date are required.'); return; }
+  S.vaccines.push({ id: uid(), child: CHILD, name: n, due: d, given: document.getElementById('vc-g').value || '', by: DR ? DR.name : 'Parent', note: document.getElementById('vc-note').value.trim() });
+  save('vaccines'); closeDlg(); render(); toast('Saved — reminder scheduled');
+}
+function vacGiven(id) { var v = byId(S.vaccines, id); if (!v) return; v.given = today(); save('vaccines'); render(); toast('Marked as done'); }
+
+VIEW.profile = function (c) {
+  return '<div class="g2"><div class="panel"><div class="ph"><h3>' + ic('user') + ' ' + esc(c.name) + '\'s details</h3><button class="btn p s" onclick="editChild(\'' + c.id + '\')">' + ic('pencil') + ' Edit</button></div>' +
+    '<table class="t"><tbody>' +
+    '<tr><td class="muted">Name</td><td><b>' + esc(c.name) + '</b></td></tr>' +
+    '<tr><td class="muted">Born</td><td>' + fmtDate(c.dob) + ' · ' + esc(ageText(c.dob)) + '</td></tr>' +
+    '<tr><td class="muted">Allergies</td><td>' + ((c.allergies || []).map(function (a) { return '<span class="chip bad">' + esc(a) + '</span> '; }).join('') || 'None known') + '</td></tr>' +
+    '<tr><td class="muted">Diet &amp; notes</td><td>' + esc(c.diet || '—') + '</td></tr>' +
+    '<tr><td class="muted">Doctor</td><td>' + esc((c.doctor && c.doctor.name) || '—') + (c.doctor && c.doctor.phone ? '<br><span class="muted">' + esc(c.doctor.phone) + '</span>' : '') + '</td></tr></tbody></table>' +
+    '<p class="muted" style="margin-top:10px">' + ic('shield') + ' Allergies are shown to our kitchen on every order for ' + esc(c.name) + '.</p></div>' +
+    '<div class="panel"><div class="ph"><h3>' + ic('steth') + ' Doctor access</h3></div>' + shareBody(c) + '</div></div>';
+};
+function doctorLink(c) { return location.origin + location.pathname + '?dr=' + encodeURIComponent(c.doctor.token); }
+function shareBody(c) {
+  if (!c.doctor || !c.doctor.token) return '<p class="muted">Add your doctor in ' + esc(c.name) + '\'s details first.</p><button class="btn p s" onclick="editChild(\'' + c.id + '\')">' + ic('pencil') + ' Add doctor</button>';
+  var link = doctorLink(c);
+  var msg = 'Hello ' + (c.doctor.name || 'Doctor') + ', here is ' + c.name + '\'s Tiny Tummy food and growth record: ' + link;
+  return '<div class="share"><p class="muted">Send this private link to <b>' + esc(c.doctor.name || 'your doctor') + '</b>. They will see ' + esc(c.name) + '\'s food diary, foods tried, growth and photos, and can add notes and vaccines that become reminders for you.</p>' +
+    '<div class="linkbox"><input id="dr-link" readonly value="' + esc(link) + '"><button class="btn p s" onclick="copyLink()">' + ic('clipboard') + ' Copy</button></div>' +
+    '<div style="display:flex;gap:8px;flex-wrap:wrap"><a class="btn w s" target="_blank" rel="noopener" href="https://wa.me/' + String(c.doctor.phone || '').replace(/\D/g, '') + '?text=' + encodeURIComponent(msg) + '">' + ic('chat') + ' Send on WhatsApp</a>' +
+    '<a class="btn o s" href="mailto:?subject=' + encodeURIComponent(c.name + ' — Tiny Tummy record') + '&body=' + encodeURIComponent(msg) + '">' + ic('mail') + ' Email</a>' +
+    '<a class="btn o s" href="' + esc(link) + '" target="_blank" rel="noopener">' + ic('eye') + ' Preview</a>' +
+    '<button class="btn o s" onclick="revokeLink(\'' + c.id + '\')">' + ic('refresh') + ' New link (revoke old)</button></div>' +
+    '<p class="muted">' + ic('lock') + ' Only people with this link can open the record. Revoke it any time.</p></div>';
+}
+function shareDoctor() {
+  var c = byId(S.children, CHILD);
+  showDlg('<div class="dlg-h"><h3>' + ic('steth') + ' Share ' + esc(c.name) + '\'s record</h3><button class="ib" onclick="closeDlg()">' + ic('x') + '</button></div>' + shareBody(c));
+}
+function copyLink() { var el = document.getElementById('dr-link'); el.select(); try { navigator.clipboard.writeText(el.value); } catch (e) { document.execCommand('copy'); } toast('Link copied'); }
+function revokeLink(id) {
+  if (!confirm('Create a new link? The old one will stop working.')) return;
+  var c = byId(S.children, id); c.doctor.token = 'dr-' + uid() + uid(); save('children');
+  if (document.getElementById('dlg').open) shareDoctor(); render(); toast('New link created');
+}
+function editChild(id) {
+  var c = id ? byId(S.children, id) : { name: '', dob: '', sex: '', allergies: [], diet: '', doctor: { name: '', phone: '' } };
+  showDlg('<div class="dlg-h"><h3>' + ic(id ? 'pencil' : 'plus') + ' ' + (id ? 'Edit ' + esc(c.name) : 'Add a child') + '</h3><button class="ib" onclick="closeDlg()">' + ic('x') + '</button></div><div class="frm">' +
+    '<div class="row"><label>First name<input id="ec-n" value="' + esc(c.name) + '"></label><label>Date of birth<input id="ec-d" type="date" max="' + today() + '" value="' + esc(c.dob) + '"></label></div>' +
+    '<div class="row"><label>Girl / boy<select id="ec-s"><option value="">—</option><option value="girl"' + (c.sex === 'girl' ? ' selected' : '') + '>Girl</option><option value="boy"' + (c.sex === 'boy' ? ' selected' : '') + '>Boy</option></select></label>' +
+    '<label>Photo (optional)<input id="ec-a" type="file" accept="image/*"></label></div>' +
+    '<label>Allergies (comma separated)<input id="ec-al" value="' + esc((c.allergies || []).join(', ')) + '" placeholder="e.g. Eggs, Walnuts"></label>' +
+    '<label>Diet &amp; notes<textarea id="ec-di" rows="2" placeholder="e.g. breastfed, vegetarian, dislikes…">' + esc(c.diet || '') + '</textarea></label>' +
+    '<div class="row"><label>Doctor\'s name<input id="ec-dn" value="' + esc((c.doctor && c.doctor.name) || '') + '" placeholder="e.g. Dr. Rima Haddad"></label><label>Doctor\'s phone<input id="ec-dp" value="' + esc((c.doctor && c.doctor.phone) || '') + '" placeholder="+961 …"></label></div>' +
+    '<button class="btn p" onclick="saveChild(' + (id ? '\'' + id + '\'' : '') + ')">' + ic('check') + ' Save</button></div>');
+}
+function saveChild(id) {
+  var n = document.getElementById('ec-n').value.trim(), d = document.getElementById('ec-d').value;
+  if (!n || !d) { alert('Name and date of birth are required.'); return; }
+  var c = id ? byId(S.children, id) : { id: uid(), family: FAMILY, avatar: '', doctor: {} };
+  c.name = n; c.dob = d; c.sex = document.getElementById('ec-s').value;
+  c.allergies = document.getElementById('ec-al').value.split(',').map(function (x) { return x.trim(); }).filter(Boolean);
+  c.diet = document.getElementById('ec-di').value.trim();
+  c.doctor = c.doctor || {}; c.doctor.name = document.getElementById('ec-dn').value.trim(); c.doctor.phone = document.getElementById('ec-dp').value.trim();
+  if (c.doctor.name && !c.doctor.token) c.doctor.token = 'dr-' + uid() + uid();
+  if (!id) S.children.push(c);
+  var file = document.getElementById('ec-a').files[0];
+  function done() { save('children'); closeDlg(); CHILD = c.id; render(); toast(id ? 'Saved' : n + ' added'); }
+  if (!file) return done();
+  var r = new FileReader();
+  r.onload = function () {
+    var img = new Image(); img.onload = function () {
+      var cv = document.createElement('canvas'), s = 240 / Math.min(img.width, img.height);
+      cv.width = cv.height = 240; var ctx = cv.getContext('2d');
+      ctx.drawImage(img, (240 - img.width * s) / 2, (240 - img.height * s) / 2, img.width * s, img.height * s);
+      c.avatar = cv.toDataURL('image/jpeg', 0.85); done();
+    }; img.src = r.result;
+  };
+  r.readAsDataURL(file);
+}
+boot();
+</script>
+</body>
+</html>

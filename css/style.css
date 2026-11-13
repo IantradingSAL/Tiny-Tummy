@@ -367,3 +367,7 @@ footer.site { background: var(--brand); }
 .foot-logo { height: 62px; width: auto; margin-bottom: 10px; }
 .foot a { display: inline-flex; align-items: center; gap: 8px; }
 .foot a .i { color: var(--gold); }
+
+nav.links a.nav-portal { border:1.5px solid var(--gold); color:var(--gold); margin-left:6px; }
+nav.links a.nav-portal:hover { background:var(--gold); color:var(--brand); }
+@media (max-width:760px){ nav.links a.nav-portal { margin-left:0; text-align:center; } }
