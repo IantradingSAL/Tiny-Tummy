@@ -205,6 +205,28 @@ dialog::backdrop { background:rgba(14,51,69,.45); }
 .toast { position:fixed; bottom:22px; left:50%; transform:translateX(-50%) translateY(20px); background:var(--brand); color:#fff; padding:10px 18px; border-radius:999px; font-weight:700; font-size:.86rem; box-shadow:0 10px 30px rgba(0,0,0,.25); opacity:0; transition:.2s; z-index:99; pointer-events:none; display:flex; gap:8px; align-items:center; }
 .toast.on { opacity:1; transform:translateX(-50%) translateY(0); } .toast .i { color:var(--gold); }
 .foot { text-align:center; color:var(--soft); font-size:.76rem; margin-top:30px; }
+
+/* ── Child theme: pink for a girl, blue for a boy ── */
+body { --acc:#17455e; --acc-d:#0e3345; --acc-soft:#eef4f6; --acc-line:#c9dcf0; transition:background-color .3s; }
+body.th-girl { --acc:#d95d76; --acc-d:#b8435c; --acc-soft:#fdeef2; --acc-line:#f6c6d2; background:#fdf6f7; }
+body.th-boy  { --acc:#2f6fb0; --acc-d:#22578e; --acc-soft:#eaf2fb; --acc-line:#c9dcf0; background:#f4f8fc; }
+body.th-girl .top, body.th-boy .top { box-shadow:0 2px 14px rgba(14,51,69,.25), inset 0 -4px 0 var(--acc); }
+.hero { background:linear-gradient(135deg, var(--acc-soft) 0%, #fff 55%, #fffaf0 100%); border-color:var(--acc-line); border-top:5px solid var(--acc); }
+.hero .age { color:var(--acc-d); }
+.hero .btn.p { background:var(--acc); }
+.kid.on { border-color:var(--acc); box-shadow:0 0 0 3px color-mix(in srgb, var(--acc) 25%, transparent); }
+.tabs { background:color-mix(in srgb, var(--acc) 12%, #ece6d6); }
+.tabs button.on { color:var(--acc-d); box-shadow:0 2px 8px rgba(23,69,94,.14), inset 0 -3px 0 var(--acc); }
+.tabs button.on .n { background:var(--acc); color:#fff; }
+.ph h3 .i { color:var(--acc); }
+.btn.p { background:var(--acc); } .btn.p:hover { background:var(--acc-d); }
+.btn.o { color:var(--acc-d); border-color:var(--acc); }
+.stage .next { color:var(--acc-d); background:var(--acc-soft); }
+.month { color:var(--acc-d); }
+.kpi:first-child { --sc:var(--acc) !important; }
+.upload .i { color:var(--acc); } .upload:hover { border-color:var(--acc); }
+.toast .i { color:var(--gold); }
+.foot { color:var(--acc-d); opacity:.75; }
 @media (prefers-reduced-motion:reduce){ * { transition:none !important; } }
 @media (max-width:640px){
   .wrap { padding:16px 14px 60px; }
@@ -267,7 +289,8 @@ function addMonths(s, m) { var d = toD(s); d.setMonth(d.getMonth() + m); return 
 function initials(n) { var w = String(n || '').replace(/[^A-Za-z؀-ۿ\s]/g, ' ').split(/\s+/).filter(Boolean); return (w.length ? w.slice(0, 2).map(function (t) { return t[0]; }).join('') : '?').toUpperCase(); }
 function toast(msg) { var t = document.getElementById('toast'); t.innerHTML = ic('check') + '<span>' + esc(msg) + '</span>'; t.classList.add('on'); clearTimeout(t._h); t._h = setTimeout(function () { t.classList.remove('on'); }, 2000); }
 function showDlg(html) { var d = document.getElementById('dlg'); d.innerHTML = html; if (!d.open) d.showModal(); }
-function closeDlg() { document.getElementById('dlg').close(); }
+function previewTheme(v) { document.body.classList.toggle('th-girl', v === 'girl'); document.body.classList.toggle('th-boy', v === 'boy'); }
+function closeDlg() { document.getElementById('dlg').close(); var c = (typeof S !== 'undefined' && S.children) ? byId(S.children, CHILD) : null; document.body.classList.toggle('th-girl', !!(c && c.sex === 'girl')); document.body.classList.toggle('th-boy', !!(c && c.sex === 'boy')); }
 
 /* ── age ── */
 function ageParts(dob, at) {
@@ -427,6 +450,8 @@ function render() {
   if (MODE === 'doctor') who.innerHTML = '<span class="nm">' + ic('steth') + ' ' + esc(DR.name) + '</span>';
   else who.innerHTML = '<span class="nm">' + esc(fam ? fam.parent : '') + '</span><button onclick="signOut()">' + ic('logout') + ' Sign out</button>';
   var kids = kidsOf(FAMILY), c = byId(S.children, CHILD);
+  document.body.classList.toggle('th-girl', !!(c && c.sex === 'girl'));
+  document.body.classList.toggle('th-boy', !!(c && c.sex === 'boy'));
   var app = document.getElementById('app');
   if (!c) {
     app.innerHTML = '<div class="panel empty">' + ic('family') + 'Add your first child to start their Tiny Tummy record.<br><br><button class="btn p" onclick="editChild()">' + ic('plus') + ' Add a child</button></div>';
@@ -734,7 +759,7 @@ function editChild(id) {
   var c = id ? byId(S.children, id) : { name: '', dob: '', sex: '', allergies: [], diet: '', doctor: { name: '', phone: '' } };
   showDlg('<div class="dlg-h"><h3>' + ic(id ? 'pencil' : 'plus') + ' ' + (id ? 'Edit ' + esc(c.name) : 'Add a child') + '</h3><button class="ib" onclick="closeDlg()">' + ic('x') + '</button></div><div class="frm">' +
     '<div class="row"><label>First name<input id="ec-n" value="' + esc(c.name) + '"></label><label>Date of birth<input id="ec-d" type="date" max="' + today() + '" value="' + esc(c.dob) + '"></label></div>' +
-    '<div class="row"><label>Girl / boy<select id="ec-s"><option value="">—</option><option value="girl"' + (c.sex === 'girl' ? ' selected' : '') + '>Girl</option><option value="boy"' + (c.sex === 'boy' ? ' selected' : '') + '>Boy</option></select></label>' +
+    '<div class="row"><label>Girl / boy (sets the page colour)<select id="ec-s" onchange="previewTheme(this.value)"><option value="">—</option><option value="girl"' + (c.sex === 'girl' ? ' selected' : '') + '>Girl</option><option value="boy"' + (c.sex === 'boy' ? ' selected' : '') + '>Boy</option></select></label>' +
     '<label>Photo (optional)<input id="ec-a" type="file" accept="image/*"></label></div>' +
     '<label>Allergies (comma separated)<input id="ec-al" value="' + esc((c.allergies || []).join(', ')) + '" placeholder="e.g. Eggs, Walnuts"></label>' +
     '<label>Diet &amp; notes<textarea id="ec-di" rows="2" placeholder="e.g. breastfed, vegetarian, dislikes…">' + esc(c.diet || '') + '</textarea></label>' +
