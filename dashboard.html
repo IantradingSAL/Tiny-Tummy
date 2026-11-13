@@ -7,7 +7,7 @@
 <meta name="robots" content="noindex">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%93%8A%3C/text%3E%3C/svg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%2312394e'/%3E%3Ctext x='16' y='22' font-family='Arial' font-weight='700' font-size='16' text-anchor='middle' fill='%23f0b64b'%3ETT%3C/text%3E%3C/svg%3E">
 <style>
 :root {
   /* Tiny Tummy brand: deep navy, warm cream, gold — from tinytummylb.com */
@@ -223,6 +223,171 @@ dialog::backdrop { background:rgba(61,50,41,.45); }
 .frm { display:grid; gap:10px; }
 .frm label { font-weight:700; font-size:.82rem; display:grid; gap:4px; }
 .frm .row { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+
+
+/* ── Order board ── */
+.otiles { display:flex; align-items:center; gap:4px; overflow-x:auto; padding:2px 2px 8px; margin-bottom:12px; }
+.otile { flex:1 0 108px; display:flex; flex-direction:column; align-items:center; gap:2px; background:var(--paper); border:1.5px solid var(--line); border-top:4px solid var(--sc); border-radius:14px; padding:10px 6px; transition:transform .12s, box-shadow .12s; }
+.otile:hover { transform:translateY(-2px); box-shadow:var(--shadow); }
+.otile.on { box-shadow:0 0 0 3px color-mix(in srgb, var(--sc) 30%, transparent); border-color:var(--sc); }
+.otile.zero { opacity:.6; }
+.otile .oi { width:34px; height:34px; border-radius:10px; display:grid; place-items:center; color:var(--sc); background:color-mix(in srgb, var(--sc) 12%, #fff); font-size:1.1rem; }
+.otile b { font-family:'Baloo 2'; font-size:1.35rem; line-height:1.1; color:var(--ink); }
+.otile small { font-size:.68rem; font-weight:700; color:var(--soft); text-transform:uppercase; letter-spacing:.04em; white-space:nowrap; }
+.otile-arrow { color:#c6d2d9; font-size:.9rem; display:flex; flex-shrink:0; }
+.oboard { display:grid; grid-auto-flow:column; grid-auto-columns:minmax(240px,1fr); gap:12px; overflow-x:auto; padding-bottom:10px; align-items:start; }
+.ocol { min-width:0; background:#efe9dc; border-radius:14px; padding:10px; min-height:120px; }
+.ocol-h { display:flex; align-items:center; gap:7px; font-weight:700; font-size:.86rem; color:var(--sc); padding:2px 4px 10px; }
+.ocol-h span { margin-left:auto; background:var(--paper); color:var(--ink); border-radius:999px; padding:0 9px; font-size:.75rem; }
+.ocol-empty { text-align:center; color:#a3b1b8; font-size:.8rem; padding:18px 0; border:1.5px dashed #d8d0bd; border-radius:10px; }
+.ocard { background:var(--paper); border-radius:12px; padding:11px 12px; margin-bottom:8px; box-shadow:0 1px 4px rgba(23,69,94,.08); border-left:4px solid var(--sc); cursor:pointer; display:grid; gap:5px; transition:transform .12s, box-shadow .12s; }
+.ocard:hover { transform:translateY(-2px); box-shadow:0 8px 20px rgba(23,69,94,.15); }
+.oc-top { display:flex; justify-content:space-between; align-items:center; gap:6px; }
+.oc-top small, .oc-foot small { color:var(--soft); font-size:.74rem; font-weight:600; }
+.oc-cust { font-size:.84rem; font-weight:600; }
+.oc-items { font-size:.78rem; color:var(--soft); }
+.oc-foot { display:flex; justify-content:space-between; align-items:center; border-top:1px solid var(--line); padding-top:6px; margin-top:2px; }
+.oc-steps { display:flex; align-items:center; gap:8px; }
+.oc-steps .stp-bar { flex:1; width:auto; min-width:30px; }
+.ocard { min-width:0; }
+.oc-steps small { font-size:.7rem; color:var(--soft); font-weight:700; white-space:nowrap; }
+.oc-avs { display:flex; } .oc-avs .stp-av { width:22px; height:22px; font-size:.58rem; margin-left:-5px; border:2px solid #fff; }
+.ostat { display:inline-flex; align-items:center; gap:5px; font-size:.76rem; font-weight:700; color:var(--sc); background:color-mix(in srgb, var(--sc) 11%, #fff); border-radius:999px; padding:3px 10px; }
+.pips { display:inline-flex; gap:2px; vertical-align:middle; margin-top:4px; }
+.pips i { width:10px; height:4px; border-radius:2px; background:#dfe5e8; }
+.pips i.d { background:var(--pea); } .pips i.n { background:var(--gold); }
+@media (max-width:640px){ .oboard { grid-auto-flow:row; grid-auto-columns:auto; overflow:visible; } .otile { flex:0 0 92px; padding:8px 4px; } .otile b { font-size:1.15rem; } .otile small { font-size:.58rem; } }
+/* ── Kitchen step cards ── */
+.stp-head { display:flex; align-items:center; gap:12px; flex-wrap:wrap; font-size:.84rem; margin-bottom:10px; }
+.stp-head .muted { font-size:.76rem; }
+.stp-bar { display:inline-block; width:120px; height:6px; background:#e6e0d0; border-radius:999px; overflow:hidden; }
+.stp-bar i { display:block; height:100%; background:var(--pea); border-radius:999px; }
+.stp { display:grid; grid-template-columns:40px 1fr auto; gap:12px; align-items:center; background:var(--paper); border:1px solid var(--line); border-radius:12px; padding:10px 12px; margin-bottom:7px; transition:border-color .12s, box-shadow .12s; }
+.stp:hover { border-color:var(--gold); box-shadow:0 4px 14px rgba(23,69,94,.1); }
+.stp.done { background:#f3f9f6; border-color:#cfe3d6; }
+.stp.running { background:#fdf8ec; border-color:#f0dcae; }
+.stp-ico { width:40px; height:40px; border-radius:11px; display:grid; place-items:center; background:var(--cream); color:var(--ink); font-size:1.15rem; }
+.stp.done .stp-ico { background:#dff0e8; color:var(--pea-dark); }
+.stp.running .stp-ico { background:#fbe9c2; color:#9a6a10; }
+.stp-main { min-width:0; display:grid; gap:5px; }
+.stp-top { display:flex; align-items:baseline; gap:8px; flex-wrap:wrap; }
+.stp-top b { font-size:.92rem; }
+.stp-meta { font-size:.74rem; color:var(--soft); font-weight:600; }
+.stp-who { display:flex; align-items:center; gap:7px; flex-wrap:wrap; }
+.stp-av { width:26px; height:26px; border-radius:50%; display:inline-grid; place-items:center; background:#e6edfb; color:#3a5ba8; font-size:.66rem; font-weight:700; flex-shrink:0; }
+.stp-av.none { background:#fde7e7; color:var(--bad); }
+.stp-sel { border:1.5px solid transparent; background:#f4f1e8; border-radius:999px; padding:3px 26px 3px 10px; font-size:.8rem; font-weight:700; max-width:190px; cursor:pointer; }
+.stp-sel:hover { border-color:var(--gold); }
+.stp-sel:disabled { background:transparent; cursor:default; padding-left:2px; -webkit-appearance:none; appearance:none; }
+.stp-auto { display:inline-flex; align-items:center; gap:3px; font-size:.68rem; font-weight:700; color:#7a5c10; background:#fff3d6; border-radius:999px; padding:2px 8px; }
+.stp-side { display:flex; flex-direction:column; align-items:flex-end; gap:6px; }
+.stp-acts { display:flex; gap:6px; }
+.stp-acts .btn { white-space:nowrap; display:inline-flex; align-items:center; gap:4px; }
+.stp-wait { font-size:.72rem; font-weight:700; color:#9aabb3; text-transform:uppercase; letter-spacing:.05em; }
+@media (max-width:560px){ .stp { grid-template-columns:36px 1fr; } .stp-side { grid-column:1/-1; flex-direction:row; justify-content:space-between; align-items:center; } }
+/* ── Dashboard-wide icon layer ── */
+aside nav a > span { display:flex; width:20px; justify-content:center; font-size:1.05rem; }
+aside nav a > span .i { stroke-width:1.8; }
+aside .logo .i { color:var(--gold); font-size:1.15em; vertical-align:-.18em; margin-right:2px; }
+h1 .i, h3 .i { color:var(--gold-dark); }
+.btn .i { font-size:1.05em; vertical-align:-.17em; }
+.sdot { display:inline-block; width:9px; height:9px; border-radius:50%; margin:0 3px 1px 0; vertical-align:middle; background:#9aa9b1; }
+.sdot.g { background:#2fbf71; box-shadow:0 0 0 3px rgba(47,191,113,.18); } .sdot.r { background:#d64545; box-shadow:0 0 0 3px rgba(214,69,69,.15); } .sdot.y { background:#f0b64b; box-shadow:0 0 0 3px rgba(240,182,75,.2); }
+/* ── Users · Roles (redesign) ── */
+.i { width:1em; height:1em; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; vertical-align:-.14em; flex-shrink:0; }
+.u-role .i, .u-meter .i, .u-id small .i { font-size:.95em; }
+.u-ib { color:var(--ink); }
+.u-ib.del { color:var(--bad); }
+.u-toast { display:flex; align-items:center; gap:8px; }
+.u-toast .i { color:var(--gold); }
+.u-tabs { display:inline-flex; background:#ece6d6; border-radius:999px; padding:4px; gap:4px; margin-bottom:16px; }
+.u-tabs button { border:none; background:transparent; color:var(--soft); font-weight:700; font-size:.88rem; padding:8px 18px; border-radius:999px; display:flex; align-items:center; gap:7px; }
+.u-tabs button.on { background:var(--paper); color:var(--ink); box-shadow:0 2px 8px rgba(23,69,94,.14); }
+.u-tabs button .n { background:var(--cream); border-radius:999px; padding:0 8px; font-size:.72rem; }
+.u-tabs button.on .n { background:var(--gold); color:#12394e; }
+.u-kpis { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px; margin-bottom:16px; }
+.u-kpi { display:flex; align-items:center; gap:12px; background:var(--paper); border:1.5px solid var(--line); border-radius:var(--radius); padding:12px 14px; cursor:pointer; text-align:left; transition:transform .12s, border-color .12s, box-shadow .12s; }
+.u-kpi:hover { transform:translateY(-2px); box-shadow:var(--shadow); }
+.u-kpi.on { border-color:var(--gold); box-shadow:0 0 0 3px rgba(240,182,75,.25); }
+.u-kpi .e { color:var(--ic,#17455e); font-size:1.35rem; width:44px; height:44px; border-radius:12px; display:grid; place-items:center; flex-shrink:0; }
+.u-kpi .v { font-family:'Baloo 2'; font-size:1.4rem; font-weight:700; line-height:1; color:var(--ink); }
+.u-kpi .l { font-size:.72rem; font-weight:700; color:var(--soft); text-transform:uppercase; letter-spacing:.05em; }
+.u-bar { display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-bottom:14px; }
+.u-search { position:relative; flex:1; min-width:220px; max-width:380px; }
+.u-search input { width:100%; padding:10px 14px 10px 38px; border-radius:999px; font-size:.9rem; }
+.u-search span { position:absolute; left:14px; top:50%; transform:translateY(-50%); color:var(--soft); display:flex; }
+.u-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(min(310px,100%),1fr)); gap:14px; }
+.u-card { background:var(--paper); border:1px solid var(--line); border-radius:16px; box-shadow:var(--shadow); padding:16px; display:flex; flex-direction:column; gap:12px; border-top:4px solid var(--rc,#ccc); transition:box-shadow .15s, transform .15s; }
+.u-card:hover { box-shadow:0 10px 26px rgba(23,69,94,.16); transform:translateY(-2px); }
+.u-card.me { background:linear-gradient(180deg,#fffaf0,#fff 60%); }
+.u-top { display:flex; gap:12px; align-items:center; }
+.u-av { width:50px; height:50px; border-radius:50%; display:grid; place-items:center; font-family:'Baloo 2'; font-weight:700; font-size:1.1rem; letter-spacing:.02em; color:var(--rc); flex-shrink:0; background:var(--rbg,#eee); position:relative; }
+.u-av i { position:absolute; right:-2px; bottom:-2px; width:14px; height:14px; border-radius:50%; background:#2fbf71; border:2px solid #fff; }
+.u-id { min-width:0; flex:1; }
+.u-id b { display:block; font-size:1.02rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.u-id small { color:var(--soft); font-size:.78rem; display:block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.u-role { display:inline-flex; align-items:center; gap:5px; font-size:.74rem; font-weight:700; border-radius:999px; padding:3px 10px; background:var(--rbg); color:var(--rc); white-space:nowrap; }
+.u-lbl { font-size:.68rem; font-weight:700; color:var(--soft); text-transform:uppercase; letter-spacing:.07em; display:flex; justify-content:space-between; }
+.u-st { display:flex; flex-wrap:wrap; gap:6px; }
+.u-st button { border:1.5px dashed #cfd8dd; background:#fafbfb; color:#93a5ae; border-radius:10px; padding:5px 9px; font-size:.76rem; font-weight:700; display:flex; align-items:center; gap:4px; transition:all .12s; }
+.u-st button .i { opacity:.6; }
+.u-st button:hover { border-color:var(--pea); color:var(--pea-dark); }
+.u-st button.on { border:1.5px solid #9fd2bd; background:#e6f4ef; color:#1d5e4d; }
+.u-st button.on .i { opacity:1; }
+.u-st button:disabled { cursor:not-allowed; }
+.u-meter { display:flex; gap:14px; font-size:.78rem; color:var(--soft); font-weight:600; }
+.u-meter b { color:var(--ink); }
+.u-acts { display:flex; gap:6px; border-top:1px solid var(--line); padding-top:12px; margin-top:auto; align-items:center; }
+.u-acts select { flex:1; padding:7px 10px; border-radius:999px; font-weight:700; font-size:.82rem; }
+.u-ib { width:36px; height:36px; border-radius:50%; border:1.5px solid var(--line); background:var(--paper); font-size:1rem; display:grid; place-items:center; flex-shrink:0; transition:all .12s; }
+.u-ib:hover { border-color:var(--gold); background:#fdf3e0; transform:scale(1.08); }
+.u-ib.del:hover { border-color:var(--bad); background:#fde7e7; }
+.u-empty { text-align:center; padding:40px; color:var(--soft); }
+.u-empty div { font-size:2rem; color:#b6c4cb; }
+.pm-wrap { overflow-x:auto; }
+table.pm { width:100%; border-collapse:separate; border-spacing:0; min-width:720px; }
+table.pm th { position:sticky; top:0; background:var(--paper); padding:12px 8px; font-size:.78rem; text-align:center; border-bottom:2px solid var(--line); }
+table.pm th .e { display:block; font-size:1.25rem; margin-bottom:4px; }
+table.pm th:first-child, table.pm td:first-child { text-align:left; }
+table.pm td { padding:10px 8px; border-bottom:1px solid var(--line); text-align:center; }
+table.pm tr:hover td { background:#fffaf0; }
+table.pm td.k { display:flex; align-items:center; gap:10px; }
+table.pm td.k .e { color:var(--ink); font-size:1.05rem; width:34px; height:34px; border-radius:10px; background:var(--cream); display:grid; place-items:center; flex-shrink:0; }
+table.pm td.k b { display:block; font-size:.88rem; }
+table.pm td.k small { color:var(--soft); font-size:.72rem; font-family:monospace; }
+table.pm tfoot td { font-size:.74rem; font-weight:700; color:var(--soft); border-bottom:none; }
+.sw { position:relative; display:inline-block; width:42px; height:24px; }
+.sw input { opacity:0; width:0; height:0; }
+.sw span { position:absolute; inset:0; background:#d5dde1; border-radius:999px; transition:.15s; cursor:pointer; }
+.sw span::before { content:''; position:absolute; width:18px; height:18px; left:3px; top:3px; background:#fff; border-radius:50%; transition:.15s; box-shadow:0 1px 3px rgba(0,0,0,.25); }
+.sw input:checked + span { background:var(--pea); }
+.sw input:checked + span::before { transform:translateX(18px); }
+.sw input:disabled + span { background:#c9a85c; cursor:not-allowed; opacity:.8; }
+.sw input:focus-visible + span { outline:3px solid var(--carrot); outline-offset:2px; }
+.u-tip { display:flex; gap:10px; align-items:flex-start; background:#fff8e6; border:1px solid #f3dca6; border-radius:12px; padding:11px 14px; font-size:.84rem; margin-top:14px; }
+.u-tip > span { font-size:1.15rem; color:var(--gold-dark); display:flex; padding-top:1px; }
+.u-toast { position:fixed; bottom:22px; left:50%; transform:translateX(-50%) translateY(20px); background:#12394e; color:#fff; padding:10px 18px; border-radius:999px; font-weight:700; font-size:.86rem; box-shadow:0 10px 30px rgba(0,0,0,.25); opacity:0; transition:.2s; z-index:999; pointer-events:none; }
+.u-toast.on { opacity:1; transform:translateX(-50%) translateY(0); }
+.st-pick { display:grid; grid-template-columns:repeat(auto-fill,minmax(130px,1fr)); gap:8px; }
+.st-pick label { display:flex !important; align-items:center; gap:8px; border:1.5px solid var(--line); border-radius:10px; padding:8px 10px; cursor:pointer; font-weight:600 !important; }
+.st-pick label:has(input:checked) { border-color:#9fd2bd; background:#e6f4ef; }
+.role-pick { display:grid; grid-template-columns:repeat(auto-fill,minmax(120px,1fr)); gap:8px; }
+.role-pick label { display:flex !important; flex-direction:column; align-items:center; gap:2px; border:1.5px solid var(--line); border-radius:12px; padding:10px 6px; cursor:pointer; text-align:center; }
+.role-pick label span { font-size:1.45rem; color:var(--rc); width:44px; height:44px; border-radius:12px; background:var(--rbg); display:grid; place-items:center; margin-bottom:4px; }
+.role-pick label small { font-weight:600; color:var(--soft); font-size:.7rem; }
+.role-pick input { display:none; }
+.role-pick label:has(input:checked) { border-color:var(--gold); background:#fff6e2; box-shadow:0 0 0 3px rgba(240,182,75,.25); }
+.u-tabs button { white-space:nowrap; }
+@media (max-width:640px){
+  .u-kpis { grid-template-columns:repeat(3,1fr); gap:8px; }
+  .u-kpi { flex-direction:column; text-align:center; gap:4px; padding:8px 4px; }
+  .u-kpi .e { width:34px; height:34px; font-size:1.15rem; }
+  .u-kpi .v { font-size:1.15rem; } .u-kpi .l { font-size:.56rem; letter-spacing:.02em; }
+  .u-tabs { display:flex; } .u-tabs button { flex:1; justify-content:center; padding:8px 8px; font-size:.8rem; }
+  .u-search { max-width:none; }
+  .u-role { display:none; }
+}
+@media (prefers-reduced-motion:reduce){ .u-card,.u-kpi,.u-ib,.u-toast,.sw span,.sw span::before { transition:none; } }
 </style>
 </head>
 <body>
@@ -251,7 +416,7 @@ dialog::backdrop { background:rgba(61,50,41,.45); }
     <a data-m="chat"><span>💬</span><em>Team Chat</em></a>
     <a data-m="notify"><span>🔔</span><em>Notifications</em></a>
     <a data-m="audit"><span>📜</span><em>Activity Log</em></a>
-    <a data-m="users"><span>👥</span><em>Users · Roles</em></a>
+    <a data-m="users"><span>👥</span><em>Team · Access</em></a>
     <a data-m="settings"><span>⚙️</span><em>Settings</em></a>
   </nav>
   <div class="who">
@@ -964,30 +1129,101 @@ function pipelineStrip(o) {
 }
 
 /* ── Orders ── */
+var STAGE_META = {
+  'new':        { l: 'Placed',      i: 'receipt',  c: '#d95d76' },
+  'confirmed':  { l: 'Confirmed',   i: 'checkc',   c: '#4a90c4' },
+  'kitchen':    { l: 'Preparing',   i: 'chef',     c: '#e08a2e' },
+  'portioning': { l: 'Portioning',  i: 'scale',    c: '#c98a1b' },
+  'qc':         { l: 'Quality check', i: 'shield', c: '#7a4aa8' },
+  'dispatch':   { l: 'Ready',       i: 'box',      c: '#2f6fb0' },
+  'delivering': { l: 'On the road', i: 'truck',    c: '#17455e' },
+  'delivered':  { l: 'Delivered',   i: 'flag',     c: '#2e8770' },
+  'cancelled':  { l: 'Cancelled',   i: 'ban',      c: '#8a979e' }
+};
+var OV = { view: 'board', stage: 'all' };
+function ago(ts) {
+  if (!ts) return '';
+  var m = Math.max(0, Math.round((Date.now() - ts) / 60000));
+  return m < 60 ? m + ' min' : m < 1440 ? Math.floor(m / 60) + ' h ' + (m % 60) + ' min' : Math.floor(m / 1440) + ' d';
+}
+function stagePips(o) {
+  var cur = PIPELINE.indexOf(o.status);
+  return '<span class="pips" title="' + (STAGE_META[o.status] || {}).l + '">' + PIPELINE.map(function (st, i) {
+    return '<i class="' + (o.status === 'cancelled' ? '' : i < cur || o.status === 'delivered' ? 'd' : i === cur ? 'n' : '') + '"></i>';
+  }).join('') + '</span>';
+}
+function ordView(v) { OV.view = v; render(); }
+function ordStage(st) { OV.stage = (OV.stage === st ? 'all' : st); render(); }
 RENDER.orders = function () {
+  autoAssignAll();
   var orders = store('orders').all(), products = store('products').all(),
       bom = store('bom').all(), ings = store('ingredients').all(), agents = store('agents').all();
-  var rows = orders.map(function (o) {
+  var counts = {};
+  orders.forEach(function (o) { counts[o.status] = (counts[o.status] || 0) + 1; });
+  var tiles = PIPELINE.map(function (st, i) {
+    var m = STAGE_META[st];
+    return (i ? '<span class="otile-arrow">' + ic('forward') + '</span>' : '') +
+      '<button class="otile' + (OV.stage === st ? ' on' : '') + (counts[st] ? '' : ' zero') + '" style="--sc:' + m.c + '" onclick="ordStage(\'' + st + '\')">' +
+      '<span class="oi">' + ic(m.i) + '</span><b>' + (counts[st] || 0) + '</b><small>' + m.l + '</small></button>';
+  }).join('');
+  function info(o) {
     var t = orderTotals(o, products, bom, ings);
     var items = o.items.map(function (it) { var p = byId(products, it.product); return it.qty + '× ' + (p ? p.name : '?'); }).join(', ');
     var ag = o.agent ? (byId(agents, o.agent) || {}).name : '';
-    return '<tr class="rowlink" onclick="openOrder(\'' + o.id + '\')"><td><b>' + esc(o.code) + '</b><br><span class="muted">' + esc(o.created) + '</span></td>' +
-      '<td>' + esc(o.customer) + '<br><span class="muted">' + esc(o.phone) + '</span></td>' +
-      '<td class="wrap">' + esc(items) + '</td>' +
-      '<td><span class="chip ' + o.status + '">' + o.status + '</span>' +
-      (o.stage_times && o.stage_times[o.status] ? '<br><span class="muted">since ' + fmtClock(o.stage_times[o.status]) + '</span>' : '') +
-      (ag ? '<br><span class="muted">🚚 ' + esc(ag) + '</span>' : '') + '</td>' +
-      '<td class="num">' + money(t.rev) + '<br><span class="muted">' + t.pct + '% margin</span></td>' +
-      '<td><button class="btn p s" onclick="openOrder(\'' + o.id + '\')">Open</button></td></tr>';
-  }).join('');
-  return '<div class="pagehead"><div><h1>🛒 Orders</h1><div class="sub">Ordering → kitchen → portioning → QC → dispatch → delivery — the whole pipeline lives on the order</div></div>' +
-    '<button class="btn p" onclick="newOrder()">＋ New order</button></div>' +
-    '<div class="panel"><div class="tbl-scroll"><table class="t reg"><thead><tr>' +
-    '<th>Order</th><th>Customer</th><th>Items</th><th>Status</th><th class="num">Value</th><th></th>' +
-    '</tr></thead><tbody>' + rows + '</tbody></table></div></div>';
+    var since = o.stage_times && o.stage_times[o.status];
+    return { t: t, items: items, ag: ag, since: since };
+  }
+  var shown = orders.filter(function (o) { return OV.stage === 'all' || o.status === OV.stage; });
+  var body;
+  if (OV.view === 'board') {
+    var cols = PIPELINE.filter(function (st) { return OV.stage === 'all' || st === OV.stage; }).map(function (st) {
+      var m = STAGE_META[st];
+      var cards = orders.filter(function (o) { return o.status === st; }).map(function (o) {
+        var x = info(o);
+        var steps = '';
+        if (['confirmed', 'kitchen', 'portioning', 'qc'].indexOf(o.status) >= 0) {
+          var defs = stepDefs(o), dn = defs.filter(function (d) { var y = o.steps.find(function (z) { return z.s === d.name; }); return y && y.done; }).length;
+          var who = {}; o.steps.forEach(function (z) { if (z.assigned && !z.done) who[z.assigned] = 1; });
+          steps = '<div class="oc-steps"><span class="stp-bar"><i style="width:' + (defs.length ? Math.round(dn / defs.length * 100) : 0) + '%"></i></span><small>' + dn + '/' + defs.length + ' steps</small>' +
+            '<span class="oc-avs">' + Object.keys(who).slice(0, 3).map(function (n) { return '<span class="stp-av" title="' + esc(n) + '">' + initials(n) + '</span>'; }).join('') + '</span></div>';
+        }
+        var late = o.kitchen_due && Date.now() > o.kitchen_due && ['kitchen', 'portioning'].indexOf(o.status) >= 0;
+        return '<div class="ocard" onclick="openOrder(\'' + o.id + '\')">' +
+          '<div class="oc-top"><b>' + esc(o.code) + '</b>' + (late ? '<span class="chip alarm">late</span>' : x.since ? '<small>' + ic('timer') + ' ' + ago(x.since) + '</small>' : '') + '</div>' +
+          '<div class="oc-cust">' + ic('user') + ' ' + esc(o.customer) + '</div>' +
+          '<div class="oc-items">' + esc(x.items) + '</div>' + steps +
+          '<div class="oc-foot"><b>' + money(x.t.rev) + '</b>' + (x.ag ? '<small>' + ic('truck') + ' ' + esc(x.ag) + '</small>' : '<small>' + esc(o.created) + '</small>') + '</div></div>';
+      }).join('');
+      return '<div class="ocol" style="--sc:' + m.c + '"><div class="ocol-h">' + ic(m.i) + ' ' + m.l + '<span>' + (counts[st] || 0) + '</span></div>' +
+        (cards || '<div class="ocol-empty">No orders</div>') + '</div>';
+    }).join('');
+    body = '<div class="oboard">' + cols + '</div>';
+  } else {
+    var rows = shown.map(function (o) {
+      var x = info(o), m = STAGE_META[o.status] || STAGE_META.cancelled;
+      return '<tr class="rowlink" onclick="openOrder(\'' + o.id + '\')"><td><b>' + esc(o.code) + '</b><br><span class="muted">' + esc(o.created) + '</span></td>' +
+        '<td>' + esc(o.customer) + '<br><span class="muted">' + esc(o.phone) + '</span></td>' +
+        '<td class="wrap">' + esc(x.items) + '</td>' +
+        '<td><span class="ostat" style="--sc:' + m.c + '">' + ic(m.i) + ' ' + m.l + '</span><br>' + stagePips(o) +
+        (x.since ? ' <span class="muted">' + ago(x.since) + '</span>' : '') + (x.ag ? '<br><span class="muted">' + ic('truck') + ' ' + esc(x.ag) + '</span>' : '') + '</td>' +
+        '<td class="num">' + money(x.t.rev) + '<br><span class="muted">' + x.t.pct + '% margin</span></td>' +
+        '<td><button class="btn p s" onclick="event.stopPropagation();openOrder(\'' + o.id + '\')">Open</button></td></tr>';
+    }).join('');
+    body = '<div class="panel"><div class="tbl-scroll"><table class="t reg"><thead><tr>' +
+      '<th>Order</th><th>Customer</th><th>Items</th><th>Status</th><th class="num">Value</th><th></th>' +
+      '</tr></thead><tbody>' + (rows || '<tr><td colspan="6" class="muted" style="text-align:center;padding:24px">No orders in this stage</td></tr>') + '</tbody></table></div></div>';
+  }
+  return '<div class="pagehead"><div><h1>Orders</h1><div class="sub">Every order from the moment it is placed until it is delivered — tap a stage to filter, tap an order to open it.</div></div>' +
+    '<button class="btn p" onclick="newOrder()">' + ic('plus') + ' New order</button></div>' +
+    '<div class="otiles">' + tiles + '</div>' +
+    '<div class="u-bar"><div class="u-tabs" style="margin:0"><button class="' + (OV.view === 'board' ? 'on' : '') + '" onclick="ordView(\'board\')">' + ic('grid') + ' Board</button>' +
+      '<button class="' + (OV.view === 'list' ? 'on' : '') + '" onclick="ordView(\'list\')">' + ic('clipboard') + ' List</button></div>' +
+      (OV.stage !== 'all' ? '<button class="btn o s" onclick="ordStage(\'all\')">' + ic('x') + ' ' + STAGE_META[OV.stage].l + ' only</button>' : '') +
+      (counts.cancelled ? '<span class="muted">' + counts.cancelled + ' cancelled</span>' : '') + '</div>' + body;
 };
 
 function openOrder(id) {
+  autoAssignAll();
   var orders = store('orders').all(); var o = byId(orders, id); if (!o) return;
   var products = store('products').all(), bom = store('bom').all(), ings = store('ingredients').all(), agents = store('agents').all();
   var t = orderTotals(o, products, bom, ings);
@@ -1098,82 +1334,114 @@ function stepStart(oid, idx) {
   }, Math.max(1, (Number(def.min) || 0)) * 60000);
   render();
 }
-/* Shared step controls — one professional row per task:
-   station icon · step + station · planned min · responsible person ·
-   live timer · actions (▶ start / ☑ done). */
+/* Shared step controls — one clean card per task:
+   station icon · step + station + plan · responsible (auto) · timer · actions. */
 function stepControls(o) {
   var defs = stepDefs(o);
   var staff = store('staff').all().map(normStaff);
-  var header = '<div class="srow hdr"><div></div><div>STEP · STATION</div><div class="plan">PLAN</div>' +
-    '<div>👤 RESPONSIBLE — assign here</div><div class="tmr">TIMER</div><div class="acts">ACTIONS</div></div>';
-  return header + defs.map(function (def, i) {
+  var doneN = 0;
+  var rows = defs.map(function (def, i) {
     var st = o.steps.find(function (x) { return x.s === def.name; });
     var done = st && st.done;
+    if (done) doneN++;
     var running = st && st.started_at && !done;
     var station = stepStation(def.name);
-    var timer = '<span class="muted">—</span>';
+    var timer = '';
     if (running) {
       var rem = Math.round((st.started_at + (Number(def.min) || 0) * 60000 - Date.now()) / 60000);
-      timer = rem >= 0 ? '<span class="chip fefo">⏳ ' + rem + 'm left</span>' : '<span class="chip alarm">⏰ +' + (-rem) + 'm</span>';
+      timer = rem >= 0 ? '<span class="chip fefo">' + ic('hourglass') + ' ' + rem + ' min left</span>' : '<span class="chip alarm">' + ic('alarm') + ' +' + (-rem) + ' min</span>';
     } else if (done) {
-      timer = '<span class="chip done">✓ ' + esc((st.at || '').split(',').pop() || '') + '</span>';
-    }
+      timer = '<span class="chip done">' + ic('check') + ' ' + esc((st.at || '').split(',').pop().trim() || 'done') + '</span>';
+    } else timer = '<span class="stp-wait">Waiting</span>';
     var eligible = staff.filter(function (u) {
       return u.role === 'super_admin' || u.role === 'manager' || (u.stations || []).indexOf(station) >= 0;
     });
-    var assignSel = '<select ' + (st && st.assigned ? 'style="border-color:var(--pea);font-weight:700;color:var(--pea-dark)" ' : 'style="border-color:var(--gold)" ') + 'onchange="stepAssign(\'' + o.id + '\',' + i + ',this.value)">' +
-      '<option value="">👤 Assign to…</option>' +
+    var who = done ? (st.by || st.assigned) : (st && st.assigned);
+    var whoSel = done ? '<span class="stp-meta">' + (who ? 'Completed by <b style="color:var(--ink)">' + esc(who) + '</b>' : 'Completed') + '</span>' : '<select class="stp-sel" title="Change who does this step" onchange="stepAssign(\'' + o.id + '\',' + i + ',this.value)"' + (done ? ' disabled' : '') + '>' +
+      '<option value="">Unassigned</option>' +
       eligible.map(function (u) {
-        var short = u.name.split(' ')[0].replace('—', '').trim();
-        return '<option' + ((st && st.assigned === u.name) ? ' selected' : '') + ' value="' + esc(u.name) + '">' + esc(short) + '</option>';
+        return '<option' + (who === u.name ? ' selected' : '') + ' value="' + esc(u.name) + '">' + esc(u.name) + '</option>';
       }).join('') + '</select>';
     var acts = '';
-    if (done) acts = '<button class="btn o s" onclick="stepToggle(\'' + o.id + '\',' + i + ',false)">↩</button>';
+    if (done) acts = '<button class="btn o s" title="Re-open this step" onclick="stepToggle(\'' + o.id + '\',' + i + ',false)">' + ic('undo') + ' Undo</button>';
     else {
-      if (!running) acts += '<button class="btn p s" title="Starts the timer and auto-assigns this step to you" onclick="stepStart(\'' + o.id + '\',' + i + ')">▶ Start</button>';
-      acts += '<button class="btn g s" onclick="stepToggle(\'' + o.id + '\',' + i + ',true)">✓ Done</button>';
+      if (!running) acts += '<button class="btn p s" title="Start the timer" onclick="stepStart(\'' + o.id + '\',' + i + ')">' + ic('timer') + ' Start</button>';
+      acts += '<button class="btn g s" onclick="stepToggle(\'' + o.id + '\',' + i + ',true)">' + ic('check') + ' Done</button>';
     }
-    return '<div class="srow ' + (done ? 'done' : running ? 'running' : '') + '">' +
-      '<div class="ico">' + STATION_ICON[station] + '</div>' +
-      '<div class="nm">' + esc(def.name) + '<small>' + station + ' station' + (done && st.by ? ' · signed ' + esc(st.by) : '') + '</small></div>' +
-      '<div class="plan">' + def.min + 'm</div>' +
-      '<div>' + assignSel + '</div>' +
-      '<div class="tmr">' + timer + '</div>' +
-      '<div class="acts">' + acts + '</div></div>';
+    return '<div class="stp ' + (done ? 'done' : running ? 'running' : '') + '">' +
+      '<div class="stp-ico">' + ic(STATION_SVG[station] || 'chef') + '</div>' +
+      '<div class="stp-main"><div class="stp-top"><b>' + (i + 1) + '. ' + esc(def.name) + '</b>' +
+        '<span class="stp-meta">' + esc(stLabel(station)) + ' · ' + def.min + ' min</span></div>' +
+        '<div class="stp-who">' + (done && !who ? '' : '<span class="stp-av' + (who ? '' : ' none') + '">' + (who ? initials(who) : '?') + '</span>') + whoSel +
+        (who && st.auto && !done ? '<span class="stp-auto" title="Assigned automatically">' + ic('zap') + ' Auto</span>' : '') +
+        '</div></div>' +
+      '<div class="stp-side"><div>' + timer + '</div><div class="stp-acts">' + acts + '</div></div></div>';
   }).join('');
+  var pct = defs.length ? Math.round(doneN / defs.length * 100) : 0;
+  return '<div class="stp-head"><span><b>' + doneN + ' of ' + defs.length + '</b> steps done</span>' +
+    '<span class="stp-bar"><i style="width:' + pct + '%"></i></span><span class="muted">' + ic('zap') + ' people are assigned automatically — change anyone from the list</span></div>' + rows;
 }
-/* ⚡ Auto-assign: every unassigned step gets the best eligible person for
-   its station — kitchen-role holders first, least-loaded first. */
-function autoAssignSteps(oid) {
-  var orders = store('orders').all(); var o = byId(orders, oid); if (!o) return;
-  var staff = store('staff').all().map(normStaff);
-  var defs = stepDefs(o);
+/* Automatic assignment: every step of an active order gets the best
+   eligible person for its station the moment the order is confirmed —
+   kitchen-role holders first, least-loaded across ALL open orders first.
+   Managers can still override any step from its dropdown. */
+var AUTO_STATUSES = ['confirmed', 'kitchen', 'portioning', 'qc'];
+function staffLoads(orders) {
   var loads = {};
-  o.steps.forEach(function (x) { if (x.assigned && !x.done) loads[x.assigned] = (loads[x.assigned] || 0) + 1; });
+  orders.forEach(function (o) {
+    if (AUTO_STATUSES.indexOf(o.status) < 0) return;
+    (o.steps || []).forEach(function (x) { if (x.assigned && !x.done) loads[x.assigned] = (loads[x.assigned] || 0) + 1; });
+  });
+  return loads;
+}
+function autoAssignCore(o, staff, loads) {
   var assigned = [];
-  defs.forEach(function (def) {
+  stepDefs(o).forEach(function (def) {
     var st = o.steps.find(function (x) { return x.s === def.name; });
     if (st && (st.done || st.assigned)) return;
     var station = stepStation(def.name);
-    var eligible = staff.filter(function (u) { return (u.stations || []).indexOf(station) >= 0; });
-    if (!eligible.length) eligible = staff.filter(function (u) { return u.role === 'manager' || u.role === 'super_admin'; });
+    var eligible = staff.filter(function (u) { return (u.stations || []).indexOf(station) >= 0 && u.role !== 'super_admin'; });
+    if (!eligible.length) eligible = staff.filter(function (u) { return u.role === 'manager'; });
+    if (!eligible.length) eligible = staff.filter(function (u) { return u.role === 'super_admin'; });
     if (!eligible.length) return;
     eligible.sort(function (a, b) {
       var ra = (a.role === 'kitchen' ? 0 : 1) - (b.role === 'kitchen' ? 0 : 1);
-      if (ra) return ra;
-      return (loads[a.name] || 0) - (loads[b.name] || 0);
+      return ra || (loads[a.name] || 0) - (loads[b.name] || 0) || (a.stations || []).length - (b.stations || []).length;
     });
     var pick = eligible[0];
     if (!st) { st = { s: def.name, done: false }; o.steps.push(st); }
-    st.assigned = pick.name;
+    st.assigned = pick.name; st.auto = true;
     loads[pick.name] = (loads[pick.name] || 0) + 1;
-    assigned.push(STATION_ICON[station] + ' ' + def.name + ' → ' + pick.name.split(' ')[0]);
+    assigned.push(def.name + ' → ' + pick.name.split(' ')[0]);
   });
-  if (!assigned.length) { alert('Nothing to assign — every step is already assigned or done.'); return; }
-  o.history.push({ at: nowTs(), what: '⚡ Auto-assigned: ' + assigned.join(' · ') + ' — by ' + currentUser().name });
-  logAct('Kitchen', 'auto-assign', o.code + ' · ' + assigned.length + ' steps');
+  return assigned;
+}
+/* Runs silently on every Orders / Kitchen view and order open. */
+function autoAssignAll() {
+  var orders = store('orders').all(), staff = store('staff').all().map(normStaff);
+  var loads = staffLoads(orders), changed = false;
+  orders.forEach(function (o) {
+    if (AUTO_STATUSES.indexOf(o.status) < 0) return;
+    o.steps = o.steps || [];
+    var got = autoAssignCore(o, staff, loads);
+    if (got.length) {
+      changed = true;
+      o.history.push({ at: nowTs(), what: 'Auto-assigned: ' + got.join(' · ') });
+      logAct('Kitchen', 'auto-assign', o.code + ' · ' + got.length + ' steps');
+    }
+  });
+  if (changed) store('orders').save(orders);
+}
+/* Re-balance: re-assign every step not yet started or done. */
+function autoAssignSteps(oid) {
+  var orders = store('orders').all(); var o = byId(orders, oid); if (!o) return;
+  o.steps.forEach(function (x) { if (!x.done && !x.started_at) { x.assigned = null; x.auto = false; } });
+  var got = autoAssignCore(o, store('staff').all().map(normStaff), staffLoads(orders));
+  o.history.push({ at: nowTs(), what: 'Re-balanced: ' + (got.join(' · ') || 'no change') + ' — by ' + currentUser().name });
+  logAct('Kitchen', 'rebalance', o.code);
   store('orders').save(orders);
-  pushDemo('Tasks assigned ⚡', o.code + ': ' + assigned.join(', '), 'Role · kitchen');
+  pushDemo('Tasks re-balanced', o.code + ': ' + got.join(', '), 'Role · kitchen');
+  if (document.getElementById('dlg').open) openOrder(oid);
   render();
 }
 function stepAssign(oid, idx, name) {
@@ -1181,7 +1449,7 @@ function stepAssign(oid, idx, name) {
   var def = stepDefs(o)[idx]; if (!def) return;
   var st = o.steps.find(function (x) { return x.s === def.name; });
   if (!st) { st = { s: def.name, done: false }; o.steps.push(st); }
-  st.assigned = name || null;
+  st.assigned = name || null; st.auto = false;
   o.history.push({ at: nowTs(), what: '👤 ' + def.name + ' assigned to ' + (name || 'nobody') + ' — by ' + currentUser().name });
   logAct('Kitchen', 'assign', o.code + ' · ' + def.name + ' → ' + (name || '—'));
   store('orders').save(orders);
@@ -1360,6 +1628,7 @@ function checkKitchenAlarms() {
   if (changed) store('orders').save(orders);
 }
 RENDER.kitchen = function () {
+  autoAssignAll();
   checkKitchenAlarms();
   var products = store('products').all().map(normProd);
   var active = store('orders').all().filter(function (o) { return ['kitchen', 'portioning', 'qc'].indexOf(o.status) >= 0; });
@@ -1392,7 +1661,7 @@ RENDER.kitchen = function () {
     var cur = currentStep(o, products);
     return '<div class="panel"><div class="toolbar"><h3>' + esc(o.code) + ' <span class="chip ' + o.status + '">' + o.status + '</span>' +
       (o.batch_lot ? ' <span class="chip fefo">lot ' + esc(o.batch_lot) + '</span>' : '') + '</h3>' +
-      '<span class="pill-row"><button class="btn o s" title="Fill every unassigned step with the best eligible person per station" onclick="autoAssignSteps(\'' + o.id + '\')">⚡ Auto-assign</button>' + (cur ? '<span class="chip progress">▶ now: ' + esc(cur) + '</span>' : '<span class="chip done">all steps complete</span>') + '</span></div>' +
+      '<span class="pill-row"><button class="btn o s" title="Steps are assigned automatically. Re-balance re-assigns every step not yet started, spreading work evenly." onclick="autoAssignSteps(\'' + o.id + '\')">↺ Re-balance</button>' + (cur ? '<span class="chip progress">▶ now: ' + esc(cur) + '</span>' : '<span class="chip done">all steps complete</span>') + '</span></div>' +
       '<p class="muted">' + esc(items) + ' · ' + esc(o.customer) + '</p>' +
       pipelineStrip(o) +
       stepTimeline(o, products) +
@@ -2535,41 +2804,178 @@ function audCsv() {
 }
 
 /* ── Users ── */
+/* Professional line icons (stroke, currentColor) used on the Team & Access page */
+var ICONS = {
+  users: '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',
+  crown: '<path d="M3 17 2 7l5 4 5-7 5 7 5-4-1 10z"/><path d="M4 21h16"/>',
+  briefcase: '<rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/><path d="M2 13h20"/>',
+  chef: '<path d="M6 13.87A4 4 0 0 1 7.41 6a5.11 5.11 0 0 1 9.18 0A4 4 0 0 1 18 13.87V21H6z"/><path d="M6 17h12"/>',
+  truck: '<path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"/><path d="M15 18H9"/><path d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.62l-3.48-4.35A1 1 0 0 0 17.52 8H14"/><circle cx="17" cy="18" r="2"/><circle cx="7" cy="18" r="2"/>',
+  headset: '<path d="M3 14h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-7a9 9 0 0 1 18 0v7a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3"/>',
+  utensils: '<path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3zm0 0v7"/>',
+  flame: '<path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.07-2.14-.22-4.05 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.15.43-2.29 1-3a2.5 2.5 0 0 0 2.5 2.5z"/>',
+  bowl: '<path d="M2 11h20a10 10 0 0 1-20 0z"/><path d="M7 21h10"/><path d="M9 7c0-1 1-1 1-2s-1-1-1-2"/><path d="M14 7c0-1 1-1 1-2s-1-1-1-2"/>',
+  scale: '<path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1z"/><path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1z"/><path d="M7 21h10"/><path d="M12 3v18"/><path d="M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2"/>',
+  snow: '<path d="M12 2v20"/><path d="M2 12h20"/><path d="m4.93 4.93 14.14 14.14"/><path d="m19.07 4.93-14.14 14.14"/><path d="m9 4 3 3 3-3"/><path d="m9 20 3-3 3 3"/>',
+  box: '<path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/>',
+  shield: '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"/><path d="m9 12 2 2 4-4"/>',
+  cart: '<circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/>',
+  clipboard: '<rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11h4"/><path d="M12 16h4"/><path d="M8 11h.01"/><path d="M8 16h.01"/>',
+  factory: '<path d="M2 20a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8l-7 5V8l-7 5V4a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/><path d="M17 18h1"/><path d="M12 18h1"/><path d="M7 18h1"/>',
+  megaphone: '<path d="m3 11 18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/>',
+  baby: '<path d="M9 12h.01"/><path d="M15 12h.01"/><path d="M10 16c.5.3 1.2.5 2 .5s1.5-.2 2-.5"/><path d="M19 6.3a9 9 0 0 1 1.8 3.9 2 2 0 0 1 0 3.6 9 9 0 0 1-17.6 0 2 2 0 0 1 0-3.6A9 9 0 0 1 12 3c2 0 3.5 1.1 3.5 2.5s-.9 2.5-2 2.5c-.8 0-1.5-.4-1.5-1"/>',
+  chat: '<path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/>',
+  bell: '<path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>',
+  chart: '<path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/>',
+  history: '<path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/>',
+  search: '<circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>',
+  mail: '<rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>',
+  lock: '<rect width="18" height="11" x="3" y="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>',
+  eye: '<path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/>',
+  pencil: '<path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/>',
+  trash: '<path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>',
+  plus: '<path d="M5 12h14"/><path d="M12 5v14"/>',
+  check: '<path d="M20 6 9 17l-5-5"/>',
+  info: '<circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/>',
+  x: '<path d="M18 6 6 18"/><path d="m6 6 12 12"/>',
+  grid: '<rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/>',
+  save: '<path d="M15.2 3a2 2 0 0 1 1.4.6l3.8 3.8a2 2 0 0 1 .6 1.4V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M17 21v-7a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v7"/><path d="M7 3v4a1 1 0 0 0 1 1h7"/>'
+};
+function ic(n) { return '<svg class="i" viewBox="0 0 24 24" aria-hidden="true">' + (ICONS[n] || ICONS.info) + '</svg>'; }
+var STATION_SVG = { prep: 'utensils', cook: 'flame', assembly: 'bowl', portion: 'scale', chill: 'snow', pack: 'box', qc: 'shield' };
+function stLabel(k) { var s = STATIONS.find(function (x) { return x[0] === k; }); return s ? s[1].replace(STATION_ICON[k], '').trim() : k; }
+function initials(n) { var w = String(n || '').replace(/[^A-Za-z\u0600-\u06FF\s]/g, ' ').split(/\s+/).filter(Boolean); return (w.length ? w.slice(0, 2).map(function (t) { return t[0]; }).join('') : '?').toUpperCase(); }
+/* Role look & feel: emoji, label, one-line meaning, colour */
+var ROLE_META = {
+  super_admin: { e: 'crown', l: 'Super admin', d: 'Everything, always', c: '#a36b00', bg: '#fff1d1' },
+  manager:     { e: 'briefcase', l: 'Manager',     d: 'Runs daily operations', c: '#3a5ba8', bg: '#e6edfb' },
+  kitchen:     { e: 'chef', l: 'Kitchen',     d: 'Cooks & prepares meals', c: '#b5531f', bg: '#fdeadf' },
+  delivery:    { e: 'truck', l: 'Delivery',    d: 'Delivers orders', c: '#1d6e5b', bg: '#e1f3ec' },
+  support:     { e: 'headset', l: 'Support',     d: 'Answers parents', c: '#7a4aa8', bg: '#f0e7fa' }
+};
+var PERM_ICON = {
+  orders_manage: 'cart', kitchen_manage: 'chef', inventory_manage: 'box', bom_manage: 'clipboard',
+  delivery_manage: 'truck', suppliers_manage: 'factory', iso_manage: 'shield', complaints_manage: 'megaphone',
+  programs_manage: 'baby', chat_use: 'chat', push_send: 'bell', reports_view: 'chart',
+  audit_view: 'history', users_manage: 'users'
+};
+var UV = { tab: 'team', role: 'all', q: '' };
+function roleMeta(r) { return ROLE_META[r] || { e: 'users', l: r, d: '', c: '#555', bg: '#eee' }; }
+function rolePermCount(role) {
+  if (role === 'super_admin') return PERM_KEYS.length;
+  return store('role_perms').all().filter(function (x) { return x.role === role && x.allowed; }).length;
+}
+function uToast(msg) {
+  var t = document.getElementById('u-toast');
+  if (!t) { t = document.createElement('div'); t.id = 'u-toast'; t.className = 'u-toast'; document.body.appendChild(t); }
+  t.innerHTML = ic('check') + '<span>' + esc(msg) + '</span>'; t.classList.add('on');
+  clearTimeout(t._h); t._h = setTimeout(function () { t.classList.remove('on'); }, 1800);
+}
+function uTab(t) { UV.tab = t; render(); }
+function uRole(r) { UV.role = (UV.role === r ? 'all' : r); render(); }
+function uSearch(v) {
+  UV.q = v;
+  var q = v.trim().toLowerCase(), shown = 0;
+  document.querySelectorAll('.u-card').forEach(function (c) {
+    var hit = !q || c.getAttribute('data-s').indexOf(q) >= 0;
+    c.style.display = hit ? '' : 'none'; if (hit) shown++;
+  });
+  var em = document.getElementById('u-none'); if (em) em.style.display = shown ? 'none' : '';
+}
+AFTER.users = function () { if (UV.q) uSearch(UV.q); };
+
 RENDER.users = function () {
   var staff = store('staff').all().map(normStaff);
-  var rows = staff.map(function (u) {
-    var roleOpts = ROLES.map(function (r) { return '<option' + (u.role === r ? ' selected' : '') + '>' + r + '</option>'; }).join('');
-    var chips = STATIONS.map(function (st) {
-      var on = (u.stations || []).indexOf(st[0]) >= 0;
-      return '<button class="pill ' + (on ? 'on' : 'off') + '" style="font-size:.68rem;padding:2px 8px" ' +
-        'onclick="stationToggle(\'' + u.id + '\',\'' + st[0] + '\')" title="Grant / revoke the ' + st[1] + ' station">' + st[1] + '</button>';
-    }).join(' ');
-    return '<tr><td><b>' + esc(u.name) + '</b><br><span class="muted">' + esc(u.email) + '</span></td>' +
-      '<td><select onchange="setRole(\'' + u.id + '\',this.value)">' + roleOpts + '</select></td>' +
-      '<td class="wrap" style="max-width:420px"><div class="pill-row">' + chips + '</div></td></tr>';
+  var me = (localStorage.getItem('ttops_whoami') || 'u1');
+  var admin = can('users_manage');
+  var counts = {}; ROLES.forEach(function (r) { counts[r] = 0; });
+  staff.forEach(function (u) { counts[u.role] = (counts[u.role] || 0) + 1; });
+
+  /* KPI tiles double as role filters */
+  var kpis = '<button class="u-kpi' + (UV.role === 'all' ? ' on' : '') + '" onclick="uRole(\'all\')">' +
+    '<span class="e" style="background:#e8eef1">' + ic('users') + '</span><span><div class="v">' + staff.length + '</div><div class="l">Whole team</div></span></button>' +
+    ROLES.map(function (r) {
+      var m = roleMeta(r);
+      return '<button class="u-kpi' + (UV.role === r ? ' on' : '') + '" onclick="uRole(\'' + r + '\')" title="Show only ' + m.l + '">' +
+        '<span class="e" style="background:' + m.bg + ';--ic:' + m.c + '">' + ic(m.e) + '</span><span><div class="v">' + (counts[r] || 0) + '</div><div class="l">' + m.l + '</div></span></button>';
+    }).join('');
+
+  var list = staff.filter(function (u) { return UV.role === 'all' || u.role === UV.role; });
+  var cards = list.map(function (u) {
+    var m = roleMeta(u.role);
+    var isOwner = u.id === 'u1', isMe = u.id === me;
+    var fullKitchen = u.role === 'super_admin' || u.role === 'manager';
+    var roleOpts = ROLES.map(function (r) {
+      var rm = roleMeta(r);
+      return '<option value="' + r + '"' + (u.role === r ? ' selected' : '') + '>' + rm.l + '</option>';
+    }).join('');
+    var st = STATIONS.map(function (s) {
+      var on = fullKitchen || (u.stations || []).indexOf(s[0]) >= 0;
+      var lbl = stLabel(s[0]);
+      return '<button class="' + (on ? 'on' : '') + '"' + (fullKitchen || !admin ? ' disabled' : '') +
+        ' onclick="stationToggle(\'' + u.id + '\',\'' + s[0] + '\')" title="' + (on ? 'Tap to remove ' : 'Tap to give ') + lbl + '">' +
+        ic(STATION_SVG[s[0]]) + lbl + '</button>';
+    }).join('');
+    var nSt = fullKitchen ? STATIONS.length : (u.stations || []).length;
+    return '<div class="u-card' + (isMe ? ' me' : '') + '" style="--rc:' + m.c + ';--rbg:' + m.bg + '" data-s="' + esc((u.name + ' ' + u.email + ' ' + m.l).toLowerCase()) + '">' +
+      '<div class="u-top"><div class="u-av">' + initials(u.name) + (isMe ? '<i title="Signed in now"></i>' : '') + '</div>' +
+        '<div class="u-id"><b>' + esc(u.name) + '</b><small>' + ic('mail') + ' ' + esc(u.email || '—') + '</small></div>' +
+        '<span class="u-role">' + ic(m.e) + ' ' + m.l + '</span></div>' +
+      '<div class="u-meter"><span>' + ic('lock') + ' <b>' + rolePermCount(u.role) + '</b>/' + PERM_KEYS.length + ' permissions</span>' +
+        '<span>' + ic('grid') + ' <b>' + nSt + '</b>/' + STATIONS.length + ' stations</span></div>' +
+      '<div><div class="u-lbl"><span>Kitchen stations</span><span>' + (fullKitchen ? 'all, by role' : (admin ? 'tap to switch' : '')) + '</span></div>' +
+        '<div class="u-st" style="margin-top:6px">' + st + '</div></div>' +
+      '<div class="u-acts">' +
+        (isOwner ? '<select disabled title="The owner always stays super admin"><option>Super admin · owner</option></select>'
+                 : '<select ' + (admin ? '' : 'disabled ') + 'onchange="setRole(\'' + u.id + '\',this.value)" title="Change role">' + roleOpts + '</select>') +
+        (isMe ? '' : '<button class="u-ib" onclick="actAs(\'' + u.id + '\')" title="View as ' + esc(u.name) + ' — see exactly what they see" aria-label="View as">' + ic('eye') + '</button>') +
+        (admin ? '<button class="u-ib" onclick="editEmployee(\'' + u.id + '\')" title="Edit name & email" aria-label="Edit">' + ic('pencil') + '</button>' : '') +
+        (admin && !isOwner && !isMe ? '<button class="u-ib del" onclick="removeEmployee(\'' + u.id + '\')" title="Remove from team" aria-label="Remove">' + ic('trash') + '</button>' : '') +
+      '</div></div>';
   }).join('');
+
+  var team = '<div class="u-kpis">' + kpis + '</div>' +
+    '<div class="u-bar"><div class="u-search"><span>' + ic('search') + '</span><input placeholder="Search by name, email or role…" value="' + esc(UV.q) + '" oninput="uSearch(this.value)"></div>' +
+      (UV.role !== 'all' ? '<button class="btn o s" onclick="uRole(\'all\')">' + ic('x') + ' ' + roleMeta(UV.role).l + ' only</button>' : '') + '</div>' +
+    '<div class="u-grid">' + cards + '</div>' +
+    '<div class="u-empty" id="u-none" style="display:' + (list.length ? 'none' : '') + '"><div>' + ic('search') + '</div>No one matches. <a href="#" onclick="UV.role=\'all\';UV.q=\'\';render();return false">Show everyone</a></div>' +
+    '<div class="u-tip"><span>' + ic('info') + '</span><div><b>Try it:</b> press the ' + ic('eye') + ' <b>View as</b> button on <b>Karim — Helper</b>, open Kitchen and start a Cooking step — he is refused, while Assembly works. Press <b>Back to super admin</b> (bottom-left) to return.</div></div>';
+
+  /* Permission matrix with toggle switches */
   var rp = store('role_perms').all();
-  var head = ROLES.map(function (r) { return '<th>' + r.replace('_', ' ') + '</th>'; }).join('');
-  var matrix = PERM_KEYS.map(function (pk) {
+  var head = ROLES.map(function (r) {
+    var m = roleMeta(r);
+    return '<th style="color:' + m.c + '"><span class="e">' + ic(m.e) + '</span>' + m.l + '</th>';
+  }).join('');
+  var body = PERM_KEYS.map(function (pk) {
     var cells = ROLES.map(function (r) {
       var row = rp.find(function (x) { return x.role === r && x.key === pk[0]; });
-      var checked = row && row.allowed;
       var lock = r === 'super_admin';
-      return '<td><input type="checkbox" ' + (checked ? 'checked' : '') + (lock ? ' disabled' : '') +
-        ' onchange="setPerm(\'' + r + '\',\'' + pk[0] + '\',this.checked)"></td>';
+      var on = lock || (row && row.allowed);
+      return '<td><label class="sw" title="' + (lock ? 'Super admin always has this' : roleMeta(r).l + ' · ' + pk[1]) + '">' +
+        '<input type="checkbox" ' + (on ? 'checked' : '') + (lock || !admin ? ' disabled' : '') +
+        ' onchange="setPerm(\'' + r + '\',\'' + pk[0] + '\',this.checked)" aria-label="' + roleMeta(r).l + ': ' + esc(pk[1]) + '"><span></span></label></td>';
     }).join('');
-    return '<tr><td><b>' + pk[0] + '</b><br><span class="muted">' + pk[1] + '</span></td>' + cells + '</tr>';
+    return '<tr><td class="k"><span class="e">' + ic(PERM_ICON[pk[0]] || 'lock') + '</span><span><b>' + esc(pk[1]) + '</b><small>' + pk[0] + '</small></span></td>' + cells + '</tr>';
   }).join('');
-  return '<div class="pagehead"><div><h1>👥 Users · Roles</h1><div class="sub">One permission key per capability (override → role → super_admin) — plus per-person <b>kitchen station grants</b>: cooking and preparation tasks in the Kitchen can only be started by someone holding that station. Hire a helper, grant only 🥣 Assembly or 📦 Packaging, and that is all they can touch.</div></div>' +
-    '<button class="btn p" onclick="newEmployee()">＋ Add employee</button></div>' +
-    '<div class="panel"><h3>Team &amp; kitchen stations</h3><div class="tbl-scroll"><table class="t reg"><thead><tr><th>Person</th><th>Role</th><th>Kitchen stations (tap to grant / revoke)</th></tr></thead><tbody>' + rows + '</tbody></table></div>' +
-    '<p class="muted" style="margin-top:8px">Real logins are Supabase Auth users; roles carry the permission keys, stations carry the physical work areas. Try it: act as <b>Karim — Helper</b> (bottom-left) and start a 🔥 cooking step — the kitchen refuses him, while 🥣 assembly works.</p></div>' +
-    '<div class="panel"><h3>🔐 Permission matrix</h3><div class="tbl-scroll"><table class="t matrix"><thead><tr><th>Permission</th>' + head + '</tr></thead><tbody>' + matrix + '</tbody></table></div>' +
-    '<p class="muted" style="margin-top:8px">super_admin always holds everything, and can <b>take over any role</b>: pick anyone in the bottom-left act-as switcher, work with exactly their permissions (watch the sidebar shrink), and return with one click. In production every acted-as action is logged with both identities.</p></div>';
+  var foot = ROLES.map(function (r) { return '<td>' + rolePermCount(r) + ' / ' + PERM_KEYS.length + '</td>'; }).join('');
+  var perms = '<div class="panel"><div class="pm-wrap"><table class="pm"><thead><tr><th>What they can do</th>' + head + '</tr></thead>' +
+    '<tbody>' + body + '</tbody><tfoot><tr><td>Total switched on</td>' + foot + '</tr></tfoot></table></div>' +
+    '<div class="u-tip"><span>' + ic('info') + '</span><div>Switch a permission on or off for a whole role — it applies to everyone in that role instantly. Super admin always has everything (gold switches are locked).</div></div></div>';
+
+  return '<div class="pagehead"><div><h1>Team &amp; Access</h1><div class="sub">Who is on the team, what they are allowed to do, and which kitchen stations they can work.</div></div>' +
+    (admin ? '<button class="btn p" onclick="newEmployee()">' + ic('plus') + ' Add team member</button>' : '') + '</div>' +
+    '<div class="u-tabs"><button class="' + (UV.tab === 'team' ? 'on' : '') + '" onclick="uTab(\'team\')">' + ic('users') + ' Team <span class="n">' + staff.length + '</span></button>' +
+      '<button class="' + (UV.tab === 'perms' ? 'on' : '') + '" onclick="uTab(\'perms\')">' + ic('lock') + ' Role permissions <span class="n">' + PERM_KEYS.length + '</span></button></div>' +
+    (UV.tab === 'team' ? team : perms);
 };
 function setRole(id, role) {
+  if (!can('users_manage')) { alert('users_manage permission required'); return; }
   var staff = store('staff').all().map(normStaff); var u = byId(staff, id);
-  if (u) { u.role = role; logAct('Users', 'role change', u.name + ' → ' + role); store('staff').save(staff); render(); }
+  if (u) {
+    u.role = role; logAct('Users', 'role change', u.name + ' → ' + role); store('staff').save(staff);
+    rebuildWhoami(); render(); uToast(u.name + ' is now ' + roleMeta(role).l);
+  }
 }
 function stationToggle(id, station) {
   if (!can('users_manage')) { alert('users_manage permission required'); return; }
@@ -2578,31 +2984,66 @@ function stationToggle(id, station) {
   if (i >= 0) u.stations.splice(i, 1); else u.stations.push(station);
   logAct('Users', (i >= 0 ? 'station revoked' : 'station granted'), u.name + ' · ' + station);
   store('staff').save(staff); render();
+  uToast(stLabel(station) + (i >= 0 ? ' removed from ' : ' given to ') + u.name);
+}
+function actAs(id) {
+  localStorage.setItem('ttops_whoami', id);
+  var sel = document.getElementById('whoami'); if (sel) sel.value = id;
+  var u = byId(store('staff').all(), id);
+  logAct('Users', 'act-as', 'Super admin now acting as ' + (u ? u.name : id));
+  syncActAs(); render(); uToast('You are now seeing what ' + (u ? u.name : '') + ' sees');
+}
+function removeEmployee(id) {
+  var staff = store('staff').all().map(normStaff); var u = byId(staff, id); if (!u) return;
+  if (!confirm('Remove ' + u.name + ' from the team?\nThey will lose all access.')) return;
+  store('staff').save(staff.filter(function (x) { return x.id !== id; }));
+  logAct('Users', 'employee removed', u.name);
+  rebuildWhoami(); render(); uToast(u.name + ' removed from the team');
+}
+function editEmployee(id) {
+  var u = byId(store('staff').all(), id); if (!u) return;
+  showDlg('<h3>' + ic('pencil') + ' Edit ' + esc(u.name) + '</h3><div class="frm" style="margin-top:10px">' +
+    '<div class="row"><label>Name<input id="ee-name" value="' + esc(u.name) + '"></label>' +
+    '<label>Email<input id="ee-email" value="' + esc(u.email || '') + '"></label></div>' +
+    '<button class="btn p" onclick="saveEdit(\'' + id + '\')">' + ic('save') + ' Save changes</button></div>');
+}
+function saveEdit(id) {
+  var name = document.getElementById('ee-name').value.trim();
+  if (!name) { alert('Name required'); return; }
+  var staff = store('staff').all(); var u = byId(staff, id); if (!u) return;
+  u.name = name; u.email = document.getElementById('ee-email').value.trim();
+  store('staff').save(staff); logAct('Users', 'employee edited', u.name);
+  rebuildWhoami(); closeDlg(); render(); uToast('Changes saved');
 }
 function newEmployee() {
-  var boxes = STATIONS.map(function (st) {
-    return '<label style="display:flex;align-items:center;gap:6px;font-weight:600"><input type="checkbox" class="ne-st" value="' + st[0] + '">' + st[1] + '</label>';
+  var roles = ROLES.filter(function (r) { return r !== 'super_admin'; }).map(function (r) {
+    var m = roleMeta(r);
+    return '<label><input type="radio" name="ne-role" value="' + r + '"' + (r === 'kitchen' ? ' checked' : '') + '><span style="--rc:' + m.c + ';--rbg:' + m.bg + '">' + ic(m.e) + '</span><b>' + m.l + '</b><small>' + m.d + '</small></label>';
   }).join('');
-  showDlg('<h3>＋ Add employee</h3><div class="frm" style="margin-top:10px">' +
+  var boxes = STATIONS.map(function (st) {
+    return '<label><input type="checkbox" class="ne-st" value="' + st[0] + '">' + ic(STATION_SVG[st[0]]) + stLabel(st[0]) + '</label>';
+  }).join('');
+  showDlg('<h3>' + ic('plus') + ' Add team member</h3><div class="frm" style="margin-top:10px">' +
     '<div class="row"><label>Name<input id="ne-name" placeholder="e.g. Karim — Helper"></label>' +
     '<label>Email<input id="ne-email" placeholder="name@tinytummy"></label></div>' +
-    '<label>Role<select id="ne-role">' + ROLES.filter(function (r) { return r !== 'super_admin'; }).map(function (r) { return '<option' + (r === 'kitchen' ? ' selected' : '') + '>' + r + '</option>'; }).join('') + '</select></label>' +
-    '<label>Kitchen stations this person may work</label>' +
-    '<div class="pill-row" style="gap:12px;flex-wrap:wrap">' + boxes + '</div>' +
-    '<button class="btn p" onclick="saveEmployee()">Add to team</button>' +
-    '<p class="muted">In production this also creates the Supabase Auth login; stations and role apply the moment they sign in.</p></div>');
+    '<label>Step 1 · Role</label><div class="role-pick">' + roles + '</div>' +
+    '<label>Step 2 · Kitchen stations they may work <span class="muted" style="font-weight:600">(optional)</span></label>' +
+    '<div class="st-pick">' + boxes + '</div>' +
+    '<button class="btn p" onclick="saveEmployee()">' + ic('check') + ' Add to team</button>' +
+    '<p class="muted">In production this also creates the Supabase login; role and stations apply the moment they sign in.</p></div>');
 }
 function saveEmployee() {
   var name = document.getElementById('ne-name').value.trim();
   if (!name) { alert('Name required'); return; }
   var stations = Array.prototype.slice.call(document.querySelectorAll('.ne-st:checked')).map(function (x) { return x.value; });
+  var roleEl = document.querySelector('input[name="ne-role"]:checked');
   var staff = store('staff').all().map(normStaff);
-  var u = { id: uid(), name: name, email: document.getElementById('ne-email').value, role: document.getElementById('ne-role').value, stations: stations };
+  var u = { id: uid(), name: name, email: document.getElementById('ne-email').value, role: roleEl ? roleEl.value : 'kitchen', stations: stations };
   staff.push(u);
   logAct('Users', 'employee added', u.name + ' (' + u.role + ') · ' + stations.join('/'));
   store('staff').save(staff);
   rebuildWhoami();
-  closeDlg(); render();
+  closeDlg(); render(); uToast(u.name + ' added to the team');
 }
 function rebuildWhoami() {
   var sel = document.getElementById('whoami'); if (!sel) return;
@@ -2620,6 +3061,8 @@ function setPerm(role, key, allowed) {
   var row = rp.find(function (x) { return x.role === role && x.key === key; });
   if (row) row.allowed = allowed; else rp.push({ role: role, key: key, allowed: allowed });
   store('role_perms').save(rp);
+  logAct('Users', allowed ? 'permission granted' : 'permission revoked', role + ' · ' + key);
+  render(); uToast(roleMeta(role).l + (allowed ? ' can now: ' : ' can no longer: ') + ((PERM_KEYS.find(function (k) { return k[0] === key; }) || [])[1] || key));
 }
 
 /* ── Settings ── */
@@ -2643,6 +3086,121 @@ function showDlg(html) {
   if (!d.open) d.showModal();
 }
 function closeDlg() { document.getElementById('dlg').close(); }
+
+/* ── Professional icon layer ──────────────────────────────────────────
+   Every emoji the dashboard renders (sidebar, pages, dialogs, toasts) is
+   swapped for a matching stroke line icon from ICONS, so the whole app
+   speaks one visual language. Emoji inside <option>, attributes, SVG
+   charts and alert/confirm boxes (which can't show icons) are removed. */
+(function () {
+  var add = {
+    alarm: '<circle cx="12" cy="13" r="8"/><path d="M12 9v4l2 2"/><path d="M5 3 2 6"/><path d="m22 6-3-3"/>',
+    alert: '<path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/>',
+    sprout: '<path d="M7 20h10"/><path d="M10 20c5.5-2.5.8-6.4 3-10"/><path d="M9.5 9.4c1.1.8 1.8 2.2 2.3 3.7-2 .4-3.5.4-4.8-.3-1.2-.6-2.3-1.9-3-4.2 2.8-.5 4.4 0 5.5.8z"/><path d="M14.1 6a7 7 0 0 0-1.1 4c1.9-.1 3.3-.6 4.3-1.4 1-1 1.6-2.3 1.7-4.6-2.7.1-4 1-4.9 2z"/>',
+    receipt: '<path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><path d="M12 17.5v-11"/>',
+    timer: '<path d="M10 2h4"/><path d="M12 14l3-3"/><circle cx="12" cy="14" r="8"/>',
+    user: '<path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>',
+    hardhat: '<path d="M2 18a1 1 0 0 0 1 1h18a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1H3a1 1 0 0 0-1 1v2z"/><path d="M10 10V5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v5"/><path d="M4 15v-3a6 6 0 0 1 6-6"/><path d="M14 6a6 6 0 0 1 6 6v3"/>',
+    bulb: '<path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/>',
+    hourglass: '<path d="M5 22h14"/><path d="M5 2h14"/><path d="M17 22v-4.17a2 2 0 0 0-.59-1.42L12 12l-4.41 4.41A2 2 0 0 0 7 17.83V22"/><path d="M7 2v4.17a2 2 0 0 0 .59 1.42L12 12l4.41-4.41A2 2 0 0 0 17 6.17V2"/>',
+    zap: '<path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/>',
+    bars: '<path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/>',
+    pin: '<path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/>',
+    bike: '<circle cx="18.5" cy="17.5" r="3.5"/><circle cx="5.5" cy="17.5" r="3.5"/><circle cx="15" cy="5" r="1"/><path d="M12 17.5V14l-3-3 4-3 2 3h2"/>',
+    ban: '<circle cx="12" cy="12" r="10"/><path d="m4.9 4.9 14.2 14.2"/>',
+    help: '<circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/>',
+    thumb: '<path d="M7 10v12"/><path d="M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2a3.13 3.13 0 0 1 3 3.88Z"/>',
+    settings: '<path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/>',
+    flask: '<path d="M10 2v7.31"/><path d="M14 9.3V1.99"/><path d="M8.5 2h7"/><path d="M14 9.3a6.5 6.5 0 1 1-4 0"/><path d="M5.52 16h12.96"/>',
+    siren: '<path d="M7 18v-6a5 5 0 1 1 10 0v6"/><path d="M5 21a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-1a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2z"/><path d="M21 12h1"/><path d="M18.5 4.5 18 5"/><path d="M2 12h1"/><path d="M12 2v1"/><path d="m4.93 4.93.71.71"/>',
+    cash: '<rect width="20" height="12" x="2" y="6" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h.01M18 12h.01"/>',
+    heart: '<path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>',
+    sparkles: '<path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3Z"/>',
+    wallet: '<path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1"/><path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4"/>',
+    checksq: '<rect width="18" height="18" x="3" y="3" rx="2"/><path d="m9 12 2 2 4-4"/>',
+    checkc: '<circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/>',
+    flag: '<path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><path d="M4 22v-7"/>',
+    ruler: '<path d="M21.3 15.3a2.4 2.4 0 0 1 0 3.4l-2.6 2.6a2.4 2.4 0 0 1-3.4 0L2.7 8.7a2.41 2.41 0 0 1 0-3.4l2.6-2.6a2.41 2.41 0 0 1 3.4 0Z"/><path d="m14.5 12.5 2-2"/><path d="m11.5 9.5 2-2"/><path d="m8.5 6.5 2-2"/><path d="m17.5 15.5 2-2"/>',
+    target: '<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>',
+    thermo: '<path d="M14 4v10.54a4 4 0 1 1-4 0V4a2 2 0 0 1 4 0Z"/>',
+    pen: '<path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/>',
+    logout: '<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/>',
+    map: '<path d="M14.1 6 9.9 3.9a2 2 0 0 0-1.8 0L3.6 6.2A1 1 0 0 0 3 7.1v12.3a1 1 0 0 0 1.4.9l3.7-1.8a2 2 0 0 1 1.8 0l4.2 2.1a2 2 0 0 0 1.8 0l4.5-2.3a1 1 0 0 0 .6-.9V4.6a1 1 0 0 0-1.4-.9l-3.7 1.8a2 2 0 0 1-1.8 0z"/><path d="M15 5.8v15"/><path d="M9 3.2v15"/>',
+    idcard: '<rect width="20" height="14" x="2" y="5" rx="2"/><circle cx="8" cy="12" r="2"/><path d="M14 10h4"/><path d="M14 14h4"/><path d="M5 17c.5-1.2 1.6-2 3-2s2.5.8 3 2"/>',
+    phone: '<rect width="14" height="20" x="5" y="2" rx="2"/><path d="M12 18h.01"/>',
+    inbox: '<path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/>',
+    plug: '<path d="M12 22v-5"/><path d="M9 8V2"/><path d="M15 8V2"/><path d="M18 8v5a4 4 0 0 1-4 4h-4a4 4 0 0 1-4-4V8Z"/>',
+    undo: '<path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/>',
+    refresh: '<path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/>',
+    forward: '<path d="m15 17 5-5-5-5"/><path d="M4 18v-2a4 4 0 0 1 4-4h12"/>'
+  };
+  for (var k in add) ICONS[k] = add[k];
+})();
+var EMOJI_ICON = {
+  '📊': 'bars', '🛒': 'cart', '👶': 'baby', '👨‍🍳': 'chef', '🍽': 'utensils', '📦': 'box', '🧾': 'receipt',
+  '🚚': 'truck', '🏭': 'factory', '🛡': 'shield', '📣': 'megaphone', '💬': 'chat', '🔔': 'bell', '📜': 'history',
+  '👥': 'users', '⚙': 'settings', '👑': 'crown', '🥕': 'sprout', '🎭': 'eye', '🔪': 'utensils', '🔥': 'flame',
+  '🥣': 'bowl', '⚖': 'scale', '❄': 'snow', '✅': 'checkc', '⏰': 'alarm', '⚠': 'alert', '⚽': 'forward',
+  '⏱': 'timer', '👷': 'hardhat', '💡': 'bulb', '⏳': 'hourglass', '👤': 'user', '⚡': 'zap', '📋': 'clipboard',
+  '🔒': 'lock', '🔐': 'lock', '📍': 'pin', '🛵': 'bike', '🚫': 'ban', '❓': 'help', '👍': 'thumb', '🧪': 'flask',
+  '🚨': 'siren', '💵': 'cash', '❤': 'heart', '🎉': 'sparkles', '💰': 'wallet', '🔎': 'search', '🔍': 'search',
+  '☑': 'checksq', '🏁': 'flag', '📐': 'ruler', '🔮': 'target', '🌡': 'thermo', '✍': 'pen', '💼': 'briefcase',
+  '✏': 'pencil', '🗑': 'trash', '🚪': 'logout', '🗺': 'map', '📈': 'chart', '📇': 'idcard', '📲': 'phone',
+  '👁': 'eye', '📬': 'inbox', '🔌': 'plug', '✓': 'check', '✗': 'x', '✕': 'x', '✖': 'x', '＋': 'plus', '➕': 'plus',
+  '↩': 'undo', '↺': 'refresh', '🔑': 'lock', '✨': 'sparkles', '🍳': 'grid', '🎧': 'headset', '🧑‍💼': 'briefcase',
+  '🟢': 'dot:g', '🔴': 'dot:r', '🟡': 'dot:y', '🟠': 'dot:y', '⚪': 'dot:n'
+};
+var EMOJI_RE = new RegExp(
+  Object.keys(EMOJI_ICON).sort(function (a, b) { return b.length - a.length; })
+    .map(function (k) { return k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\uFE0F?'; }).join('|') +
+  '|(?:[\\u{1F300}-\\u{1FAFF}\\u{2600}-\\u{27BF}](?:\\uFE0F)?(?:\\u200D[\\u{1F300}-\\u{1FAFF}\\u{2600}-\\u{27BF}]\\uFE0F?)*)', 'gu');
+function stripEmoji(t) { return String(t).replace(EMOJI_RE, '').replace(/^\s+/, '').replace(/ {2,}/g, ' '); }
+function emojiHtml(m) {
+  var n = EMOJI_ICON[m.replace(/️/g, '')];
+  if (!n) return '';
+  if (n.indexOf('dot:') === 0) return '<span class="sdot ' + n.slice(4) + '" aria-hidden="true"></span>';
+  return ic(n);
+}
+var ICON_SKIP = { SCRIPT: 1, STYLE: 1, TEXTAREA: 1, OPTION: 1, TITLE: 1 };
+function iconize(root) {
+  if (!root) return;
+  if (root.nodeType === 3) { iconText(root); return; }
+  if (root.nodeType !== 1) return;
+  if (root.tagName === 'OPTION' || root.tagName === 'SELECT') { root.querySelectorAll ? [].forEach.call(root.tagName === 'OPTION' ? [root] : root.options, function (o) { if (EMOJI_RE.test(o.text)) o.text = stripEmoji(o.text); EMOJI_RE.lastIndex = 0; }) : 0; return; }
+  ['title', 'placeholder', 'aria-label'].forEach(function (a) {
+    [].forEach.call(root.querySelectorAll('[' + a + ']').length || root.hasAttribute(a) ? [root].concat([].slice.call(root.querySelectorAll('[' + a + ']'))) : [], function (el) {
+      var v = el.getAttribute(a); if (v && EMOJI_RE.test(v)) el.setAttribute(a, stripEmoji(v)); EMOJI_RE.lastIndex = 0;
+    });
+  });
+  [].forEach.call(root.querySelectorAll('option'), function (o) { if (EMOJI_RE.test(o.text)) o.text = stripEmoji(o.text); EMOJI_RE.lastIndex = 0; });
+  var w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, null), list = [], n;
+  while ((n = w.nextNode())) list.push(n);
+  list.forEach(iconText);
+}
+function iconText(t) {
+  var v = t.nodeValue; if (!v) return;
+  EMOJI_RE.lastIndex = 0; if (!EMOJI_RE.test(v)) return; EMOJI_RE.lastIndex = 0;
+  var p = t.parentNode; if (!p || ICON_SKIP[p.nodeName]) { if (p && p.nodeName === 'OPTION') t.nodeValue = stripEmoji(v); return; }
+  if (p.namespaceURI === 'http://www.w3.org/2000/svg') { t.nodeValue = stripEmoji(v); return; }
+  var html = esc(v).replace(EMOJI_RE, function (m) { return emojiHtml(m); });
+  var tpl = document.createElement('template'); tpl.innerHTML = html;
+  p.replaceChild(tpl.content, t);
+}
+(function () {
+  var a = window.alert, c = window.confirm, pr = window.prompt;
+  window.alert = function (m) { return a.call(window, stripEmoji(m == null ? '' : m)); };
+  window.confirm = function (m) { return c.call(window, stripEmoji(m == null ? '' : m)); };
+  window.prompt = function (m, d) { return pr.call(window, stripEmoji(m == null ? '' : m), d); };
+  document.title = stripEmoji(document.title);
+  iconize(document.body);
+  new MutationObserver(function (muts) {
+    muts.forEach(function (m) {
+      if (m.type === 'characterData') iconText(m.target);
+      else if (m.type === 'attributes') { var v = m.target.getAttribute(m.attributeName); if (v && EMOJI_RE.test(v)) m.target.setAttribute(m.attributeName, stripEmoji(v)); EMOJI_RE.lastIndex = 0; }
+      else [].forEach.call(m.addedNodes, iconize);
+    });
+  }).observe(document.body, { childList: true, subtree: true, characterData: true, attributes: true, attributeFilter: ['title', 'placeholder', 'aria-label'] });
+})();
 
 /* ── boot ── */
 /* Super admin can take over any role: pick anyone in the act-as switcher,
