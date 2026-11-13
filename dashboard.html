@@ -223,6 +223,95 @@ dialog::backdrop { background:rgba(61,50,41,.45); }
 .frm { display:grid; gap:10px; }
 .frm label { font-weight:700; font-size:.82rem; display:grid; gap:4px; }
 .frm .row { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+/* ── Users · Roles (redesign) ── */
+.u-tabs { display:inline-flex; background:#ece6d6; border-radius:999px; padding:4px; gap:4px; margin-bottom:16px; }
+.u-tabs button { border:none; background:transparent; color:var(--soft); font-weight:700; font-size:.88rem; padding:8px 18px; border-radius:999px; display:flex; align-items:center; gap:7px; }
+.u-tabs button.on { background:var(--paper); color:var(--ink); box-shadow:0 2px 8px rgba(23,69,94,.14); }
+.u-tabs button .n { background:var(--cream); border-radius:999px; padding:0 8px; font-size:.72rem; }
+.u-tabs button.on .n { background:var(--gold); color:#12394e; }
+.u-kpis { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px; margin-bottom:16px; }
+.u-kpi { display:flex; align-items:center; gap:12px; background:var(--paper); border:1.5px solid var(--line); border-radius:var(--radius); padding:12px 14px; cursor:pointer; text-align:left; transition:transform .12s, border-color .12s, box-shadow .12s; }
+.u-kpi:hover { transform:translateY(-2px); box-shadow:var(--shadow); }
+.u-kpi.on { border-color:var(--gold); box-shadow:0 0 0 3px rgba(240,182,75,.25); }
+.u-kpi .e { font-size:1.5rem; width:44px; height:44px; border-radius:12px; display:grid; place-items:center; flex-shrink:0; }
+.u-kpi .v { font-family:'Baloo 2'; font-size:1.4rem; font-weight:700; line-height:1; color:var(--ink); }
+.u-kpi .l { font-size:.72rem; font-weight:700; color:var(--soft); text-transform:uppercase; letter-spacing:.05em; }
+.u-bar { display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-bottom:14px; }
+.u-search { position:relative; flex:1; min-width:220px; max-width:380px; }
+.u-search input { width:100%; padding:10px 14px 10px 38px; border-radius:999px; font-size:.9rem; }
+.u-search span { position:absolute; left:14px; top:50%; transform:translateY(-50%); }
+.u-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(min(310px,100%),1fr)); gap:14px; }
+.u-card { background:var(--paper); border:1px solid var(--line); border-radius:16px; box-shadow:var(--shadow); padding:16px; display:flex; flex-direction:column; gap:12px; border-top:4px solid var(--rc,#ccc); transition:box-shadow .15s, transform .15s; }
+.u-card:hover { box-shadow:0 10px 26px rgba(23,69,94,.16); transform:translateY(-2px); }
+.u-card.me { background:linear-gradient(180deg,#fffaf0,#fff 60%); }
+.u-top { display:flex; gap:12px; align-items:center; }
+.u-av { width:50px; height:50px; border-radius:50%; display:grid; place-items:center; font-size:1.55rem; flex-shrink:0; background:var(--rbg,#eee); position:relative; }
+.u-av i { position:absolute; right:-2px; bottom:-2px; width:14px; height:14px; border-radius:50%; background:#2fbf71; border:2px solid #fff; }
+.u-id { min-width:0; flex:1; }
+.u-id b { display:block; font-size:1.02rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.u-id small { color:var(--soft); font-size:.78rem; display:block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.u-role { display:inline-flex; align-items:center; gap:5px; font-size:.74rem; font-weight:700; border-radius:999px; padding:3px 10px; background:var(--rbg); color:var(--rc); white-space:nowrap; }
+.u-lbl { font-size:.68rem; font-weight:700; color:var(--soft); text-transform:uppercase; letter-spacing:.07em; display:flex; justify-content:space-between; }
+.u-st { display:flex; flex-wrap:wrap; gap:6px; }
+.u-st button { border:1.5px dashed #cfd8dd; background:#fafbfb; color:#93a5ae; border-radius:10px; padding:5px 9px; font-size:.76rem; font-weight:700; display:flex; align-items:center; gap:4px; transition:all .12s; }
+.u-st button .ic { filter:grayscale(1); opacity:.55; }
+.u-st button:hover { border-color:var(--pea); color:var(--pea-dark); }
+.u-st button.on { border:1.5px solid #9fd2bd; background:#e6f4ef; color:#1d5e4d; }
+.u-st button.on .ic { filter:none; opacity:1; }
+.u-st button:disabled { cursor:not-allowed; }
+.u-meter { display:flex; gap:14px; font-size:.78rem; color:var(--soft); font-weight:600; }
+.u-meter b { color:var(--ink); }
+.u-acts { display:flex; gap:6px; border-top:1px solid var(--line); padding-top:12px; margin-top:auto; align-items:center; }
+.u-acts select { flex:1; padding:7px 10px; border-radius:999px; font-weight:700; font-size:.82rem; }
+.u-ib { width:36px; height:36px; border-radius:50%; border:1.5px solid var(--line); background:var(--paper); font-size:1rem; display:grid; place-items:center; flex-shrink:0; transition:all .12s; }
+.u-ib:hover { border-color:var(--gold); background:#fdf3e0; transform:scale(1.08); }
+.u-ib.del:hover { border-color:var(--bad); background:#fde7e7; }
+.u-empty { text-align:center; padding:40px; color:var(--soft); }
+.u-empty div { font-size:2.4rem; }
+.pm-wrap { overflow-x:auto; }
+table.pm { width:100%; border-collapse:separate; border-spacing:0; min-width:720px; }
+table.pm th { position:sticky; top:0; background:var(--paper); padding:12px 8px; font-size:.78rem; text-align:center; border-bottom:2px solid var(--line); }
+table.pm th .e { display:block; font-size:1.4rem; }
+table.pm th:first-child, table.pm td:first-child { text-align:left; }
+table.pm td { padding:10px 8px; border-bottom:1px solid var(--line); text-align:center; }
+table.pm tr:hover td { background:#fffaf0; }
+table.pm td.k { display:flex; align-items:center; gap:10px; }
+table.pm td.k .e { font-size:1.2rem; width:34px; height:34px; border-radius:10px; background:var(--cream); display:grid; place-items:center; flex-shrink:0; }
+table.pm td.k b { display:block; font-size:.88rem; }
+table.pm td.k small { color:var(--soft); font-size:.72rem; font-family:monospace; }
+table.pm tfoot td { font-size:.74rem; font-weight:700; color:var(--soft); border-bottom:none; }
+.sw { position:relative; display:inline-block; width:42px; height:24px; }
+.sw input { opacity:0; width:0; height:0; }
+.sw span { position:absolute; inset:0; background:#d5dde1; border-radius:999px; transition:.15s; cursor:pointer; }
+.sw span::before { content:''; position:absolute; width:18px; height:18px; left:3px; top:3px; background:#fff; border-radius:50%; transition:.15s; box-shadow:0 1px 3px rgba(0,0,0,.25); }
+.sw input:checked + span { background:var(--pea); }
+.sw input:checked + span::before { transform:translateX(18px); }
+.sw input:disabled + span { background:#c9a85c; cursor:not-allowed; opacity:.8; }
+.sw input:focus-visible + span { outline:3px solid var(--carrot); outline-offset:2px; }
+.u-tip { display:flex; gap:10px; align-items:flex-start; background:#fff8e6; border:1px solid #f3dca6; border-radius:12px; padding:11px 14px; font-size:.84rem; margin-top:14px; }
+.u-tip > span { font-size:1.2rem; }
+.u-toast { position:fixed; bottom:22px; left:50%; transform:translateX(-50%) translateY(20px); background:#12394e; color:#fff; padding:10px 18px; border-radius:999px; font-weight:700; font-size:.86rem; box-shadow:0 10px 30px rgba(0,0,0,.25); opacity:0; transition:.2s; z-index:999; pointer-events:none; }
+.u-toast.on { opacity:1; transform:translateX(-50%) translateY(0); }
+.st-pick { display:grid; grid-template-columns:repeat(auto-fill,minmax(130px,1fr)); gap:8px; }
+.st-pick label { display:flex !important; align-items:center; gap:8px; border:1.5px solid var(--line); border-radius:10px; padding:8px 10px; cursor:pointer; font-weight:600 !important; }
+.st-pick label:has(input:checked) { border-color:#9fd2bd; background:#e6f4ef; }
+.role-pick { display:grid; grid-template-columns:repeat(auto-fill,minmax(120px,1fr)); gap:8px; }
+.role-pick label { display:flex !important; flex-direction:column; align-items:center; gap:2px; border:1.5px solid var(--line); border-radius:12px; padding:10px 6px; cursor:pointer; text-align:center; }
+.role-pick label span { font-size:1.6rem; }
+.role-pick label small { font-weight:600; color:var(--soft); font-size:.7rem; }
+.role-pick input { display:none; }
+.role-pick label:has(input:checked) { border-color:var(--gold); background:#fff6e2; box-shadow:0 0 0 3px rgba(240,182,75,.25); }
+.u-tabs button { white-space:nowrap; }
+@media (max-width:640px){
+  .u-kpis { grid-template-columns:repeat(3,1fr); gap:8px; }
+  .u-kpi { flex-direction:column; text-align:center; gap:4px; padding:8px 4px; }
+  .u-kpi .e { width:34px; height:34px; font-size:1.15rem; }
+  .u-kpi .v { font-size:1.15rem; } .u-kpi .l { font-size:.56rem; letter-spacing:.02em; }
+  .u-tabs { display:flex; } .u-tabs button { flex:1; justify-content:center; padding:8px 8px; font-size:.8rem; }
+  .u-search { max-width:none; }
+  .u-role { display:none; }
+}
+@media (prefers-reduced-motion:reduce){ .u-card,.u-kpi,.u-ib,.u-toast,.sw span,.sw span::before { transition:none; } }
 </style>
 </head>
 <body>
@@ -251,7 +340,7 @@ dialog::backdrop { background:rgba(61,50,41,.45); }
     <a data-m="chat"><span>💬</span><em>Team Chat</em></a>
     <a data-m="notify"><span>🔔</span><em>Notifications</em></a>
     <a data-m="audit"><span>📜</span><em>Activity Log</em></a>
-    <a data-m="users"><span>👥</span><em>Users · Roles</em></a>
+    <a data-m="users"><span>👥</span><em>Team · Access</em></a>
     <a data-m="settings"><span>⚙️</span><em>Settings</em></a>
   </nav>
   <div class="who">
@@ -2535,74 +2624,205 @@ function audCsv() {
 }
 
 /* ── Users ── */
+/* Role look & feel: emoji, label, one-line meaning, colour */
+var ROLE_META = {
+  super_admin: { e: '👑', l: 'Super admin', d: 'Everything, always', c: '#a36b00', bg: '#fff1d1' },
+  manager:     { e: '🧑‍💼', l: 'Manager',     d: 'Runs daily operations', c: '#3a5ba8', bg: '#e6edfb' },
+  kitchen:     { e: '👨‍🍳', l: 'Kitchen',     d: 'Cooks & prepares meals', c: '#b5531f', bg: '#fdeadf' },
+  delivery:    { e: '🚚', l: 'Delivery',    d: 'Delivers orders', c: '#1d6e5b', bg: '#e1f3ec' },
+  support:     { e: '🎧', l: 'Support',     d: 'Answers parents', c: '#7a4aa8', bg: '#f0e7fa' }
+};
+var PERM_ICON = {
+  orders_manage: '🛒', kitchen_manage: '👨‍🍳', inventory_manage: '📦', bom_manage: '🍽️',
+  delivery_manage: '🚚', suppliers_manage: '🏭', iso_manage: '🛡️', complaints_manage: '📣',
+  programs_manage: '👶', chat_use: '💬', push_send: '🔔', reports_view: '📈',
+  audit_view: '📜', users_manage: '👥'
+};
+var UV = { tab: 'team', role: 'all', q: '' };
+function roleMeta(r) { return ROLE_META[r] || { e: '👤', l: r, d: '', c: '#555', bg: '#eee' }; }
+function rolePermCount(role) {
+  if (role === 'super_admin') return PERM_KEYS.length;
+  return store('role_perms').all().filter(function (x) { return x.role === role && x.allowed; }).length;
+}
+function uToast(msg) {
+  var t = document.getElementById('u-toast');
+  if (!t) { t = document.createElement('div'); t.id = 'u-toast'; t.className = 'u-toast'; document.body.appendChild(t); }
+  t.textContent = msg; t.classList.add('on');
+  clearTimeout(t._h); t._h = setTimeout(function () { t.classList.remove('on'); }, 1800);
+}
+function uTab(t) { UV.tab = t; render(); }
+function uRole(r) { UV.role = (UV.role === r ? 'all' : r); render(); }
+function uSearch(v) {
+  UV.q = v;
+  var q = v.trim().toLowerCase(), shown = 0;
+  document.querySelectorAll('.u-card').forEach(function (c) {
+    var hit = !q || c.getAttribute('data-s').indexOf(q) >= 0;
+    c.style.display = hit ? '' : 'none'; if (hit) shown++;
+  });
+  var em = document.getElementById('u-none'); if (em) em.style.display = shown ? 'none' : '';
+}
+AFTER.users = function () { if (UV.q) uSearch(UV.q); };
+
 RENDER.users = function () {
   var staff = store('staff').all().map(normStaff);
-  var rows = staff.map(function (u) {
-    var roleOpts = ROLES.map(function (r) { return '<option' + (u.role === r ? ' selected' : '') + '>' + r + '</option>'; }).join('');
-    var chips = STATIONS.map(function (st) {
-      var on = (u.stations || []).indexOf(st[0]) >= 0;
-      return '<button class="pill ' + (on ? 'on' : 'off') + '" style="font-size:.68rem;padding:2px 8px" ' +
-        'onclick="stationToggle(\'' + u.id + '\',\'' + st[0] + '\')" title="Grant / revoke the ' + st[1] + ' station">' + st[1] + '</button>';
-    }).join(' ');
-    return '<tr><td><b>' + esc(u.name) + '</b><br><span class="muted">' + esc(u.email) + '</span></td>' +
-      '<td><select onchange="setRole(\'' + u.id + '\',this.value)">' + roleOpts + '</select></td>' +
-      '<td class="wrap" style="max-width:420px"><div class="pill-row">' + chips + '</div></td></tr>';
+  var me = (localStorage.getItem('ttops_whoami') || 'u1');
+  var admin = can('users_manage');
+  var counts = {}; ROLES.forEach(function (r) { counts[r] = 0; });
+  staff.forEach(function (u) { counts[u.role] = (counts[u.role] || 0) + 1; });
+
+  /* KPI tiles double as role filters */
+  var kpis = '<button class="u-kpi' + (UV.role === 'all' ? ' on' : '') + '" onclick="uRole(\'all\')">' +
+    '<span class="e" style="background:#e8eef1">👥</span><span><div class="v">' + staff.length + '</div><div class="l">Whole team</div></span></button>' +
+    ROLES.map(function (r) {
+      var m = roleMeta(r);
+      return '<button class="u-kpi' + (UV.role === r ? ' on' : '') + '" onclick="uRole(\'' + r + '\')" title="Show only ' + m.l + '">' +
+        '<span class="e" style="background:' + m.bg + '">' + m.e + '</span><span><div class="v">' + (counts[r] || 0) + '</div><div class="l">' + m.l + '</div></span></button>';
+    }).join('');
+
+  var list = staff.filter(function (u) { return UV.role === 'all' || u.role === UV.role; });
+  var cards = list.map(function (u) {
+    var m = roleMeta(u.role);
+    var isOwner = u.id === 'u1', isMe = u.id === me;
+    var fullKitchen = u.role === 'super_admin' || u.role === 'manager';
+    var roleOpts = ROLES.map(function (r) {
+      var rm = roleMeta(r);
+      return '<option value="' + r + '"' + (u.role === r ? ' selected' : '') + '>' + rm.e + ' ' + rm.l + '</option>';
+    }).join('');
+    var st = STATIONS.map(function (s) {
+      var on = fullKitchen || (u.stations || []).indexOf(s[0]) >= 0;
+      var ic = STATION_ICON[s[0]], lbl = s[1].replace(ic, '').trim();
+      return '<button class="' + (on ? 'on' : '') + '"' + (fullKitchen || !admin ? ' disabled' : '') +
+        ' onclick="stationToggle(\'' + u.id + '\',\'' + s[0] + '\')" title="' + (on ? 'Tap to remove ' : 'Tap to give ') + lbl + '">' +
+        '<span class="ic">' + ic + '</span>' + lbl + '</button>';
+    }).join('');
+    var nSt = fullKitchen ? STATIONS.length : (u.stations || []).length;
+    return '<div class="u-card' + (isMe ? ' me' : '') + '" style="--rc:' + m.c + ';--rbg:' + m.bg + '" data-s="' + esc((u.name + ' ' + u.email + ' ' + m.l).toLowerCase()) + '">' +
+      '<div class="u-top"><div class="u-av">' + m.e + (isMe ? '<i title="Signed in now"></i>' : '') + '</div>' +
+        '<div class="u-id"><b>' + esc(u.name) + '</b><small>✉️ ' + esc(u.email || '—') + '</small></div>' +
+        '<span class="u-role">' + m.e + ' ' + m.l + '</span></div>' +
+      '<div class="u-meter"><span>🔐 <b>' + rolePermCount(u.role) + '</b>/' + PERM_KEYS.length + ' permissions</span>' +
+        '<span>🍳 <b>' + nSt + '</b>/' + STATIONS.length + ' stations</span></div>' +
+      '<div><div class="u-lbl"><span>Kitchen stations</span><span>' + (fullKitchen ? '✨ all, by role' : (admin ? 'tap to switch' : '')) + '</span></div>' +
+        '<div class="u-st" style="margin-top:6px">' + st + '</div></div>' +
+      '<div class="u-acts">' +
+        (isOwner ? '<select disabled title="The owner always stays super admin"><option>👑 Super admin · owner</option></select>'
+                 : '<select ' + (admin ? '' : 'disabled ') + 'onchange="setRole(\'' + u.id + '\',this.value)" title="Change role">' + roleOpts + '</select>') +
+        (isMe ? '' : '<button class="u-ib" onclick="actAs(\'' + u.id + '\')" title="🎭 Act as ' + esc(u.name) + ' — see exactly what they see">🎭</button>') +
+        (admin ? '<button class="u-ib" onclick="editEmployee(\'' + u.id + '\')" title="✏️ Edit name & email">✏️</button>' : '') +
+        (admin && !isOwner && !isMe ? '<button class="u-ib del" onclick="removeEmployee(\'' + u.id + '\')" title="🗑️ Remove from team">🗑️</button>' : '') +
+      '</div></div>';
   }).join('');
+
+  var team = '<div class="u-kpis">' + kpis + '</div>' +
+    '<div class="u-bar"><div class="u-search"><span>🔎</span><input placeholder="Search by name, email or role…" value="' + esc(UV.q) + '" oninput="uSearch(this.value)"></div>' +
+      (UV.role !== 'all' ? '<button class="btn o s" onclick="uRole(\'all\')">✕ ' + roleMeta(UV.role).e + ' ' + roleMeta(UV.role).l + ' only</button>' : '') + '</div>' +
+    '<div class="u-grid">' + cards + '</div>' +
+    '<div class="u-empty" id="u-none" style="display:' + (list.length ? 'none' : '') + '"><div>🔍</div>No one matches. <a href="#" onclick="UV.role=\'all\';UV.q=\'\';render();return false">Show everyone</a></div>' +
+    '<div class="u-tip"><span>💡</span><div><b>Try it:</b> press 🎭 on <b>Karim — Helper</b>, then open 👨‍🍳 Kitchen and start a 🔥 cooking step — he is refused, while 🥣 assembly works. Press <b>↩ Back to super admin</b> (bottom-left) to return.</div></div>';
+
+  /* Permission matrix with toggle switches */
   var rp = store('role_perms').all();
-  var head = ROLES.map(function (r) { return '<th>' + r.replace('_', ' ') + '</th>'; }).join('');
-  var matrix = PERM_KEYS.map(function (pk) {
+  var head = ROLES.map(function (r) {
+    var m = roleMeta(r);
+    return '<th style="color:' + m.c + '"><span class="e">' + m.e + '</span>' + m.l + '</th>';
+  }).join('');
+  var body = PERM_KEYS.map(function (pk) {
     var cells = ROLES.map(function (r) {
       var row = rp.find(function (x) { return x.role === r && x.key === pk[0]; });
-      var checked = row && row.allowed;
       var lock = r === 'super_admin';
-      return '<td><input type="checkbox" ' + (checked ? 'checked' : '') + (lock ? ' disabled' : '') +
-        ' onchange="setPerm(\'' + r + '\',\'' + pk[0] + '\',this.checked)"></td>';
+      var on = lock || (row && row.allowed);
+      return '<td><label class="sw" title="' + (lock ? 'Super admin always has this' : roleMeta(r).l + ' · ' + pk[1]) + '">' +
+        '<input type="checkbox" ' + (on ? 'checked' : '') + (lock || !admin ? ' disabled' : '') +
+        ' onchange="setPerm(\'' + r + '\',\'' + pk[0] + '\',this.checked)" aria-label="' + roleMeta(r).l + ': ' + esc(pk[1]) + '"><span></span></label></td>';
     }).join('');
-    return '<tr><td><b>' + pk[0] + '</b><br><span class="muted">' + pk[1] + '</span></td>' + cells + '</tr>';
+    return '<tr><td class="k"><span class="e">' + (PERM_ICON[pk[0]] || '🔑') + '</span><span><b>' + esc(pk[1]) + '</b><small>' + pk[0] + '</small></span></td>' + cells + '</tr>';
   }).join('');
-  return '<div class="pagehead"><div><h1>👥 Users · Roles</h1><div class="sub">One permission key per capability (override → role → super_admin) — plus per-person <b>kitchen station grants</b>: cooking and preparation tasks in the Kitchen can only be started by someone holding that station. Hire a helper, grant only 🥣 Assembly or 📦 Packaging, and that is all they can touch.</div></div>' +
-    '<button class="btn p" onclick="newEmployee()">＋ Add employee</button></div>' +
-    '<div class="panel"><h3>Team &amp; kitchen stations</h3><div class="tbl-scroll"><table class="t reg"><thead><tr><th>Person</th><th>Role</th><th>Kitchen stations (tap to grant / revoke)</th></tr></thead><tbody>' + rows + '</tbody></table></div>' +
-    '<p class="muted" style="margin-top:8px">Real logins are Supabase Auth users; roles carry the permission keys, stations carry the physical work areas. Try it: act as <b>Karim — Helper</b> (bottom-left) and start a 🔥 cooking step — the kitchen refuses him, while 🥣 assembly works.</p></div>' +
-    '<div class="panel"><h3>🔐 Permission matrix</h3><div class="tbl-scroll"><table class="t matrix"><thead><tr><th>Permission</th>' + head + '</tr></thead><tbody>' + matrix + '</tbody></table></div>' +
-    '<p class="muted" style="margin-top:8px">super_admin always holds everything, and can <b>take over any role</b>: pick anyone in the bottom-left act-as switcher, work with exactly their permissions (watch the sidebar shrink), and return with one click. In production every acted-as action is logged with both identities.</p></div>';
+  var foot = ROLES.map(function (r) { return '<td>' + rolePermCount(r) + ' / ' + PERM_KEYS.length + '</td>'; }).join('');
+  var perms = '<div class="panel"><div class="pm-wrap"><table class="pm"><thead><tr><th>What they can do</th>' + head + '</tr></thead>' +
+    '<tbody>' + body + '</tbody><tfoot><tr><td>Total switched on</td>' + foot + '</tr></tfoot></table></div>' +
+    '<div class="u-tip"><span>🔐</span><div>Switch a permission on or off for a whole role — it applies to everyone in that role instantly. 👑 Super admin always has everything (gold switches are locked).</div></div></div>';
+
+  return '<div class="pagehead"><div><h1>👥 Team &amp; Access</h1><div class="sub">Who is on the team, what they are allowed to do, and which kitchen stations they can work.</div></div>' +
+    (admin ? '<button class="btn p" onclick="newEmployee()">➕ Add team member</button>' : '') + '</div>' +
+    '<div class="u-tabs"><button class="' + (UV.tab === 'team' ? 'on' : '') + '" onclick="uTab(\'team\')">👥 Team <span class="n">' + staff.length + '</span></button>' +
+      '<button class="' + (UV.tab === 'perms' ? 'on' : '') + '" onclick="uTab(\'perms\')">🔐 Role permissions <span class="n">' + PERM_KEYS.length + '</span></button></div>' +
+    (UV.tab === 'team' ? team : perms);
 };
 function setRole(id, role) {
+  if (!can('users_manage')) { alert('🔒 users_manage permission required'); return; }
   var staff = store('staff').all().map(normStaff); var u = byId(staff, id);
-  if (u) { u.role = role; logAct('Users', 'role change', u.name + ' → ' + role); store('staff').save(staff); render(); }
+  if (u) {
+    u.role = role; logAct('Users', 'role change', u.name + ' → ' + role); store('staff').save(staff);
+    rebuildWhoami(); render(); uToast(roleMeta(role).e + ' ' + u.name + ' is now ' + roleMeta(role).l);
+  }
 }
 function stationToggle(id, station) {
-  if (!can('users_manage')) { alert('users_manage permission required'); return; }
+  if (!can('users_manage')) { alert('🔒 users_manage permission required'); return; }
   var staff = store('staff').all().map(normStaff); var u = byId(staff, id); if (!u) return;
   var i = u.stations.indexOf(station);
   if (i >= 0) u.stations.splice(i, 1); else u.stations.push(station);
   logAct('Users', (i >= 0 ? 'station revoked' : 'station granted'), u.name + ' · ' + station);
   store('staff').save(staff); render();
+  uToast(STATION_ICON[station] + ' ' + (i >= 0 ? 'Removed from ' : 'Given to ') + u.name);
+}
+function actAs(id) {
+  localStorage.setItem('ttops_whoami', id);
+  var sel = document.getElementById('whoami'); if (sel) sel.value = id;
+  var u = byId(store('staff').all(), id);
+  logAct('Users', 'act-as', 'Super admin now acting as ' + (u ? u.name : id));
+  syncActAs(); render(); uToast('🎭 You are now seeing what ' + (u ? u.name : '') + ' sees');
+}
+function removeEmployee(id) {
+  var staff = store('staff').all().map(normStaff); var u = byId(staff, id); if (!u) return;
+  if (!confirm('🗑️ Remove ' + u.name + ' from the team?\nThey will lose all access.')) return;
+  store('staff').save(staff.filter(function (x) { return x.id !== id; }));
+  logAct('Users', 'employee removed', u.name);
+  rebuildWhoami(); render(); uToast('🗑️ ' + u.name + ' removed');
+}
+function editEmployee(id) {
+  var u = byId(store('staff').all(), id); if (!u) return;
+  showDlg('<h3>✏️ Edit ' + esc(u.name) + '</h3><div class="frm" style="margin-top:10px">' +
+    '<div class="row"><label>👤 Name<input id="ee-name" value="' + esc(u.name) + '"></label>' +
+    '<label>✉️ Email<input id="ee-email" value="' + esc(u.email || '') + '"></label></div>' +
+    '<button class="btn p" onclick="saveEdit(\'' + id + '\')">💾 Save changes</button></div>');
+}
+function saveEdit(id) {
+  var name = document.getElementById('ee-name').value.trim();
+  if (!name) { alert('Name required'); return; }
+  var staff = store('staff').all(); var u = byId(staff, id); if (!u) return;
+  u.name = name; u.email = document.getElementById('ee-email').value.trim();
+  store('staff').save(staff); logAct('Users', 'employee edited', u.name);
+  rebuildWhoami(); closeDlg(); render(); uToast('✅ Saved');
 }
 function newEmployee() {
-  var boxes = STATIONS.map(function (st) {
-    return '<label style="display:flex;align-items:center;gap:6px;font-weight:600"><input type="checkbox" class="ne-st" value="' + st[0] + '">' + st[1] + '</label>';
+  var roles = ROLES.filter(function (r) { return r !== 'super_admin'; }).map(function (r) {
+    var m = roleMeta(r);
+    return '<label><input type="radio" name="ne-role" value="' + r + '"' + (r === 'kitchen' ? ' checked' : '') + '><span>' + m.e + '</span><b>' + m.l + '</b><small>' + m.d + '</small></label>';
   }).join('');
-  showDlg('<h3>＋ Add employee</h3><div class="frm" style="margin-top:10px">' +
-    '<div class="row"><label>Name<input id="ne-name" placeholder="e.g. Karim — Helper"></label>' +
-    '<label>Email<input id="ne-email" placeholder="name@tinytummy"></label></div>' +
-    '<label>Role<select id="ne-role">' + ROLES.filter(function (r) { return r !== 'super_admin'; }).map(function (r) { return '<option' + (r === 'kitchen' ? ' selected' : '') + '>' + r + '</option>'; }).join('') + '</select></label>' +
-    '<label>Kitchen stations this person may work</label>' +
-    '<div class="pill-row" style="gap:12px;flex-wrap:wrap">' + boxes + '</div>' +
-    '<button class="btn p" onclick="saveEmployee()">Add to team</button>' +
-    '<p class="muted">In production this also creates the Supabase Auth login; stations and role apply the moment they sign in.</p></div>');
+  var boxes = STATIONS.map(function (st) {
+    return '<label><input type="checkbox" class="ne-st" value="' + st[0] + '">' + st[1] + '</label>';
+  }).join('');
+  showDlg('<h3>➕ Add team member</h3><div class="frm" style="margin-top:10px">' +
+    '<div class="row"><label>👤 Name<input id="ne-name" placeholder="e.g. Karim — Helper"></label>' +
+    '<label>✉️ Email<input id="ne-email" placeholder="name@tinytummy"></label></div>' +
+    '<label>1️⃣ Pick a role</label><div class="role-pick">' + roles + '</div>' +
+    '<label>2️⃣ Kitchen stations they may work <span class="muted" style="font-weight:600">(optional)</span></label>' +
+    '<div class="st-pick">' + boxes + '</div>' +
+    '<button class="btn p" onclick="saveEmployee()">✅ Add to team</button>' +
+    '<p class="muted">In production this also creates the Supabase login; role and stations apply the moment they sign in.</p></div>');
 }
 function saveEmployee() {
   var name = document.getElementById('ne-name').value.trim();
   if (!name) { alert('Name required'); return; }
   var stations = Array.prototype.slice.call(document.querySelectorAll('.ne-st:checked')).map(function (x) { return x.value; });
+  var roleEl = document.querySelector('input[name="ne-role"]:checked');
   var staff = store('staff').all().map(normStaff);
-  var u = { id: uid(), name: name, email: document.getElementById('ne-email').value, role: document.getElementById('ne-role').value, stations: stations };
+  var u = { id: uid(), name: name, email: document.getElementById('ne-email').value, role: roleEl ? roleEl.value : 'kitchen', stations: stations };
   staff.push(u);
   logAct('Users', 'employee added', u.name + ' (' + u.role + ') · ' + stations.join('/'));
   store('staff').save(staff);
   rebuildWhoami();
-  closeDlg(); render();
+  closeDlg(); render(); uToast('🎉 ' + u.name + ' joined the team');
 }
 function rebuildWhoami() {
   var sel = document.getElementById('whoami'); if (!sel) return;
@@ -2620,6 +2840,8 @@ function setPerm(role, key, allowed) {
   var row = rp.find(function (x) { return x.role === role && x.key === key; });
   if (row) row.allowed = allowed; else rp.push({ role: role, key: key, allowed: allowed });
   store('role_perms').save(rp);
+  logAct('Users', allowed ? 'permission granted' : 'permission revoked', role + ' · ' + key);
+  render(); uToast((allowed ? '✅ ' : '⛔ ') + roleMeta(role).l + (allowed ? ' can now: ' : ' can no longer: ') + ((PERM_KEYS.find(function (k) { return k[0] === key; }) || [])[1] || key));
 }
 
 /* ── Settings ── */
