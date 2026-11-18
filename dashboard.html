@@ -575,6 +575,12 @@ table.pm tfoot td { font-size:.74rem; font-weight:700; color:var(--soft); border
 .t.kl tr.kl-late td { background:#fdf0f0; }
 .oc-next { margin-top:8px; } .oc-next .btn { width:100%; justify-content:center; }
 .kwait .ia .pill-row { margin-left:auto; flex-wrap:nowrap; }
+#k-alarm { position:fixed; top:14px; right:14px; z-index:950; width:min(440px,calc(100vw - 28px)); background:#fff; border:2px solid #b23a48; border-radius:14px; box-shadow:0 16px 44px rgba(178,58,72,.28); padding:10px 12px; animation:kpulse 1.2s ease-in-out infinite; }
+#k-alarm .ka-h { display:flex; align-items:center; gap:8px; color:#b23a48; font-size:.9rem; margin-bottom:6px; }
+#k-alarm .ka-h span { margin-left:auto; background:#b23a48; color:#fff; border-radius:999px; padding:0 8px; font-size:.75rem; font-weight:800; }
+#k-alarm .ka-r { display:flex; align-items:center; gap:6px; padding:6px 0; border-top:1px solid #f3e1e3; }
+#k-alarm .ka-r > div { flex:1; font-size:.85rem; color:#17455e; } #k-alarm .ka-r small { display:block; color:#64808e; }
+@keyframes kpulse { 0%,100% { box-shadow:0 16px 44px rgba(178,58,72,.28); } 50% { box-shadow:0 16px 44px rgba(178,58,72,.55); } }
 .o-next { display:flex; align-items:center; gap:12px; flex-wrap:wrap; background:#fff7e6; border:1px solid #f3dcae; border-radius:12px; padding:10px 12px; margin:12px 0 4px; }
 .o-next-l { font-size:.7rem; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:#a3720d; }
 .o-next .pill-row { margin:0; }
@@ -1623,6 +1629,7 @@ function kitchenWaiting(products) {
 }
 function openOrder(id) {
   autoAssignAll();
+  kitchenAuto();
   var orders = store('orders').all(); var o = byId(orders, id); if (!o) return;
   var products = store('products').all(), bom = store('bom').all(), ings = store('ingredients').all(), agents = store('agents').all();
   var t = orderTotals(o, products, bom, ings);
@@ -1657,6 +1664,7 @@ function openOrder(id) {
     '<h4>👨‍🍳 Kitchen steps</h4><div style="margin:8px 0 8px">' + steps + '</div>' +
     kitchenDetail(o) +
     '<h4>📍 Tracking</h4><ul class="timeline" style="margin-top:8px">' + hist + '</ul>');
+  document.getElementById('dlg').dataset.order = id;
 }
 
 function stepDefs(o) { return normProd(orderProduct(o, store('products').all())).steps; }
@@ -1747,8 +1755,7 @@ function stepControls(o) {
     var station = stepStation(def.name);
     var timer = '';
     if (running) {
-      var rem = Math.round((st.started_at + (Number(def.min) || 0) * 60000 - Date.now()) / 60000);
-      timer = rem >= 0 ? '<span class="chip fefo">' + ic('hourglass') + ' ' + rem + ' min left</span>' : '<span class="chip alarm">' + ic('alarm') + ' +' + (-rem) + ' min</span>';
+      timer = timerHtml(stepDue(st, def), 'chip', st.snooze_until);
     } else if (done) {
       timer = '<span class="chip done">' + ic('check') + ' ' + esc((st.at || '').split(',').pop().trim() || 'done') + '</span>';
     } else timer = '<span class="stp-wait">Waiting</span>';
@@ -1765,6 +1772,7 @@ function stepControls(o) {
     if (done) acts = '<button class="btn o s" title="Re-open this step" onclick="stepToggle(\'' + o.id + '\',' + i + ',false)">' + ic('undo') + ' Undo</button>';
     else {
       if (!running) acts += '<button class="btn p s" title="Start the timer" onclick="stepStart(\'' + o.id + '\',' + i + ')">' + ic('timer') + ' Start</button>';
+      else if (Date.now() > stepDue(st, def)) acts += '<button class="btn o s" title="Silence the alarm for ' + SNOOZE_MIN + ' minutes" onclick="stepSnooze(\'' + o.id + '\',' + i + ')">' + ic('timer') + ' Snooze ' + SNOOZE_MIN + ' min</button>';
       acts += '<button class="btn g s" onclick="stepToggle(\'' + o.id + '\',' + i + ',true)">' + ic('check') + ' Done</button>';
     }
     return '<div class="stp ' + (done ? 'done' : running ? 'running' : '') + '">' +
@@ -2029,6 +2037,119 @@ function checkKitchenAlarms() {
   });
   if (changed) store('orders').save(orders);
 }
+/* ── Kitchen automation: steps start by themselves, the buzzer rings while a
+   step is over time (every 30 s until Done or snoozed 5 min), an order whose
+   steps are all done moves to QC, countdowns update live. ── */
+var BUZZ_EVERY = 30000, SNOOZE_MIN = 5;
+function stepDue(st, def) { return st.started_at + (Number(def.min) || 0) * 60000; }
+function kitchenAuto() {
+  var orders = store('orders').all(), now = Date.now(), changed = false;
+  orders.forEach(function (o) {
+    if (['kitchen', 'portioning'].indexOf(o.status) < 0) return;
+    var defs = stepDefs(o); if (!defs.length) return;
+    o.steps = o.steps || [];
+    var get = function (d) { return o.steps.find(function (s) { return s.s === d.name; }); };
+    if (defs.every(function (d) { var s = get(d); return s && s.done; })) {
+      o.status = 'qc'; o.stage_times = o.stage_times || {}; o.stage_times.qc = now;
+      o.history.push({ at: nowTs(), what: 'All kitchen steps done — moved to QC automatically' });
+      changed = true; return;
+    }
+    if (defs.some(function (d) { var s = get(d); return s && s.started_at && !s.done; })) return;
+    var next = defs.filter(function (d) { var s = get(d); return !(s && s.done); })[0];
+    var st = get(next); if (!st) { st = { s: next.name, done: false }; o.steps.push(st); }
+    st.started_at = now; st.buzzed = false; st.last_buzz = 0; st.snooze_until = 0; st.auto_start = true;
+    o.history.push({ at: nowTs(), what: '▶ ' + next.name + ' started automatically (' + next.min + ' min planned)' + (st.assigned ? ' — ' + st.assigned : '') });
+    changed = true;
+  });
+  if (changed) store('orders').save(orders);
+  return changed;
+}
+function overdueSteps() {
+  var now = Date.now(), list = [];
+  store('orders').all().forEach(function (o) {
+    if (['kitchen', 'portioning', 'qc'].indexOf(o.status) < 0) return;
+    stepDefs(o).forEach(function (d, i) {
+      var s = (o.steps || []).find(function (x) { return x.s === d.name; });
+      if (!s || !s.started_at || s.done) return;
+      var due = stepDue(s, d); if (now < due) return;
+      list.push({ o: o, d: d, i: i, s: s, over: Math.round((now - due) / 60000), snoozed: s.snooze_until && now < s.snooze_until });
+    });
+  });
+  return list;
+}
+function kitchenBuzz() {
+  var orders = store('orders').all(), now = Date.now(), ring = false, changed = false;
+  orders.forEach(function (o) {
+    if (['kitchen', 'portioning', 'qc'].indexOf(o.status) < 0) return;
+    stepDefs(o).forEach(function (d) {
+      var s = (o.steps || []).find(function (x) { return x.s === d.name; });
+      if (!s || !s.started_at || s.done || now < stepDue(s, d)) return;
+      if (s.snooze_until && now < s.snooze_until) return;
+      if (s.last_buzz && now - s.last_buzz < BUZZ_EVERY) return;
+      if (!s.buzzed) {
+        o.history.push({ at: nowTs(), what: '⏰ ' + d.name + ' over its ' + d.min + ' min — alarm' });
+        pushDemo('⏰ Step timer — ' + d.name, o.code + ': the ' + d.min + ' min for “' + d.name + '” are up', 'Role · kitchen');
+        logAct('Kitchen', 'timer alarm', o.code + ' · ' + d.name);
+      }
+      s.buzzed = true; s.last_buzz = now; ring = true; changed = true;
+    });
+  });
+  if (changed) store('orders').save(orders);
+  if (ring) buzz();
+  kitchenAlarmBar();
+}
+function stepSnooze(oid, idx) {
+  var orders = store('orders').all(), o = byId(orders, oid); if (!o) return;
+  var d = stepDefs(o)[idx]; if (!d) return;
+  var s = o.steps.find(function (x) { return x.s === d.name; }); if (!s) return;
+  s.snooze_until = Date.now() + SNOOZE_MIN * 60000; s.last_buzz = 0;
+  o.history.push({ at: nowTs(), what: 'Alarm snoozed ' + SNOOZE_MIN + ' min on ' + d.name + ' — ' + currentUser().name });
+  logAct('Kitchen', 'alarm snoozed ' + SNOOZE_MIN + ' min', o.code + ' · ' + d.name);
+  store('orders').save(orders);
+  kitchenAlarmBar(); render();
+  var dlg = document.getElementById('dlg'); if (dlg && dlg.open && dlg.dataset.order === oid) openOrder(oid);
+  uToast('Alarm snoozed ' + SNOOZE_MIN + ' min — ' + d.name);
+}
+function kitchenAlarmBar() {
+  var ring = overdueSteps().filter(function (x) { return !x.snoozed; });
+  var bar = document.getElementById('k-alarm');
+  if (!ring.length) { if (bar) bar.remove(); return; }
+  if (!bar) { bar = document.createElement('div'); bar.id = 'k-alarm'; document.body.appendChild(bar); }
+  bar.innerHTML = '<div class="ka-h">' + ic('alarm') + ' <b>Over time</b><span>' + ring.length + '</span></div>' + ring.slice(0, 4).map(function (x) {
+    return '<div class="ka-r"><div><b>' + esc(x.o.code) + '</b> · ' + esc(x.d.name) + '<small>+' + x.over + ' min · ' + esc(x.s.assigned || 'unassigned') + '</small></div>' +
+      '<button class="btn o s" onclick="stepSnooze(\'' + x.o.id + '\',' + x.i + ')">' + ic('timer') + ' Snooze ' + SNOOZE_MIN + ' min</button>' +
+      '<button class="btn g s" onclick="stepToggle(\'' + x.o.id + '\',' + x.i + ',true)">' + ic('check') + ' Done</button>' +
+      '<button class="u-ib" title="Open the order" onclick="openOrder(\'' + x.o.id + '\')">' + ic('eye') + '</button></div>';
+  }).join('');
+}
+/* countdown chips carry data-due (ms) and data-st (chip | ostat); refreshed in place */
+function timerHtml(due, style, snoozeUntil) {
+  var rem = Math.round((due - Date.now()) / 60000), over = rem < 0;
+  var sn = snoozeUntil && Date.now() < snoozeUntil ? ' · snoozed' : '';
+  var txt = over ? ic('alarm') + ' +' + (-rem) + ' min' + (style === 'ostat' ? ' over' : '') + sn : ic('hourglass') + ' ' + rem + ' min left';
+  return style === 'ostat'
+    ? '<span class="ostat" data-due="' + due + '" data-st="ostat"' + (snoozeUntil ? ' data-sn="' + snoozeUntil + '"' : '') + ' style="--sc:' + (over ? '#b23a48' : '#2f6fb0') + '">' + txt + '</span>'
+    : '<span class="chip ' + (over ? 'alarm' : 'fefo') + '" data-due="' + due + '" data-st="chip"' + (snoozeUntil ? ' data-sn="' + snoozeUntil + '"' : '') + '>' + txt + '</span>';
+}
+function refreshCountdowns() {
+  document.querySelectorAll('[data-due]').forEach(function (el) {
+    var t = document.createElement('template'); t.innerHTML = timerHtml(Number(el.dataset.due), el.dataset.st, Number(el.dataset.sn || 0));
+    el.replaceWith(t.content.firstChild);
+  });
+}
+function kitchenTick() {
+  var changed = kitchenAuto();
+  kitchenBuzz();
+  var typing = document.activeElement && /INPUT|SELECT|TEXTAREA/.test(document.activeElement.tagName);
+  var dlg = document.getElementById('dlg');
+  if (changed && !typing && ['kitchen', 'orders', 'overview', 'delivery'].indexOf(current) >= 0) render();
+  if (changed && dlg && dlg.open && dlg.dataset.order && !typing) openOrder(dlg.dataset.order);
+  refreshCountdowns();
+}
+setInterval(kitchenTick, 5000);
+document.addEventListener('pointerdown', function () {
+  try { _audio = _audio || new (window.AudioContext || window.webkitAudioContext)(); if (_audio.resume) _audio.resume(); } catch (e) {}
+}, { once: true });
 /* Kitchen · Board / List — the list is one row per production step */
 var KV = { view: (function () { try { return localStorage.getItem('ttops_kitchen_view') || 'board'; } catch (e) { return 'board'; } })(),
   show: 'todo', who: 'all', station: 'all', q: '' };
@@ -2087,12 +2208,12 @@ function klListView(active, products) {
         eligible.map(function (u) { return '<option' + (t.who === u.name ? ' selected' : '') + ' value="' + esc(u.name) + '">' + esc(u.name) + '</option>'; }).join('') + '</select>' +
         (t.who && t.st.auto ? ' <span class="stp-auto" title="Assigned automatically">' + ic('zap') + '</span>' : '');
     var state = t.done ? '<span class="ostat" style="--sc:#2e8770">' + ic('check') + ' Done</span><div class="il-sub muted">' + esc((t.st.at || '').split(',').pop().trim()) + '</div>'
-      : t.running ? (t.rem >= 0 ? '<span class="ostat" style="--sc:#2f6fb0">' + ic('hourglass') + ' ' + t.rem + ' min left</span>' : '<span class="ostat" style="--sc:#b23a48">' + ic('alarm') + ' +' + (-t.rem) + ' min over</span>')
+      : t.running ? timerHtml(stepDue(t.st, def), 'ostat', t.st.snooze_until)
       : t.now ? '<span class="ostat" style="--sc:#c98a1b">' + ic('forward') + ' Next</span>' : '<span class="ostat" style="--sc:#8a979e">Waiting</span>';
     if (t.late && !t.running) state += '<div class="il-sub" style="color:#b23a48">' + ic('alarm') + ' order past its due time</div>';
     var acts = t.done
       ? '<button class="btn o s" title="Re-open this step" onclick="event.stopPropagation();stepToggle(\'' + o.id + '\',' + i + ',false)">' + ic('undo') + '</button>'
-      : (t.running ? '' : '<button class="btn p s" onclick="event.stopPropagation();stepStart(\'' + o.id + '\',' + i + ')">' + ic('timer') + ' Start</button>') +
+      : (t.running ? (t.rem < 0 ? '<button class="btn o s" title="Silence the alarm for ' + SNOOZE_MIN + ' minutes" onclick="event.stopPropagation();stepSnooze(\'' + o.id + '\',' + i + ')">' + ic('timer') + ' Snooze</button>' : '') : '<button class="btn p s" onclick="event.stopPropagation();stepStart(\'' + o.id + '\',' + i + ')">' + ic('timer') + ' Start</button>') +
         '<button class="btn g s" onclick="event.stopPropagation();stepToggle(\'' + o.id + '\',' + i + ',true)">' + ic('check') + ' Done</button>';
     var child = typeof orderChild === 'function' ? orderChild(o) : null, stop = child && typeof orderAllergens === 'function' ? orderAllergens(o, child) : [];
     var ccp = /cook|chill/i.test(def.name);
@@ -2115,6 +2236,7 @@ function klListView(active, products) {
 }
 RENDER.kitchen = function () {
   autoAssignAll();
+  kitchenAuto();
   checkKitchenAlarms();
   var products = store('products').all().map(normProd);
   var active = store('orders').all().filter(function (o) { return ['kitchen', 'portioning', 'qc'].indexOf(o.status) >= 0; });
@@ -2154,7 +2276,7 @@ RENDER.kitchen = function () {
       kitchenClock(o, products) +
       '<div style="margin-top:10px">' + stepControls(o) + '</div>' +
       kitchenDetail(o) +
-      (pct === 100 ? '<p style="margin-top:10px"><button class="btn g s" onclick="orderAct(\'' + o.id + '\',\'qcpass\')">✅ QC pass → dispatch</button></p>' : '') +
+      (NEXT_STEP[o.status] ? '<div class="o-next"><span class="o-next-l">Next step</span><div class="pill-row">' + nextStepBtn(o) + '</div></div>' : '') +
       '</div>';
   }).join('');
 
@@ -4110,6 +4232,7 @@ RENDER.settings = function () {
 function showDlg(html) {
   var d = document.getElementById('dlg');
   d.innerHTML = '<div style="display:flex;justify-content:flex-end"><button class="btn o s" onclick="closeDlg()">✕ Close</button></div>' + html;
+  d.dataset.order = '';
   if (!d.open) d.showModal();
 }
 function closeDlg() { document.getElementById('dlg').close(); }

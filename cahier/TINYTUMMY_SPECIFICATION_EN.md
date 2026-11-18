@@ -271,8 +271,16 @@ Each order, client, recipe or ingredient in the answer is a link to it.
 | Portioning | Portions and average weight vs target | ± 5 % | Recorded; outside tolerance alerts the manager |
 | Final QC | Label vs order, seal, weight, cold chain | Pass | Nothing reaches dispatch without QC signature |
 
-- Each step has a planned time; when it is exceeded, the kitchen buzzer sounds
-  and the step turns red.
+- **Timers run by themselves.** When an order is sent to the kitchen its
+  first step starts; when a step is done the next one starts, each with its
+  planned minutes and live countdown. When every step is done the order moves
+  to QC by itself; the QC pass stays a signature.
+- **Buzzer.** A step past its planned time turns red, the buzzer sounds and
+  an *Over time* banner names the order, the step and the person, with
+  **Snooze 5 min**, **Done** and **Open**. The buzzer repeats every 30 seconds
+  until the step is done or snoozed; a snooze silences it for 5 minutes, then
+  it rings again if the step is still open. Alarms and snoozes go to the order
+  history and the Activity Log.
 - The **ISO 22000** module holds the clause-by-clause checklist (context to
   improvement, PRPs, HACCP chain) with status, owner and evidence, and a
   readiness bar reviewed monthly. A traceability drill (delivered order →
@@ -356,6 +364,7 @@ Each order, client, recipe or ingredient in the answer is a link to it.
 - Start page per person (18/11/2026).
 - Menu: groups that fold, favourites, Find a page (Ctrl K), pages limited to the person's access (18/11/2026).
 - Orders: the next step (Confirm, Send to kitchen, Kitchen done → QC, QC pass, Dispatch, Delivered) is a button on every order — in the order window's top bar, on each board card and on each list row; Kitchen shows the confirmed orders waiting to be sent, with their Send to kitchen button (18/11/2026).
+- Kitchen: steps start automatically one after the other, live countdowns, the buzzer repeats every 30 s while a step is over time with an Over time banner and Snooze 5 min, the order moves to QC by itself when all steps are done; next-step button on each kitchen card (18/11/2026).
 
 ### V1.1 — from 01/11/2026 to 18/11/2026 (live on 18/11/2026)
 

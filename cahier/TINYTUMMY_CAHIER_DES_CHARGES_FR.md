@@ -302,8 +302,18 @@ Chaque commande, client, recette ou ingrédient de la réponse est un lien.
 | Portionnement | Portions et poids moyen vs objectif | ± 5 % | Enregistré ; hors tolérance, le responsable est alerté |
 | CQ final | Étiquette vs commande, scellé, poids, chaîne du froid | Conforme | Rien ne part sans la signature CQ |
 
-- Chaque étape a un temps prévu ; s'il est dépassé, l'alarme sonne en cuisine
-  et l'étape passe au rouge.
+- **Les minuteurs démarrent seuls.** Quand une commande est envoyée en
+  cuisine, sa première étape démarre ; quand une étape est terminée, la
+  suivante démarre, chacune avec ses minutes prévues et un compte à rebours
+  en direct. Quand toutes les étapes sont faites, la commande passe seule au
+  CQ ; la validation CQ reste une signature.
+- **Alarme.** Une étape qui dépasse son temps passe au rouge, l'alarme sonne et
+  un bandeau *Over time* indique la commande, l'étape et la personne, avec
+  **Snooze 5 min** (reporter 5 minutes), **Done** et **Open**. L'alarme
+  revient toutes les 30 secondes jusqu'à ce que l'étape soit terminée ou
+  reportée ; un report la coupe 5 minutes, puis elle sonne de nouveau si
+  l'étape est toujours ouverte. Alarmes et reports vont à l'historique de la
+  commande et au Journal d'activité.
 - Le module **ISO 22000** contient la liste de contrôle clause par clause (du
   contexte à l'amélioration, PRP, chaîne HACCP) avec statut, responsable et
   preuve, et une barre de préparation revue chaque mois. Un exercice de
@@ -393,6 +403,7 @@ Chaque commande, client, recette ou ingrédient de la réponse est un lien.
 - Page d'accueil par personne (18/11/2026).
 - Menu : groupes repliables, favoris, Trouver une page (Ctrl K), pages limitées aux accès de la personne (18/11/2026).
 - Commandes : l'étape suivante (Confirmer, Envoyer en cuisine, Cuisine terminée → CQ, CQ conforme, Expédier, Livrée) est un bouton sur chaque commande — dans la barre en haut de la fenêtre, sur chaque carte du tableau et sur chaque ligne de la liste ; la Cuisine affiche les commandes confirmées qui attendent d'être envoyées, avec leur bouton Envoyer en cuisine (18/11/2026).
+- Cuisine : les étapes démarrent seules l'une après l'autre, comptes à rebours en direct, l'alarme revient toutes les 30 s tant qu'une étape dépasse son temps avec un bandeau et Snooze 5 min, la commande passe seule au CQ quand toutes les étapes sont faites ; bouton d'étape suivante sur chaque carte en cuisine (18/11/2026).
 
 ### V1.1 — du 01/11/2026 au 18/11/2026 (mise en service le 18/11/2026)
 
