@@ -573,6 +573,9 @@ table.pm tfoot td { font-size:.74rem; font-weight:700; color:var(--soft); border
 .t.kl .stp-sel { max-width:150px; }
 .t.kl tr.kl-now td { background:#fffaf0; }
 .t.kl tr.kl-late td { background:#fdf0f0; }
+.o-next { display:flex; align-items:center; gap:12px; flex-wrap:wrap; background:#fff7e6; border:1px solid #f3dcae; border-radius:12px; padding:10px 12px; margin:12px 0 4px; }
+.o-next-l { font-size:.7rem; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:#a3720d; }
+.o-next .pill-row { margin:0; }
 .stp-note { color:#a3720d; background:#fff7e6; border:1px solid #f3dcae; border-radius:8px; padding:4px 10px; font-size:.8rem; }
 .kl-n { display:inline-block; font-size:.7rem; font-weight:800; color:#64808e; background:#efe9dc; border-radius:6px; padding:1px 6px; }
 .t.dl td:nth-child(3) { max-width:170px; }
@@ -1601,12 +1604,12 @@ function openOrder(id) {
   showDlg('<h3>' + esc(o.code) + ' — ' + esc(o.customer) + ' <span class="chip ' + o.status + '">' + o.status + '</span></h3>' + childBlock(o) +
     '<p class="muted">' + esc(o.phone) + ' · ' + esc(o.address) + '</p>' +
     pipelineStrip(o) +
+    (actions ? '<div class="o-next"><span class="o-next-l">Next step</span><div class="pill-row">' + actions + '</div></div>' : '') +
     '<div class="tbl-scroll" style="margin:12px 0"><table class="t"><thead><tr><th>Item</th><th class="num">Qty</th><th class="num">Price</th><th class="num">Cost (BOM)</th><th class="num">Margin</th></tr></thead>' +
     '<tbody>' + items + '</tbody>' +
     '<tfoot><tr><th colspan="2">Totals</th><th class="num">' + money(t.rev) + '</th><th class="num">' + money(t.cost) + '</th><th class="num">' + money(t.margin) + ' (' + t.pct + '%)</th></tr></tfoot></table></div>' +
     '<h4>👨‍🍳 Kitchen steps</h4><div style="margin:8px 0 8px">' + steps + '</div>' +
     kitchenDetail(o) +
-    '<div class="pill-row" style="margin:14px 0">' + actions + '</div>' +
     '<h4>📍 Tracking</h4><ul class="timeline" style="margin-top:8px">' + hist + '</ul>');
 }
 
