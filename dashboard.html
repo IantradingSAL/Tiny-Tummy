@@ -1531,7 +1531,7 @@ function ordListView(orders, shown, info) {
     return '<tr class="rowlink" onclick="openOrder(\'' + o.id + '\')">' +
       '<td><b>' + esc(o.code) + '</b><div class="il-sub muted">' + esc(String(o.created).split('-').reverse().join('/')) + (x.since ? ' · ' + ago(x.since) + ' in stage' : '') + '</div>' + (o.batch_lot ? '<code class="lotc">' + esc(o.batch_lot) + '</code>' : '') + '</td>' +
       '<td><b>' + esc(o.customer) + '</b><div class="il-sub muted">' + esc(o.phone || '') + (o.address ? ' · ' + esc(o.address) : '') + '</div>' +
-        (child ? '<div class="il-sub">' + ic('baby') + ' ' + esc(child.name) + '</div>' : '') +
+        (child ? '<div class="il-sub">' + ic('baby') + ' ' + esc(childName(child)) + '</div>' : '') +
         (stop.length ? '<span class="chip alarm">STOP · ' + esc(stop.join(', ')) + '</span>' : '') + '</td>' +
       '<td class="wrap">' + o.items.map(function (it) { var pr = byId(products, it.product); return '<div><b>' + it.qty + '×</b> ' + esc(pr ? pr.name : '?') + '</div>'; }).join('') + '</td>' +
       '<td><span class="ostat" style="--sc:' + m.c + '">' + ic(m.i) + ' ' + m.l + '</span> ' + stockChip(o) + (late ? ' <span class="chip alarm">late</span>' : '') +
@@ -2116,7 +2116,7 @@ function labelHtml(o) {
       '<div class="lb-i"><b>Ingredients:</b> ' + esc(ingr.join(', ') || '—') + '</div>' +
       '<div class="lb-a"><b>Allergens:</b> ' + esc(al.length ? al.join(', ') : 'none in the recipe') + '</div>' +
       '<div class="lb-d"><span>Made ' + dmy(made) + '</span><span><b>Use by ' + dmy(use) + '</b></span></div>' +
-      '<div class="lb-l"><span class="lot">LOT ' + esc(o.batch_lot) + '</span><span>' + esc(o.code) + (child ? ' · ' + esc(child.name) : '') + '</span></div>' +
+      '<div class="lb-l"><span class="lot">LOT ' + esc(o.batch_lot) + '</span><span>' + esc(o.code) + (child ? ' · ' + esc(childName(child)) : '') + '</span></div>' +
       '<div class="lb-k">Keep refrigerated 0–4 °C · eat within 24 h once opened</div></div>');
   });
   return '<!doctype html><html><head><meta charset="utf-8"><title>Labels ' + esc(o.batch_lot) + '</title><style>' +
@@ -2232,11 +2232,11 @@ function qcForm(oid) {
       qcExtra(p).map(function (x, k) { var key = 'p' + i + ':' + k; return '<div class="qc-row" data-qk="' + key + '"><span>' + esc(x) + '</span>' + qcBtns(key) + '</div>'; }).join('') + '</div>';
   }).join('');
   showDlg('<h3>' + ic('shield') + ' Quality check — ' + esc(o.code) + '</h3>' +
-    '<p class="muted">' + esc(o.customer) + (child ? ' · for <b>' + esc(child.name) + '</b>' : '') + ' · press <b>OK</b> on each point once checked</p>' +
+    '<p class="muted">' + esc(o.customer) + (child ? ' · for <b>' + esc(childName(child)) + '</b>' : '') + ' · press <b>OK</b> on each point once checked</p>' +
     (last && !last.pass ? '<div class="qc-warn">' + ic('alarm') + ' Previous check FAILED (' + esc(last.at) + ', ' + esc(last.by) + '): ' + esc(last.reasons.join('; ')) + '</div>' : '') +
     '<div class="qc-lot"><span>Batch lot <b>' + esc(o.batch_lot) + '</b>' + (o.labels ? ' · ' + o.labels.n + ' labels printed ' + esc(o.labels.at) : ' · <b style="color:#b23a48">labels not printed yet</b>') + '</span>' +
       '<button class="btn o s" onclick="printLabels(\'' + oid + '\');setTimeout(function(){qcForm(\'' + oid + '\')},400)">' + ic('receipt') + ' Print labels</button></div>' +
-    (child ? '<div class="qc-al' + (hits.length ? ' bad' : '') + '">' + ic(hits.length ? 'alarm' : 'shield') + ' ' + esc(child.name) + '\'s allergies: <b>' + esc(allergies.length ? allergies.join(', ') : 'none recorded') + '</b>' +
+    (child ? '<div class="qc-al' + (hits.length ? ' bad' : '') + '">' + ic(hits.length ? 'alarm' : 'shield') + ' ' + esc(childName(child)) + ' — allergies: <b>' + esc(allergies.length ? allergies.join(', ') : 'none recorded') + '</b>' +
       (hits.length ? ' — <b>STOP: this order contains ' + esc(hits.join(', ')) + '</b>' : '') + '</div>' : '') +
     '<h4 class="qc-sec">Order checks</h4>' + orderRows +
     '<h4 class="qc-sec">Each product</h4>' + lines +
@@ -5209,6 +5209,14 @@ function decorateKpis(root) {
 }
 /* ── Family Portal link: which child an order is for, allergy checks,
    birthdays (cupcake!), milestones and vaccine reminders ── */
+/* GDPR: a child's name is shown only to a person who holds the "children_view"
+   permission AND has signed the current confidentiality agreement (js/gdpr.js).
+   Everyone else sees a stable code. Allergies stay visible to all — they are a
+   food-safety control (STOP alert, QC). */
+function childCode(c) { var h = 0, s = String(c && c.id || ''); for (var i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0; return 'Child #' + ('000' + h.toString(36).toUpperCase()).slice(-4); }
+function childCanSee() { return typeof window.gdprCanSee === 'function' ? window.gdprCanSee() : false; }
+function childName(c) { return !c ? '' : childCanSee() ? c.name : childCode(c); }
+function childLock() { return childCanSee() ? '' : ' <a href="#" class="muted" style="font-size:.78rem" onclick="event.stopPropagation();gdprExplain();return false" title="Why is the name hidden?">' + ic('lock') + ' name hidden (GDPR)</a>'; }
 function orderChild(o) {
   var oc = store('order_child').all().find(function (x) { return x.id === o.id; });
   return oc ? byId(store('children').all(), oc.child) : null;
@@ -5235,7 +5243,7 @@ function orderAllergens(o, child) {
 function childBlock(o) {
   var c = orderChild(o); if (!c) return '';
   var hits = orderAllergens(o, c);
-  return '<div class="kid-for' + (hits.length ? ' bad' : '') + '">' + ic(hits.length ? 'alert' : 'user') + '<div><b>For ' + esc(c.name) + '</b> · ' + childAgeText(c.dob) +
+  return '<div class="kid-for' + (hits.length ? ' bad' : '') + '">' + ic(hits.length ? 'alert' : 'user') + '<div><b>For ' + esc(childName(c)) + '</b>' + childLock() + ' · ' + childAgeText(c.dob) +
     ((c.allergies || []).length ? ' · allergies: <b>' + esc(c.allergies.join(', ')) + '</b>' : ' · no known allergies') +
     (hits.length ? '<br><b>STOP — this order contains ' + esc(hits.join(', ')) + '.</b> Call the parent before cooking.' : '') + '</div></div>';
 }
@@ -5252,14 +5260,14 @@ function familyAlerts() {
     if (isBirthdayToday(c.dob)) {
       var turns = yr - a.getFullYear();
       var allergy = (c.allergies || []).length ? ' — make it ' + c.allergies.map(function (x) { return x.toLowerCase().replace(/s$/, '') + '-free'; }).join(', ') : '';
-      tips.push('🎂 <b>' + esc(c.name) + '</b> (' + esc(parent) + ') turns ' + turns + ' today — send a birthday cupcake' + esc(allergy) + (f.address ? ' to ' + esc(f.address) : '') + '.');
+      tips.push('🎂 <b>' + esc(childName(c)) + '</b> (' + esc(parent) + ') turns ' + turns + ' today — send a birthday cupcake' + esc(allergy) + (f.address ? ' to ' + esc(f.address) : '') + '.');
       once('bday-' + c.id + '-' + yr, function () {
         pushDemo('Happy birthday, ' + c.name + '! 🎂', c.name + ' turns ' + turns + ' today — huge love from Tiny Tummy. A little cupcake is on its way!', 'Customer · ' + parent);
-        pushDemo('Birthday cupcake to send 🎂', c.name + ' (' + parent + ') turns ' + turns + ' today' + allergy + (f.address ? ' · ' + f.address : ''), 'Role · manager');
-        logAct('Family', 'birthday', c.name + ' turns ' + turns + ' — cupcake alert');
+        pushDemo('Birthday cupcake to send 🎂', childCode(c) + ' (' + parent + ') turns ' + turns + ' today' + allergy + (f.address ? ' · ' + f.address : ''), 'Role · manager');
+        logAct('Family', 'birthday', childCode(c) + ' (' + parent + ') turns ' + turns + ' — cupcake alert');
       });
     } else if (a.getMonth() === tomorrow.getMonth() && a.getDate() === tomorrow.getDate()) {
-      tips.push('🎂 <b>' + esc(c.name) + '</b> (' + esc(parent) + ') has a birthday tomorrow — prepare the cupcake' + ((c.allergies || []).length ? ' (' + esc(c.allergies.map(function (x) { return x.toLowerCase().replace(/s$/, ''); }).join('-free, ')) + '-free)' : '') + '.');
+      tips.push('🎂 <b>' + esc(childName(c)) + '</b> (' + esc(parent) + ') has a birthday tomorrow — prepare the cupcake' + ((c.allergies || []).length ? ' (' + esc(c.allergies.map(function (x) { return x.toLowerCase().replace(/s$/, ''); }).join('-free, ')) + '-free)' : '') + '.');
     }
     [6, 7, 9, 12, 18, 24, 36].forEach(function (m) {
       var d = new Date(a); d.setMonth(d.getMonth() + m);
@@ -5316,6 +5324,7 @@ function syncActAs() {
 <script src="js/ask-ops.js"></script>
 <script src="js/inv-scan.js"></script>
 <script src="js/sup-file.js"></script>
+<script src="js/gdpr.js"></script>
 <script src="js/help.js"></script>
 </body>
 </html>
