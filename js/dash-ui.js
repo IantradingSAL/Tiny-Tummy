@@ -484,7 +484,7 @@
   window.navGroup = function (g) { openG = openG || {}; openG[g] = !isOpen(g); lsSet('ttops_nav_open', openG); buildNav(); };
   function groupOf(m) { for (var i = 0; i < NAV.length; i++) if (NAV[i].items.indexOf(m) >= 0) return NAV[i].g; return ''; }
   function isOpen(g) { if (!g || navQ) return true; if (g === groupOf(current)) return true; return openG ? !!openG[g] : false; }
-  function allowed(m) { var k = MODULE_PERMS[m]; return !k || can(k); }
+  function allowed(m) { return window.pageAllowed(m); }
   function navLink(m, inFav) {
     var L = PAGE_LABEL[m] || { e: '', l: m }, f = favs().indexOf(m) >= 0;
     return '<a data-m="' + m + '"' + (m === current ? ' class="active"' : '') + '><span>' + L.e + '</span><em>' + esc(L.l) + '</em>' +

@@ -1331,10 +1331,13 @@ document.querySelectorAll('#sidenav a').forEach(function (a) {
   a.addEventListener('click', function () { nav(a.dataset.m); });
 });
 
+/* May this person open page m? Default: the page's permission (MODULE_PERMS).
+   js/access.js adds page access per role and per person on top. */
+function pageAllowed(m) { var k = MODULE_PERMS[m]; return !k || can(k); }
 function guard(m) {
   var k = MODULE_PERMS[m];
-  if (!k || can(k)) return null;
-  return '<div class="panel"><h3>🔒 No access</h3><p class="muted">Your role (<b>' + esc(currentUser().role) + '</b>) does not hold the <code>' + esc(k) + '</code> permission. A super admin can grant it per role or per person in <b>Users · Roles</b> — same idea as the municipality build: one permission key per capability, role default plus per-person override.</p></div>';
+  if (window.pageAllowed(m)) return null;
+  return '<div class="panel"><h3>🔒 No access</h3><p class="muted">Your role (<b>' + esc(currentUser().role) + '</b>) and your own access do not include this page' + (k ? ' (permission <code>' + esc(k) + '</code>)' : '') + '. A super admin can open it per role or per person in <b>Team &amp; Access → Page access</b>.</p></div>';
 }
 
 /* ═════════ RENDERERS ═════════ */
@@ -5325,6 +5328,7 @@ function syncActAs() {
 <script src="js/inv-scan.js"></script>
 <script src="js/sup-file.js"></script>
 <script src="js/gdpr.js"></script>
+<script src="js/access.js"></script>
 <script src="js/help.js"></script>
 </body>
 </html>

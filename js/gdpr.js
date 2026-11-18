@@ -7,7 +7,7 @@
    are a food-safety control (STOP alert, QC, labels). Signed agreements are kept (who, version,
    date, typed name, signature), can be printed, and can be revoked — revoking hides the names again.
    Team & Access → "GDPR agreements" lists every person, their permission and signature.
-   Loaded after js/dash-ui.js. Server side: supabase/schema4_gdpr.sql. */
+   Loaded after js/dash-ui.js. Server side: supabase/schema4_access_gdpr.sql. */
 (function () {
   'use strict';
   if (typeof store !== 'function') return;
