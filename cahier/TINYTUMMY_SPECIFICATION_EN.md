@@ -141,7 +141,7 @@ The menu is grouped by trade:
 | Group | Module | Purpose |
 |---|---|---|
 | — | Overview | Today across the operation, advisor tips, records waiting for me |
-| Sales | Orders | Order pipeline, stage board, kanban / list |
+| Sales | Orders | Order pipeline: stage tiles, Board, and List (search, period, driver, sort; customer, child and allergy STOP, items, stage, kitchen progress, batch lot, driver and ETA, value, cost, margin; totals; CSV; link to the stock the order used) |
 | Sales | Age Programs | Programmes by age of the child |
 | Production | Kitchen | Production steps, timers, stations |
 | Production | Recipes · BOM | Ingredients, process steps, full cost |
@@ -313,6 +313,7 @@ Each order, client, recipe or ingredient in the answer is a link to it.
 - Ask me for staff: my orders, delivered today, what to prepare, ready / on the road / late, a client, a product, an ingredient or an order number — with links that open the page, order, client or item (18/11/2026).
 - Cahier des charges moved from the public home page into the dashboard (System → Cahier des charges), with its own permission, cards and list views (18/11/2026).
 - Inventory: stock ledger of every movement, List view with stock counts, consumption Report by item / order / person / day / month, CSV export (18/11/2026).
+- Orders: professional List view (filters, kitchen progress, batch lot, driver and ETA, value, cost and margin, totals, CSV, stock used by the order) (18/11/2026).
 
 ### V1.0 — 28/08/2026 (platform launch)
 

@@ -155,7 +155,7 @@ Le menu est regroupé par métier :
 | Groupe | Module | Rôle |
 |---|---|---|
 | — | Vue d'ensemble | La journée sur toute l'activité, conseils, dossiers en attente pour moi |
-| Ventes | Commandes | Circuit des commandes, tableau par étape, kanban / liste |
+| Ventes | Commandes | Circuit des commandes : étapes, vue Tableau et vue Liste (recherche, période, livreur, tri ; client, enfant et STOP allergie, articles, étape, avancement cuisine, lot, livreur et heure d'arrivée, valeur, coût, marge ; totaux ; CSV ; lien vers le stock utilisé par la commande) |
 | Ventes | Programmes par âge | Programmes selon l'âge de l'enfant |
 | Production | Cuisine | Étapes de production, minuteurs, postes |
 | Production | Recettes · BOM | Ingrédients, étapes, coût complet |
@@ -344,6 +344,7 @@ Chaque commande, client, recette ou ingrédient de la réponse est un lien.
 - Ask me pour le personnel : mes commandes, livrées aujourd'hui, à préparer, prêtes / en route / en retard, un client, un produit, un ingrédient ou un numéro de commande — avec des liens qui ouvrent la page, la commande, la fiche client ou l'article (18/11/2026).
 - Le cahier des charges quitte la page d'accueil publique pour le tableau de bord (Système → Cahier des charges), avec son propre droit d'accès, vues cartes et liste (18/11/2026).
 - Stock : journal de tous les mouvements, vue Liste avec comptages, Rapport de consommation par article / commande / personne / jour / mois, export CSV (18/11/2026).
+- Commandes : vue Liste complète (filtres, avancement cuisine, lot, livreur et heure d'arrivée, valeur, coût et marge, totaux, CSV, stock utilisé par la commande) (18/11/2026).
 
 ### V1.0 — 28/08/2026 (lancement de la plateforme)
 

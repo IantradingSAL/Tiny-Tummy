@@ -566,6 +566,10 @@ table.pm tfoot td { font-size:.74rem; font-weight:700; color:var(--soft); border
 .il-bar span { position:absolute; top:-3px; width:2px; height:11px; background:#17455e; opacity:.55; }
 .il-cnt { display:flex; gap:4px; align-items:center; }
 .il-cnt input { width:78px; padding:6px 8px; border:1px solid #d9e2e7; border-radius:8px; font:inherit; }
+.ol-bar { display:block; width:90px; }
+.t.ol td { padding-top:12px; padding-bottom:12px; }
+.t.ol td .il-sub { white-space:normal; max-width:220px; }
+.t.ol td:nth-child(2) .il-sub.muted { max-width:200px; }
 .il-acts { display:flex; gap:6px; align-items:center; justify-content:flex-end; flex-wrap:nowrap; } .il-acts > * { margin:0 !important; flex:none; }
 .t.il tfoot td, .t.lg tfoot td { background:#f6f2e8; border-top:2px solid #e7e1d2; }
 .lg-f { display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin:0 0 12px; }
@@ -1401,7 +1405,95 @@ var STAGE_META = {
   'delivered':  { l: 'Delivered',   i: 'flag',     c: '#2e8770' },
   'cancelled':  { l: 'Cancelled',   i: 'ban',      c: '#8a979e' }
 };
-var OV = { view: 'board', stage: 'all' };
+var OV = { view: (function () { try { return localStorage.getItem('ttops_orders_view') || 'board'; } catch (e) { return 'board'; } })(), stage: 'all' };
+/* Orders · List view: filters, full columns, totals, CSV */
+var OL = { q: '', period: 'all', agent: 'all', sort: 'new' };
+function olSet(k, v) { OL[k] = v; render(); }
+function olRows(orders, shown, info) {
+  var q = OL.q.trim().toLowerCase(), from = OL.period === 'all' ? '' : today(-Number(OL.period));
+  var rows = shown.filter(function (o) {
+    if (from && o.created < from) return false;
+    if (OL.agent !== 'all' && (OL.agent === '__none__' ? o.agent : o.agent !== OL.agent)) return false;
+    if (q) { var x = info(o); if ([o.code, o.customer, o.phone, o.address, x.items, o.batch_lot || ''].join(' ').toLowerCase().indexOf(q) < 0) return false; }
+    return true;
+  });
+  var key = {
+    'new': function (o) { return -((o.stage_times && o.stage_times['new']) || new Date(o.created + 'T12:00:00').getTime()); },
+    value: function (o) { return -info(o).t.rev; },
+    stage: function (o) { return PIPELINE.indexOf(o.status); },
+    customer: function (o) { return String(o.customer).toLowerCase(); }
+  }[OL.sort];
+  return rows.sort(function (a, b) { var x = key(a), y = key(b); return x < y ? -1 : x > y ? 1 : 0; });
+}
+function ordListView(orders, shown, info) {
+  var agents = store('agents').all(), products = store('products').all(), rows = olRows(orders, shown, info), now = Date.now();
+  function opt(v, l, cur) { return '<option value="' + esc(v) + '"' + (cur === v ? ' selected' : '') + '>' + esc(l) + '</option>'; }
+  var filters = '<div class="lg-f">' +
+    '<div class="u-search" style="margin:0"><span>' + ic('search') + '</span><input placeholder="Search order, customer, phone, item, lot…" value="' + esc(OL.q) + '" onchange="olSet(\'q\',this.value)"></div>' +
+    '<span class="lg-q">' + [['all', 'All'], ['0', 'Today'], ['7', '7 d'], ['30', '30 d']].map(function (x) {
+      return '<button class="' + (OL.period === x[0] ? 'on' : '') + '" onclick="olSet(\'period\',\'' + x[0] + '\')">' + x[1] + '</button>';
+    }).join('') + '</span>' +
+    '<select onchange="olSet(\'agent\',this.value)">' + opt('all', 'All drivers', OL.agent) + opt('__none__', 'No driver yet', OL.agent) +
+      agents.map(function (a) { return opt(a.id, a.name, OL.agent); }).join('') + '</select>' +
+    '<select onchange="olSet(\'sort\',this.value)">' + opt('new', 'Newest first', OL.sort) + opt('stage', 'By stage', OL.sort) +
+      opt('value', 'Highest value', OL.sort) + opt('customer', 'Customer A–Z', OL.sort) + '</select>' +
+    '<button class="btn o s" onclick="olCsv()">' + ic('save') + ' CSV</button></div>';
+  var tot = { rev: 0, cost: 0 };
+  var body = rows.map(function (o) {
+    var x = info(o), m = STAGE_META[o.status] || STAGE_META.cancelled;
+    tot.rev += x.t.rev; tot.cost += x.t.cost;
+    var child = typeof orderChild === 'function' ? orderChild(o) : null;
+    var stop = child && typeof orderAllergens === 'function' ? orderAllergens(o, child) : [];
+    var prog = '<span class="muted">—</span>';
+    if (['confirmed', 'kitchen', 'portioning', 'qc'].indexOf(o.status) >= 0) {
+      var defs = stepDefs(o), dn = defs.filter(function (d) { var y = o.steps.find(function (z) { return z.s === d.name; }); return y && y.done; }).length;
+      var who = {}; o.steps.forEach(function (z) { if (z.assigned && !z.done) who[z.assigned] = 1; });
+      prog = '<span class="stp-bar ol-bar"><i style="width:' + (defs.length ? Math.round(dn / defs.length * 100) : 0) + '%"></i></span>' +
+        '<div class="il-sub">' + dn + '/' + defs.length + ' steps' + (Object.keys(who).length ? ' · ' + Object.keys(who).slice(0, 2).map(esc).join(', ') : '') + '</div>';
+    } else if (['dispatch', 'delivering', 'delivered'].indexOf(o.status) >= 0) prog = '<span class="il-sub">' + ic('check') + ' kitchen done</span>';
+    var late = (o.kitchen_due && now > o.kitchen_due && ['kitchen', 'portioning', 'qc'].indexOf(o.status) >= 0) ||
+      (o.track && o.status === 'delivering' && (o.track.delayed || o.track.promised < now));
+    var drv = x.ag ? esc(x.ag) + (o.track && o.status === 'delivering' ? '<div class="il-sub muted">ETA ' + o.track.eta_min + ' min · ' + o.track.km + ' km</div>' : '') : '<span class="muted">—</span>';
+    var pctC = x.t.pct >= 50 ? '#2e8770' : x.t.pct >= 30 ? '#c98a1b' : '#b23a48';
+    return '<tr class="rowlink" onclick="openOrder(\'' + o.id + '\')">' +
+      '<td><b>' + esc(o.code) + '</b><div class="il-sub muted">' + esc(String(o.created).split('-').reverse().join('/')) + (x.since ? ' · ' + ago(x.since) + ' in stage' : '') + '</div>' + (o.batch_lot ? '<code class="lotc">' + esc(o.batch_lot) + '</code>' : '') + '</td>' +
+      '<td><b>' + esc(o.customer) + '</b><div class="il-sub muted">' + esc(o.phone || '') + (o.address ? ' · ' + esc(o.address) : '') + '</div>' +
+        (child ? '<div class="il-sub">' + ic('baby') + ' ' + esc(child.name) + '</div>' : '') +
+        (stop.length ? '<span class="chip alarm">STOP · ' + esc(stop.join(', ')) + '</span>' : '') + '</td>' +
+      '<td class="wrap">' + o.items.map(function (it) { var pr = byId(products, it.product); return '<div><b>' + it.qty + '×</b> ' + esc(pr ? pr.name : '?') + '</div>'; }).join('') + '</td>' +
+      '<td><span class="ostat" style="--sc:' + m.c + '">' + ic(m.i) + ' ' + m.l + '</span>' + (late ? ' <span class="chip alarm">late</span>' : '') +
+        '<div style="margin-top:4px">' + stagePips(o) + '</div></td>' +
+      '<td>' + prog + '</td>' +
+      '<td>' + drv + '</td>' +
+      '<td class="num"><b>' + money(x.t.rev) + '</b><div class="il-sub muted">cost ' + money(x.t.cost) + '</div></td>' +
+      '<td class="num"><span class="ostat" style="--sc:' + pctC + '">' + x.t.pct + '%</span></td>' +
+      '<td><div class="il-acts"><button class="u-ib" title="Stock used by this order (ledger)" onclick="event.stopPropagation();ordLedger(\'' + esc(o.code) + '\')">' + ic('history') + '</button>' +
+        '<button class="btn p s" onclick="event.stopPropagation();openOrder(\'' + o.id + '\')">Open</button></div></td></tr>';
+  }).join('');
+  var pct = tot.rev ? Math.round((tot.rev - tot.cost) / tot.rev * 100) : 0;
+  return filters + '<div class="panel" style="padding:0;overflow:hidden"><div class="tbl-scroll"><table class="t reg il ol"><thead><tr>' +
+    '<th>Order</th><th>Customer</th><th>Items</th><th>Stage</th><th>Kitchen</th><th>Driver</th><th class="num">Value</th><th class="num">Margin</th><th></th></tr></thead><tbody>' +
+    (body || '<tr><td colspan="9" class="muted" style="text-align:center;padding:26px">No orders match these filters.</td></tr>') + '</tbody>' +
+    '<tfoot><tr><td><b>' + rows.length + ' order' + (rows.length === 1 ? '' : 's') + '</b></td><td colspan="5"></td>' +
+    '<td class="num"><b>' + money(tot.rev) + '</b><div class="il-sub muted">cost ' + money(tot.cost) + '</div></td><td class="num"><b>' + pct + '%</b></td><td></td></tr></tfoot></table></div></div>';
+}
+function ordLedger(code) { lgReset(); LG.order = code; invTab = 'ledger'; nav('inventory'); }
+function olCsv() {
+  var orders = store('orders').all(), products = store('products').all(), bom = store('bom').all(), ings = store('ingredients').all(), agents = store('agents').all();
+  var info = function (o) {
+    return { t: orderTotals(o, products, bom, ings), ag: o.agent ? (byId(agents, o.agent) || {}).name : '',
+      items: o.items.map(function (i) { var p = byId(products, i.product); return i.qty + 'x ' + (p ? p.name : '?'); }).join(', ') };
+  };
+  var shown = orders.filter(function (o) { return OV.stage === 'all' || o.status === OV.stage; });
+  var lines = [['Order', 'Date', 'Customer', 'Phone', 'Address', 'Items', 'Stage', 'Batch lot', 'Driver', 'Value', 'Cost', 'Margin %']].concat(olRows(orders, shown, info).map(function (o) {
+    var x = info(o);
+    return [o.code, o.created, o.customer, o.phone, o.address, x.items, (STAGE_META[o.status] || {}).l || o.status, o.batch_lot || '', x.ag, r3(x.t.rev), r3(x.t.cost), x.t.pct];
+  })).map(function (r) { return r.map(function (c) { c = String(c == null ? '' : c); return /[",;\n]/.test(c) ? '"' + c.replace(/"/g, '""') + '"' : c; }).join(','); }).join('\n');
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob(['﻿' + lines], { type: 'text/csv;charset=utf-8' }));
+  a.download = 'tinytummy-orders-' + today(0) + '.csv'; a.click();
+  logAct('Orders', 'list export', olRows(orders, shown, info).length + ' orders');
+}
 function ago(ts) {
   if (!ts) return '';
   var m = Math.max(0, Math.round((Date.now() - ts) / 60000));
@@ -1413,7 +1505,7 @@ function stagePips(o) {
     return '<i class="' + (o.status === 'cancelled' ? '' : i < cur || o.status === 'delivered' ? 'd' : i === cur ? 'n' : '') + '"></i>';
   }).join('') + '</span>';
 }
-function ordView(v) { OV.view = v; render(); }
+function ordView(v) { OV.view = v; try { localStorage.setItem('ttops_orders_view', v); } catch (e) {} render(); }
 function ordStage(st) { OV.stage = (OV.stage === st ? 'all' : st); render(); }
 RENDER.orders = function () {
   autoAssignAll();
@@ -1459,21 +1551,7 @@ RENDER.orders = function () {
         (cards || '<div class="ocol-empty">No orders</div>') + '</div>';
     }).join('');
     body = '<div class="oboard">' + cols + '</div>';
-  } else {
-    var rows = shown.map(function (o) {
-      var x = info(o), m = STAGE_META[o.status] || STAGE_META.cancelled;
-      return '<tr class="rowlink" onclick="openOrder(\'' + o.id + '\')"><td><b>' + esc(o.code) + '</b><br><span class="muted">' + esc(o.created) + '</span></td>' +
-        '<td>' + esc(o.customer) + '<br><span class="muted">' + esc(o.phone) + '</span></td>' +
-        '<td class="wrap">' + esc(x.items) + '</td>' +
-        '<td><span class="ostat" style="--sc:' + m.c + '">' + ic(m.i) + ' ' + m.l + '</span><br>' + stagePips(o) +
-        (x.since ? ' <span class="muted">' + ago(x.since) + '</span>' : '') + (x.ag ? '<br><span class="muted">' + ic('truck') + ' ' + esc(x.ag) + '</span>' : '') + '</td>' +
-        '<td class="num">' + money(x.t.rev) + '<br><span class="muted">' + x.t.pct + '% margin</span></td>' +
-        '<td><button class="btn p s" onclick="event.stopPropagation();openOrder(\'' + o.id + '\')">Open</button></td></tr>';
-    }).join('');
-    body = '<div class="panel"><div class="tbl-scroll"><table class="t reg"><thead><tr>' +
-      '<th>Order</th><th>Customer</th><th>Items</th><th>Status</th><th class="num">Value</th><th></th>' +
-      '</tr></thead><tbody>' + (rows || '<tr><td colspan="6" class="muted" style="text-align:center;padding:24px">No orders in this stage</td></tr>') + '</tbody></table></div></div>';
-  }
+  } else body = ordListView(orders, shown, info);
   return '<div class="pagehead"><div><h1>Orders</h1><div class="sub">Every order from the moment it is placed until it is delivered — tap a stage to filter, tap an order to open it.</div></div>' +
     '<button class="btn p" onclick="newOrder()">' + ic('plus') + ' New order</button></div>' +
     '<div class="otiles">' + tiles + '</div>' +
