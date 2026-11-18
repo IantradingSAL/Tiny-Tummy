@@ -223,6 +223,14 @@ Each order, client, recipe or ingredient in the answer is a link to it.
    re-balance.
    Confirmed orders wait in **Kitchen → Waiting to be sent to the kitchen**
    until someone presses **Send to kitchen** there or on the order.
+   **Stock check.** When an order is placed and when it is confirmed, the
+   recipe quantities are checked against the stock (lots not expired, minus
+   what orders confirmed earlier need). If anything is short, a purchase
+   requisition opens automatically for the missing quantity (marked *for*
+   the order), the order shows *Waiting for stock* with what is missing, and
+   **Send to kitchen is blocked**; only a super admin can send it anyway
+   (recorded). When the stock is received the order is released by itself
+   and the kitchen is told.
 3. Entering the kitchen **consumes stock FEFO** (first-expired, first-out)
    from the recipe's ingredient lines, logged lot by lot.
 4. **Quality gates** (see §7), portioning, final QC; a **batch lot label**
@@ -389,6 +397,7 @@ Each order, client, recipe or ingredient in the answer is a link to it.
 - Kitchen done → QC with steps still open asks first and closes them in the person's name; an order that has left the kitchen never keeps open steps; a cook or chill step closed without its temperature is flagged "CCP not recorded" in the order history (18/11/2026).
 - QC form before dispatch (checks, weight ±5 %, temperature ≤ 5 °C, child's allergies, signature; FAIL keeps the order at QC); batch lot created at Pack with one printable label per portion (18/11/2026).
 - Menu: group headers without counts (18/11/2026).
+- Orders: stock check when placed and confirmed; a shortfall opens a purchase requisition for the order and blocks Send to kitchen until received (super admin override recorded); released automatically on receipt (18/11/2026).
 
 ### V1.1 — from 01/11/2026 to 18/11/2026 (live on 18/11/2026)
 

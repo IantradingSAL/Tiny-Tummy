@@ -246,6 +246,14 @@ Chaque commande, client, recette ou ingrédient de la réponse est un lien.
    responsable peut modifier ou rééquilibrer.
    Les commandes confirmées attendent dans **Cuisine → En attente d'envoi en
    cuisine** jusqu'au clic sur **Envoyer en cuisine**, là ou sur la commande.
+   **Contrôle du stock.** À la prise de commande et à la confirmation, les
+   quantités de la recette sont comparées au stock (lots non périmés, moins ce
+   que demandent les commandes confirmées avant). S'il manque quelque chose,
+   une réquisition d'achat s'ouvre automatiquement pour la quantité manquante
+   (marquée *pour* la commande), la commande affiche *En attente de stock*
+   avec ce qui manque, et **l'envoi en cuisine est bloqué** ; seul un super
+   administrateur peut l'envoyer quand même (tracé). À la réception du stock,
+   la commande est libérée d'elle-même et la cuisine est prévenue.
 3. L'entrée en cuisine **sort le stock en FEFO** (premier périmé, premier
    sorti) selon les lignes d'ingrédients de la recette, lot par lot, avec
    trace.
@@ -431,6 +439,7 @@ Chaque commande, client, recette ou ingrédient de la réponse est un lien.
 - Cuisine terminée → CQ avec des étapes encore ouvertes demande confirmation et les clôture au nom de la personne ; une commande sortie de la cuisine ne garde jamais d'étape ouverte ; une cuisson ou un refroidissement clos sans température est signalé « CCP non enregistré » dans l'historique de la commande (18/11/2026).
 - Formulaire CQ avant expédition (contrôles, poids ±5 %, température ≤ 5 °C, allergies de l'enfant, signature ; NON CONFORME garde la commande au CQ) ; lot créé au Conditionnement avec une étiquette imprimable par portion (18/11/2026).
 - Menu : titres de groupes sans compteur (18/11/2026).
+- Commandes : contrôle du stock à la prise de commande et à la confirmation ; un manque ouvre une réquisition d'achat pour la commande et bloque l'envoi en cuisine jusqu'à réception (dérogation super administrateur tracée) ; libération automatique à la réception (18/11/2026).
 
 ### V1.1 — du 01/11/2026 au 18/11/2026 (mise en service le 18/11/2026)
 

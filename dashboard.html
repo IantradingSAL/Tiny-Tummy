@@ -595,6 +595,9 @@ table.pm tfoot td { font-size:.74rem; font-weight:700; color:var(--soft); border
 .qc-lot { background:#eef4f7; } .qc-lot .btn { margin-left:auto; }
 .qc-al { background:#e6f4ef; color:#226a58; } .qc-al.bad, .qc-warn, .qc-sum.bad { background:#fdeaea; color:#b23a48; }
 .qc-sum.ok { background:#e6f4ef; color:#226a58; }
+.stk-b { display:flex; gap:10px; align-items:flex-start; background:#fdeaea; color:#7d2330; border:1px solid #f3c4ca; border-radius:12px; padding:10px 12px; margin:12px 0 4px; font-size:.88rem; }
+.stk-b > .i { color:#b23a48; margin-top:3px; } .stk-b ul { margin:4px 0 4px 18px; } .stk-b small { color:#8a4a52; }
+.btn[disabled] { opacity:.65; cursor:not-allowed; }
 .o-next { display:flex; align-items:center; gap:12px; flex-wrap:wrap; background:#fff7e6; border:1px solid #f3dcae; border-radius:12px; padding:10px 12px; margin:12px 0 4px; }
 .o-next-l { font-size:.7rem; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:#a3720d; }
 .o-next .pill-row { margin:0; }
@@ -1498,7 +1501,7 @@ function ordListView(orders, shown, info) {
         (child ? '<div class="il-sub">' + ic('baby') + ' ' + esc(child.name) + '</div>' : '') +
         (stop.length ? '<span class="chip alarm">STOP · ' + esc(stop.join(', ')) + '</span>' : '') + '</td>' +
       '<td class="wrap">' + o.items.map(function (it) { var pr = byId(products, it.product); return '<div><b>' + it.qty + '×</b> ' + esc(pr ? pr.name : '?') + '</div>'; }).join('') + '</td>' +
-      '<td><span class="ostat" style="--sc:' + m.c + '">' + ic(m.i) + ' ' + m.l + '</span>' + (late ? ' <span class="chip alarm">late</span>' : '') +
+      '<td><span class="ostat" style="--sc:' + m.c + '">' + ic(m.i) + ' ' + m.l + '</span> ' + stockChip(o) + (late ? ' <span class="chip alarm">late</span>' : '') +
         '<div style="margin-top:4px">' + stagePips(o) + '</div></td>' +
       '<td>' + prog + '</td>' +
       '<td>' + drv + '</td>' +
@@ -1579,7 +1582,7 @@ RENDER.orders = function () {
         }
         var late = o.kitchen_due && Date.now() > o.kitchen_due && ['kitchen', 'portioning'].indexOf(o.status) >= 0;
         return '<div class="ocard" onclick="openOrder(\'' + o.id + '\')">' +
-          '<div class="oc-top"><b>' + esc(o.code) + '</b>' + (late ? '<span class="chip alarm">late</span>' : x.since ? '<small>' + ic('timer') + ' ' + ago(x.since) + '</small>' : '') + '</div>' +
+          '<div class="oc-top"><b>' + esc(o.code) + '</b>' + (late ? '<span class="chip alarm">late</span>' : x.since ? '<small>' + ic('timer') + ' ' + ago(x.since) + '</small>' : '') + '</div>' + stockChip(o) +
           '<div class="oc-cust">' + ic('user') + ' ' + esc(o.customer) + '</div>' +
           '<div class="oc-items">' + esc(x.items) + '</div>' + steps +
           '<div class="oc-foot"><b>' + money(x.t.rev) + '</b>' + (x.ag ? '<small>' + ic('truck') + ' ' + esc(x.ag) + '</small>' : '<small>' + esc(o.created) + '</small>') + '</div>' +
@@ -1611,6 +1614,10 @@ var NEXT_STEP = {
 };
 function nextStepBtn(o) {
   var n = NEXT_STEP[o.status]; if (!n) return '';
+  if (o.status === 'confirmed' && o.stock_short && o.stock_short.length) {
+    if (currentUser().role !== 'super_admin') return '<button class="btn o s" disabled title="Waiting for stock — released automatically when received">' + ic('lock') + ' Waiting for stock</button>';
+    return '<button class="btn r s" title="Not enough stock — super admin override" onclick="event.stopPropagation();orderStep(\'' + o.id + '\')">' + ic('lock') + ' Send anyway</button>';
+  }
   return '<button class="btn ' + n[3] + ' s" title="Next step: ' + n[1] + '" onclick="event.stopPropagation();orderStep(\'' + o.id + '\')">' + ic(n[2]) + ' ' + n[1] + '</button>';
 }
 function orderStep(oid) {
@@ -1638,14 +1645,15 @@ function kitchenWaiting(products) {
       var child = typeof orderChild === 'function' ? orderChild(o) : null, stop = child && typeof orderAllergens === 'function' ? orderAllergens(o, child) : [];
       return '<div class="ia"><span class="ia-i">' + ic('chef') + '</span><div><b>' + esc(o.code) + '</b> · ' + esc(o.customer) + ' — ' +
         o.items.map(function (it) { var p = byId(products, it.product); return it.qty + '× ' + esc(p ? p.name : '?'); }).join(', ') +
-        (stop.length ? ' <span class="chip alarm">STOP · ' + esc(stop.join(', ')) + '</span>' : '') +
-        '<small>' + (since ? 'confirmed ' + ago(since) + ' ago · ' : '') + (Object.keys(who).length ? 'team: ' + Object.keys(who).map(esc).join(', ') : 'no one assigned yet') + '</small></div>' +
+        (stop.length ? ' <span class="chip alarm">STOP · ' + esc(stop.join(', ')) + '</span>' : '') + ' ' + stockChip(o) +
+        '<small>' + (o.stock_short && o.stock_short.length ? 'missing: ' + o.stock_short.map(function (s) { return esc(s.name) + ' ' + s.short + ' ' + esc(s.unit); }).join(', ') + ' · ' : '') + (since ? 'confirmed ' + ago(since) + ' ago · ' : '') + (Object.keys(who).length ? 'team: ' + Object.keys(who).map(esc).join(', ') : 'no one assigned yet') + '</small></div>' +
         '<span class="pill-row"><button class="btn o s" onclick="openOrder(\'' + o.id + '\')">Open</button>' + nextStepBtn(o) + '</span></div>';
     }).join('') + '</div>';
 }
 function openOrder(id) {
   autoAssignAll();
   kitchenAuto();
+  stockWatch();
   var orders = store('orders').all(); var o = byId(orders, id); if (!o) return;
   var products = store('products').all(), bom = store('bom').all(), ings = store('ingredients').all(), agents = store('agents').all();
   var t = orderTotals(o, products, bom, ings);
@@ -1662,7 +1670,9 @@ function openOrder(id) {
     .map(function (a) { return '<option value="' + a.id + '"' + ((o.agent || suggestAgent(orders)) === a.id ? ' selected' : '') + '>' + esc(a.name) + '</option>'; }).join('');
   var actions = '';
   if (o.status === 'new') actions = '<button class="btn p" onclick="orderAct(\'' + o.id + '\',\'confirm\')">✓ Confirm order</button>';
-  else if (o.status === 'confirmed') actions = '<button class="btn p" onclick="orderAct(\'' + o.id + '\',\'tokitchen\')">👨‍🍳 Send to kitchen (consume stock FEFO)</button>';
+  else if (o.status === 'confirmed') actions = o.stock_short && o.stock_short.length
+      ? (currentUser().role === 'super_admin' ? '<button class="btn r" onclick="orderAct(\'' + o.id + '\',\'tokitchen\')">' + ic('lock') + ' Send to kitchen anyway (super admin)</button>' : '<button class="btn o" disabled>' + ic('lock') + ' Waiting for stock</button>')
+      : '<button class="btn p" onclick="orderAct(\'' + o.id + '\',\'tokitchen\')">👨‍🍳 Send to kitchen (consume stock FEFO)</button>';
   else if (o.status === 'kitchen' || o.status === 'portioning') actions = '<button class="btn p" onclick="orderAct(\'' + o.id + '\',\'qc\')">🔎 Kitchen done → QC</button>';
   else if (o.status === 'qc') actions = '<button class="btn g" onclick="qcForm(\'' + o.id + '\')">' + ic('shield') + ' QC check → ready to dispatch</button>';
   else if (o.status === 'dispatch') actions = '<select id="dl-agent">' + agentOpts + '</select> <button class="btn p" onclick="orderAct(\'' + o.id + '\',\'dispatch\')">🚚 Dispatch with agent</button>';
@@ -1673,6 +1683,7 @@ function openOrder(id) {
   showDlg('<h3>' + esc(o.code) + ' — ' + esc(o.customer) + ' <span class="chip ' + o.status + '">' + o.status + '</span></h3>' + childBlock(o) +
     '<p class="muted">' + esc(o.phone) + ' · ' + esc(o.address) + '</p>' +
     pipelineStrip(o) +
+    stockBanner(o) +
     (actions ? '<div class="o-next"><span class="o-next-l">Next step</span><div class="pill-row">' + actions + '</div>' +
       (o.batch_lot || ['kitchen', 'portioning', 'qc', 'dispatch'].indexOf(o.status) >= 0 ? '<button class="btn o s o-lbl" onclick="printLabels(\'' + o.id + '\')" title="One label per portion">' + ic('receipt') + ' Print labels' + (o.batch_lot ? ' · ' + esc(o.batch_lot) : '') + '</button>' : '') + '</div>' : '') +
     (o.qc ? '<div class="qc-sum ' + (o.qc.pass ? 'ok' : 'bad') + '">' + ic(o.qc.pass ? 'check' : 'alarm') + ' QC ' + (o.qc.pass ? 'passed' : 'FAILED') + ' · ' + esc(o.qc.at) + ' · ' + esc(o.qc.by) +
@@ -1926,6 +1937,95 @@ function savePortioning(oid, planned, target, stepName) {
   closeDlg(); openOrder(oid); render();
 }
 
+/* ── Stock check for an order ──
+   Need = recipe (BOM) × quantity, in each item's stock unit. Available = lots
+   not expired, minus what orders confirmed earlier (not yet in the kitchen)
+   already need. A shortfall opens a purchase requisition for the missing
+   quantity and blocks "Send to kitchen" until the stock is there; only a super
+   admin may send it anyway (logged). */
+function orderNeeds(o) {
+  var bom = store('bom').all(), ings = store('ingredients').all(), need = {};
+  (o.items || []).forEach(function (it) {
+    bom.forEach(function (b) {
+      if (b.product !== it.product) return;
+      var g = byId(ings, b.ing); if (!g) return;
+      need[b.ing] = (need[b.ing] || 0) + bomLineStockQty(b, g) * it.qty;
+    });
+  });
+  return need;
+}
+function orderQueueTime(o) { return (o.stage_times && (o.stage_times.confirmed || o.stage_times['new'])) || 0; }
+function stockShortages(o) {
+  var orders = store('orders').all(), lots = store('lots').all(), ings = store('ingredients').all(), need = orderNeeds(o);
+  var reserved = {}, mine = orderQueueTime(o) || Date.now();
+  orders.forEach(function (x) {
+    if (x.id === o.id || x.status !== 'confirmed') return;
+    if (orderQueueTime(x) > mine) return; // only orders confirmed before this one come first
+    var n = orderNeeds(x); for (var k in n) reserved[k] = (reserved[k] || 0) + n[k];
+  });
+  var out = [];
+  Object.keys(need).forEach(function (gid) {
+    var g = byId(ings, gid);
+    var have = lots.filter(function (l) { return l.ing === gid && l.qty > 0 && !(l.expiry && l.expiry < today(0)); }).reduce(function (s, l) { return s + l.qty; }, 0);
+    var avail = r3(Math.max(0, have - (reserved[gid] || 0))), n = r3(need[gid]);
+    if (avail + 1e-9 < n) out.push({ ing: gid, name: g ? g.name : gid, unit: g ? g.unit : '', need: n, avail: avail, short: r3(n - avail) });
+  });
+  return out;
+}
+/* open (or top up) a requisition for each missing item; returns the lines written */
+function requisitionShortages(o, shorts) {
+  if (!shorts.length) return [];
+  var reqs = store('requisitions').all(), done = [];
+  shorts.forEach(function (s) {
+    var already = (o.stock_reqs || {})[s.ing] || 0, add = r3(s.short - already);
+    if (add <= 0) return;
+    var open = reqs.map(normReq).filter(function (r) { return r.ing === s.ing && (r.status === 'pending' || r.status === 'approved'); })[0];
+    if (open) { open.qty = r3(open.qty + add); open.note = (open.note ? open.note + ' · ' : '') + '+' + add + ' ' + s.unit + ' for ' + o.code; open.orders = (open.orders || []).concat(o.code); }
+    else reqs.push({ id: uid(), ing: s.ing, qty: add, reason: 'order', orders: [o.code], status: 'pending', created: today(0),
+      note: o.code + ' needs ' + s.need + ' ' + s.unit + ' ' + s.name + ', only ' + s.avail + ' ' + s.unit + ' available' });
+    o.stock_reqs = o.stock_reqs || {}; o.stock_reqs[s.ing] = r3(already + add);
+    done.push(add + ' ' + s.unit + ' ' + s.name);
+  });
+  if (done.length) store('requisitions').save(reqs);
+  return done;
+}
+/* run on a new or confirmed order (o is the object about to be saved) */
+function stockGate(o) {
+  var shorts = stockShortages(o);
+  o.stock_short = shorts;
+  if (!shorts.length) return shorts;
+  var opened = requisitionShortages(o, shorts);
+  o.history.push({ at: nowTs(), what: '⚠ Not enough stock: ' + shorts.map(function (s) { return s.name + ' short ' + s.short + ' ' + s.unit; }).join(', ') +
+    (opened.length ? ' — purchase requisition opened: ' + opened.join(', ') : '') + ' · cannot go to the kitchen until received' });
+  logAct('Orders', 'stock short', o.code + ' · ' + shorts.map(function (s) { return s.name + ' −' + s.short + ' ' + s.unit; }).join(', '));
+  pushDemo('Stock short for ' + o.code + ' 📦', shorts.map(function (s) { return s.name + ' −' + s.short + ' ' + s.unit; }).join(', ') + ' — requisition opened', 'Role · manager');
+  return shorts;
+}
+/* every tick: a waiting order whose stock has arrived is released */
+function stockWatch() {
+  var orders = store('orders').all(), changed = false;
+  orders.forEach(function (o) {
+    if ((o.status !== 'confirmed' && o.status !== 'new') || !(o.stock_short && o.stock_short.length)) return;
+    var s = stockShortages(o);
+    if (s.length) { if (JSON.stringify(s) !== JSON.stringify(o.stock_short)) { o.stock_short = s; changed = true; } return; }
+    o.stock_short = []; changed = true;
+    o.history.push({ at: nowTs(), what: '✓ Stock now available — ready to send to the kitchen' });
+    pushDemo('Stock available ✓', o.code + ' can go to the kitchen', 'Role · kitchen');
+    logAct('Orders', 'stock available', o.code);
+  });
+  if (changed) store('orders').save(orders);
+  return changed;
+}
+function stockBanner(o) {
+  var s = o.stock_short || [];
+  if (!s.length || ['new', 'confirmed'].indexOf(o.status) < 0) return '';
+  return '<div class="stk-b">' + ic('alarm') + '<div><b>Waiting for stock</b> — cannot be sent to the kitchen yet' +
+    '<ul>' + s.map(function (x) { return '<li><b>' + esc(x.name) + '</b>: needs ' + x.need + ' ' + esc(x.unit) + ', available ' + x.avail + ' ' + esc(x.unit) + ' — <b>short ' + x.short + ' ' + esc(x.unit) + '</b></li>'; }).join('') + '</ul>' +
+    '<small>A purchase requisition is open for the missing quantity (' + '<a href="#" onclick="closeDlg();nav(\'requisitions\');return false">Requisitions</a>). The order is released automatically when the stock is received.' +
+    (currentUser().role === 'super_admin' ? ' As super admin you can still send it to the kitchen.' : '') + '</small></div></div>';
+}
+function stockChip(o) { return o.stock_short && o.stock_short.length && ['new', 'confirmed'].indexOf(o.status) >= 0 ? '<span class="chip alarm" title="' + esc(o.stock_short.map(function (s) { return s.name + ' short ' + s.short + ' ' + s.unit; }).join(', ')) + '">' + ic('box') + ' waiting for stock</span>' : ''; }
+
 /* ── Quality control before dispatch + batch lot labels ──
    QC form: every point OK / not OK, a weight sample against the recipe portion
    (±5 %), the product temperature (≤ 5 °C) and the child's allergies; PASS
@@ -2080,8 +2180,17 @@ function orderAct(oid, act) {
   var orders = store('orders').all(); var o = byId(orders, oid); if (!o) return;
   var prevStatus = o.status;
   function log(w) { o.history.push({ at: nowTs(), what: w }); }
-  if (act === 'confirm') { o.status = 'confirmed'; log('Order confirmed'); pushDemo('Order confirmed 🥕', o.code + ' is confirmed and heading to the kitchen', 'Customer · ' + o.customer); }
+  if (act === 'confirm') { o.status = 'confirmed'; o.stage_times = o.stage_times || {}; o.stage_times.confirmed = Date.now(); stockGate(o); log('Order confirmed'); pushDemo('Order confirmed 🥕', o.code + ' is confirmed and heading to the kitchen', 'Customer · ' + o.customer); }
   if (act === 'tokitchen') {
+    var sh = stockShortages(o);
+    if (sh.length) {
+      var miss = sh.map(function (s) { return s.name + ' short ' + s.short + ' ' + s.unit; }).join(', ');
+      if (currentUser().role !== 'super_admin') { alert('Not enough stock — ' + o.code + ' cannot go to the kitchen yet.\n\n' + miss + '\n\nA purchase requisition is open; the order is released when the stock is received. Only a super admin can send it anyway.'); return; }
+      if (!confirm('Not enough stock: ' + miss + '.\n\nSend ' + o.code + ' to the kitchen anyway? (super admin override — recorded)')) return;
+      log('⚠ Sent to the kitchen WITHOUT enough stock — super admin override by ' + currentUser().name + ': ' + miss);
+      logAct('Orders', 'stock override', o.code + ' · ' + miss);
+    }
+    o.stock_short = [];
     var picked = consumeFEFO(o);
     o.status = 'kitchen';
     var plan = orderPlanMin(o, store('products').all().map(normProd));
@@ -2131,6 +2240,7 @@ function saveOrder() {
     phone: document.getElementById('no-phone').value, address: document.getElementById('no-addr').value,
     items: [{ product: document.getElementById('no-prod').value, qty: Number(document.getElementById('no-qty').value) || 1 }],
     status: 'new', agent: null, steps: [], stage_times: { 'new': Date.now() }, history: [{ at: nowTs(), what: 'Order created from dashboard' }], created: today(0) };
+  stockGate(o);
   orders.unshift(o); logAct('Orders', 'create', o.code + ' — ' + o.customer); store('orders').save(orders);
   pushDemo('New order', o.code + ' waiting for confirmation', 'Role · manager');
   closeDlg(); render();
@@ -2359,6 +2469,7 @@ function refreshCountdowns() {
 }
 function kitchenTick() {
   var changed = kitchenAuto();
+  if (stockWatch()) changed = true;
   kitchenBuzz();
   var typing = document.activeElement && /INPUT|SELECT|TEXTAREA/.test(document.activeElement.tagName);
   var dlg = document.getElementById('dlg');

@@ -276,14 +276,15 @@
     var list = ttList({ id: 'requisitions', page: 'requisitions', rows: reqs.slice().reverse(), ph: 'Search item, note…',
       search: function (r) { var g = byId(ings, r.ing); return [g ? g.name : '', r.note, r.status].join(' '); },
       filters: [{ k: 'st', l: 'Status', opts: [['pending', 'Pending'], ['approved', 'Approved'], ['received', 'Received'], ['cancelled', 'Cancelled']], test: function (r, v) { return r.status === v; } },
-                { k: 'why', l: 'Origin', all: 'Auto + manual', opts: [['auto', 'Automatic'], ['manual', 'Manual']], test: function (r, v) { return v === 'auto' ? r.reason === 'auto' : r.reason !== 'auto'; } },
+                { k: 'why', l: 'Origin', all: 'Any origin', opts: [['auto', 'Automatic (below minimum)'], ['order', 'For an order (stock short)'], ['manual', 'Manual']], test: function (r, v) { return v === 'manual' ? (r.reason !== 'auto' && r.reason !== 'order') : r.reason === v; } },
                 { k: 'ing', l: 'Item', opts: ings.map(function (g) { return [g.id, g.name]; }), test: function (r, v) { return r.ing === v; } }],
       cols: [
         { k: 'date', l: 'Date', html: function (r) { return esc(r.created); }, text: function (r) { return r.created; } },
         { k: 'item', l: 'Item', html: function (r) { var g = byId(ings, r.ing); return '<b>' + esc(g ? g.name : '?') + '</b>'; }, text: function (r) { var g = byId(ings, r.ing); return g ? g.name : '?'; } },
         { k: 'qty', l: 'Quantity', num: true, html: function (r) { var g = byId(ings, r.ing); return r.qty + ' ' + (g ? g.unit : ''); }, sort: function (r) { return r.qty; } },
         { k: 'lead', l: 'Lead', num: true, html: function (r) { var g = byId(ings, r.ing); return g ? g.lead + ' d' : '—'; } },
-        { k: 'why', l: 'Origin', html: function (r) { return r.reason === 'auto' ? chipS(ic('zap') + ' Auto', '#7a4aa8') : chipS('Manual', '#64808e'); }, text: function (r) { return r.reason === 'auto' ? 'Auto' : 'Manual'; } },
+        { k: 'why', l: 'Origin', html: function (r) { return r.reason === 'auto' ? chipS(ic('zap') + ' Auto', '#7a4aa8') : r.reason === 'order' ? chipS(ic('cart') + ' For ' + esc((r.orders || []).join(', ')), '#b23a48') : chipS('Manual', '#64808e'); },
+          text: function (r) { return r.reason === 'auto' ? 'Auto' : r.reason === 'order' ? 'For ' + (r.orders || []).join(' ') : 'Manual'; } },
         { k: 'note', l: 'Why', wrap: true, html: function (r) { return '<span class="muted">' + esc(r.note || '') + '</span>'; }, text: function (r) { return r.note || ''; } },
         { k: 'st', l: 'Status', html: function (r) { return chipS(r.status, { pending: '#c98a1b', approved: '#2f6fb0', received: '#2e8770' }[r.status] || '#8a979e'); }, text: function (r) { return r.status; } },
         { k: 'act', l: '', csv: false, sortable: false, html: function (r) { var g = byId(ings, r.ing);
