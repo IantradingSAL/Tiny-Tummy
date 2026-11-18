@@ -501,7 +501,7 @@
       if (!items.length) return;
       if (!G.g) { html += items.filter(function (m) { return q || fav.indexOf(m) < 0; }).map(function (m) { return navLink(m); }).join(''); return; }
       var open = isOpen(G.g), hasCur = items.indexOf(current) >= 0;
-      html += '<button type="button" class="nv-g' + (open ? ' open' : '') + (hasCur ? ' cur' : '') + '" onclick="navGroup(\'' + G.g + '\')">' + esc(G.g) + '<span class="nv-c">' + items.length + '</span><span class="nv-ch">' + (open ? '▾' : '▸') + '</span></button>' +
+      html += '<button type="button" class="nv-g' + (open ? ' open' : '') + (hasCur ? ' cur' : '') + '" onclick="navGroup(\'' + G.g + '\')">' + esc(G.g) + '<span class="nv-ch">' + (open ? '▾' : '▸') + '</span></button>' +
         (open ? '<div class="nv-items">' + items.map(function (m) { return navLink(m); }).join('') + '</div>' : '');
     });
     if (q && !NAV.some(function (G) { return G.items.some(function (m) { return allowed(m) && match(m); }); })) html += '<p class="nv-none">No page matches.</p>';

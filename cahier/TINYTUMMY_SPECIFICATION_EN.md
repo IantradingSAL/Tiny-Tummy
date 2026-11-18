@@ -269,7 +269,7 @@ Each order, client, recipe or ingredient in the answer is a link to it.
 | Cooking (CCP) | Core temperature | ≥ 85 °C | Step cannot close; failure logged, manager alerted |
 | Blast chill (CCP) | Temperature within 90 min | ≤ 5 °C | Step stays open; excursion recorded |
 | Portioning | Portions and average weight vs target | ± 5 % | Recorded; outside tolerance alerts the manager |
-| Final QC | Label vs order, seal, weight, cold chain | Pass | Nothing reaches dispatch without QC signature |
+| Final QC | QC form: label vs order, lot label on every pack, seals, look/smell/texture, child's allergies, packaging and cold box; weight sample; product temperature | Every point OK · weight ± 5 % of the recipe portion · ≤ 5 °C | Order stays at QC, reasons in the history, manager alerted; nothing reaches dispatch without a signed PASS |
 
 - **Timers run by themselves.** When an order is sent to the kitchen its
   first step starts; when a step is done the next one starts, each with its
@@ -281,6 +281,19 @@ Each order, client, recipe or ingredient in the answer is a link to it.
   until the step is done or snoozed; a snooze silences it for 5 minutes, then
   it rings again if the step is still open. Alarms and snoozes go to the order
   history and the Activity Log.
+- **QC form and labels.** *Done* on the QC step, or *QC check* on the order,
+  opens the QC form (only once every other kitchen step is done). It shows the
+  batch lot, whether the labels were printed, and the child's allergies (a
+  STOP if the order contains one). Each point is answered OK / Not OK, the
+  weight sample and the temperature are entered, and the inspector signs:
+  PASS closes the QC step and makes the order ready to dispatch; FAIL keeps
+  it at QC with the reasons. Every check is kept with its answers, values,
+  person and time.
+- **Batch lot and labels.** The batch lot (B-YYYY-NNN-MMDD) is created at the
+  Pack step, or at QC if missing; *Print labels* (Pack step, order window, QC
+  form) prints one label per portion (62 × 40 mm): product, age, net weight,
+  ingredients, allergens found in the recipe, made and use-by dates, lot,
+  order and child, storage line. Printing is recorded.
 - **Whose work.** At the top of Kitchen (Board and List) each cook picks
   **My steps** (or any person, or unassigned steps): only the orders where
   that person has open steps are shown, their own steps outlined.
@@ -374,6 +387,8 @@ Each order, client, recipe or ingredient in the answer is a link to it.
 - Kitchen: steps start automatically one after the other, live countdowns, the buzzer repeats every 30 s while a step is over time with an Over time banner and Snooze 5 min, the order moves to QC by itself when all steps are done; next-step button on each kitchen card (18/11/2026).
 - Kitchen: "Whose work" selector (My steps / a person / unassigned) on Board and List; an order past its due time turns red and rings the buzzer every 30 s, with Snooze 5 min (18/11/2026).
 - Kitchen done → QC with steps still open asks first and closes them in the person's name; an order that has left the kitchen never keeps open steps; a cook or chill step closed without its temperature is flagged "CCP not recorded" in the order history (18/11/2026).
+- QC form before dispatch (checks, weight ±5 %, temperature ≤ 5 °C, child's allergies, signature; FAIL keeps the order at QC); batch lot created at Pack with one printable label per portion (18/11/2026).
+- Menu: group headers without counts (18/11/2026).
 
 ### V1.1 — from 01/11/2026 to 18/11/2026 (live on 18/11/2026)
 

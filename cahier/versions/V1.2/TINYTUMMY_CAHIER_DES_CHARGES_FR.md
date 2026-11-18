@@ -300,7 +300,7 @@ Chaque commande, client, recette ou ingrédient de la réponse est un lien.
 | Cuisson (CCP) | Température à cœur | ≥ 85 °C | L'étape ne se ferme pas ; échec tracé, responsable alerté |
 | Refroidissement rapide (CCP) | Température en moins de 90 min | ≤ 5 °C | L'étape reste ouverte ; écart enregistré |
 | Portionnement | Portions et poids moyen vs objectif | ± 5 % | Enregistré ; hors tolérance, le responsable est alerté |
-| CQ final | Étiquette vs commande, scellé, poids, chaîne du froid | Conforme | Rien ne part sans la signature CQ |
+| CQ final | Formulaire CQ : étiquette vs commande, étiquette de lot sur chaque emballage, scellés, aspect/odeur/texture, allergies de l'enfant, emballage et glacière ; pesée d'échantillon ; température du produit | Tous les points OK · poids ± 5 % de la portion de la recette · ≤ 5 °C | La commande reste au CQ, motifs dans l'historique, responsable alerté ; rien ne part sans un CQ CONFORME signé |
 
 - **Les minuteurs démarrent seuls.** Quand une commande est envoyée en
   cuisine, sa première étape démarre ; quand une étape est terminée, la
@@ -314,6 +314,20 @@ Chaque commande, client, recette ou ingrédient de la réponse est un lien.
   reportée ; un report la coupe 5 minutes, puis elle sonne de nouveau si
   l'étape est toujours ouverte. Alarmes et reports vont à l'historique de la
   commande et au Journal d'activité.
+- **Formulaire CQ et étiquettes.** *Done* sur l'étape CQ, ou *QC check* sur la
+  commande, ouvre le formulaire CQ (seulement quand toutes les autres étapes
+  sont faites). Il montre le lot, si les étiquettes ont été imprimées et les
+  allergies de l'enfant (un STOP si la commande en contient une). Chaque point
+  reçoit OK / Non OK, la pesée et la température sont saisies et le
+  contrôleur signe : CONFORME clôt l'étape CQ et rend la commande prête à
+  expédier ; NON CONFORME la garde au CQ avec les motifs. Chaque contrôle est
+  conservé avec ses réponses, valeurs, personne et heure.
+- **Lot et étiquettes.** Le numéro de lot (B-AAAA-NNN-MMJJ) est créé à l'étape
+  Conditionnement, ou au CQ s'il manque ; *Print labels* (étape
+  Conditionnement, fenêtre de la commande, formulaire CQ) imprime une
+  étiquette par portion (62 × 40 mm) : produit, âge, poids net, ingrédients,
+  allergènes trouvés dans la recette, dates de fabrication et limite, lot,
+  commande et enfant, conservation. L'impression est tracée.
 - **Le travail de qui.** En haut de la Cuisine (Tableau et Liste), chaque
   cuisinier choisit **My steps** (mes étapes), ou une personne, ou les étapes
   sans personne : seules les commandes où cette personne a des étapes
@@ -415,6 +429,8 @@ Chaque commande, client, recette ou ingrédient de la réponse est un lien.
 - Cuisine : les étapes démarrent seules l'une après l'autre, comptes à rebours en direct, l'alarme revient toutes les 30 s tant qu'une étape dépasse son temps avec un bandeau et Snooze 5 min, la commande passe seule au CQ quand toutes les étapes sont faites ; bouton d'étape suivante sur chaque carte en cuisine (18/11/2026).
 - Cuisine : sélecteur « Le travail de qui » (mes étapes / une personne / sans personne) sur Tableau et Liste ; une commande en retard passe au rouge et fait sonner l'alarme toutes les 30 s, avec report de 5 min (18/11/2026).
 - Cuisine terminée → CQ avec des étapes encore ouvertes demande confirmation et les clôture au nom de la personne ; une commande sortie de la cuisine ne garde jamais d'étape ouverte ; une cuisson ou un refroidissement clos sans température est signalé « CCP non enregistré » dans l'historique de la commande (18/11/2026).
+- Formulaire CQ avant expédition (contrôles, poids ±5 %, température ≤ 5 °C, allergies de l'enfant, signature ; NON CONFORME garde la commande au CQ) ; lot créé au Conditionnement avec une étiquette imprimable par portion (18/11/2026).
+- Menu : titres de groupes sans compteur (18/11/2026).
 
 ### V1.1 — du 01/11/2026 au 18/11/2026 (mise en service le 18/11/2026)
 

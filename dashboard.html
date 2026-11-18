@@ -588,6 +588,13 @@ table.pm tfoot td { font-size:.74rem; font-weight:700; color:var(--soft); border
 .panel.k-late { border:2px solid #b23a48; box-shadow:0 0 0 4px rgba(178,58,72,.12); }
 .panel.k-late > .toolbar h3 { color:#b23a48; }
 .stp.mine { box-shadow:0 0 0 2px #f0b64b; background:#fffaf0; }
+.o-lbl { margin-left:auto; }
+.qc-t td:nth-child(2), .qc-t td:nth-child(3), .qc-t th:nth-child(2), .qc-t th:nth-child(3) { text-align:center; width:70px; }
+.qc-t input[type=radio] { width:18px; height:18px; accent-color:#17455e; }
+.qc-lot, .qc-al, .qc-warn, .qc-sum { display:flex; align-items:center; gap:10px; flex-wrap:wrap; border-radius:10px; padding:8px 12px; margin:8px 0; font-size:.88rem; }
+.qc-lot { background:#eef4f7; } .qc-lot .btn { margin-left:auto; }
+.qc-al { background:#e6f4ef; color:#226a58; } .qc-al.bad, .qc-warn, .qc-sum.bad { background:#fdeaea; color:#b23a48; }
+.qc-sum.ok { background:#e6f4ef; color:#226a58; }
 .o-next { display:flex; align-items:center; gap:12px; flex-wrap:wrap; background:#fff7e6; border:1px solid #f3dcae; border-radius:12px; padding:10px 12px; margin:12px 0 4px; }
 .o-next-l { font-size:.7rem; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:#a3720d; }
 .o-next .pill-row { margin:0; }
@@ -878,6 +885,7 @@ function stepKind(name) {
   if (n.indexOf('chill') >= 0 || n.indexOf('freez') >= 0) return 'chill';
   if (n.indexOf('cook') >= 0 || n.indexOf('bake') >= 0 || n.indexOf('boil') >= 0) return 'cook';
   if (n.indexOf('pack') >= 0) return 'pack';
+  if (/\bqc\b|quality/.test(n)) return 'qc';
   return null;
 }
 function orderProduct(o, products) { return byId(products, (o.items[0] || {}).product) || products[0]; }
@@ -1597,7 +1605,7 @@ var NEXT_STEP = {
   confirmed:  ['tokitchen', 'Send to kitchen',   'chef',   'p'],
   kitchen:    ['qc',        'Kitchen done → QC', 'shield', 'p'],
   portioning: ['qc',        'Kitchen done → QC', 'shield', 'p'],
-  qc:         ['qcpass',    'QC pass',           'check',  'g'],
+  qc:         ['qcpass',    'QC check',          'shield', 'g'],
   dispatch:   ['dispatch',  'Dispatch',          'truck',  'p'],
   delivering: ['delivered', 'Delivered',         'flag',   'g']
 };
@@ -1608,6 +1616,7 @@ function nextStepBtn(o) {
 function orderStep(oid) {
   var o = byId(store('orders').all(), oid); if (!o) return;
   var n = NEXT_STEP[o.status]; if (!n) return;
+  if (n[0] === 'qcpass' && !(o.qc && o.qc.pass)) { qcForm(oid); return; }
   if (n[0] === 'dispatch') {
     var ag = suggestAgent();
     if (!ag) { alert('No delivery agent on duty — switch one on in Dispatch · Agents.'); return; }
@@ -1655,7 +1664,7 @@ function openOrder(id) {
   if (o.status === 'new') actions = '<button class="btn p" onclick="orderAct(\'' + o.id + '\',\'confirm\')">✓ Confirm order</button>';
   else if (o.status === 'confirmed') actions = '<button class="btn p" onclick="orderAct(\'' + o.id + '\',\'tokitchen\')">👨‍🍳 Send to kitchen (consume stock FEFO)</button>';
   else if (o.status === 'kitchen' || o.status === 'portioning') actions = '<button class="btn p" onclick="orderAct(\'' + o.id + '\',\'qc\')">🔎 Kitchen done → QC</button>';
-  else if (o.status === 'qc') actions = '<button class="btn g" onclick="orderAct(\'' + o.id + '\',\'qcpass\')">✅ QC pass → ready to dispatch</button>';
+  else if (o.status === 'qc') actions = '<button class="btn g" onclick="qcForm(\'' + o.id + '\')">' + ic('shield') + ' QC check → ready to dispatch</button>';
   else if (o.status === 'dispatch') actions = '<select id="dl-agent">' + agentOpts + '</select> <button class="btn p" onclick="orderAct(\'' + o.id + '\',\'dispatch\')">🚚 Dispatch with agent</button>';
   else if (o.status === 'delivering') actions = '<button class="btn g" onclick="orderAct(\'' + o.id + '\',\'delivered\')">📦 Mark delivered</button>';
   if (o.status !== 'delivered' && o.status !== 'cancelled')
@@ -1664,7 +1673,10 @@ function openOrder(id) {
   showDlg('<h3>' + esc(o.code) + ' — ' + esc(o.customer) + ' <span class="chip ' + o.status + '">' + o.status + '</span></h3>' + childBlock(o) +
     '<p class="muted">' + esc(o.phone) + ' · ' + esc(o.address) + '</p>' +
     pipelineStrip(o) +
-    (actions ? '<div class="o-next"><span class="o-next-l">Next step</span><div class="pill-row">' + actions + '</div></div>' : '') +
+    (actions ? '<div class="o-next"><span class="o-next-l">Next step</span><div class="pill-row">' + actions + '</div>' +
+      (o.batch_lot || ['kitchen', 'portioning', 'qc', 'dispatch'].indexOf(o.status) >= 0 ? '<button class="btn o s o-lbl" onclick="printLabels(\'' + o.id + '\')" title="One label per portion">' + ic('receipt') + ' Print labels' + (o.batch_lot ? ' · ' + esc(o.batch_lot) : '') + '</button>' : '') + '</div>' : '') +
+    (o.qc ? '<div class="qc-sum ' + (o.qc.pass ? 'ok' : 'bad') + '">' + ic(o.qc.pass ? 'check' : 'alarm') + ' QC ' + (o.qc.pass ? 'passed' : 'FAILED') + ' · ' + esc(o.qc.at) + ' · ' + esc(o.qc.by) +
+      ' · ' + o.qc.weight_g + ' g (' + (o.qc.dev_pct >= 0 ? '+' : '') + o.qc.dev_pct + ' %) · ' + o.qc.temp_c + ' °C' + (o.qc.pass ? '' : ' — ' + esc(o.qc.reasons.join('; '))) + '</div>' : '') +
     '<div class="tbl-scroll" style="margin:12px 0"><table class="t"><thead><tr><th>Item</th><th class="num">Qty</th><th class="num">Price</th><th class="num">Cost (BOM)</th><th class="num">Margin</th></tr></thead>' +
     '<tbody>' + items + '</tbody>' +
     '<tfoot><tr><th colspan="2">Totals</th><th class="num">' + money(t.rev) + '</th><th class="num">' + money(t.cost) + '</th><th class="num">' + money(t.margin) + ' (' + t.pct + '%)</th></tr></tfoot></table></div>' +
@@ -1685,6 +1697,8 @@ function stepToggle(oid, idx, checked) {
     alert('🔒 ' + currentUser().name + ' does not have the ' + STATION_ICON[station] + ' ' + station + ' station.\nA super admin or manager can grant it in Users · Roles → Kitchen stations.');
     render(); return;
   }
+  // The QC step is the quality-control form (checks, weight, temperature, lot).
+  if (kind === 'qc' && checked) { qcForm(oid); return; }
   // Portioning-type steps have their own control sheet — checking opens the form.
   if (kind === 'portion' && checked) { portioningForm(oid, step); return; }
   // Cook / chill steps are CCPs: record a measured value against the limit.
@@ -1707,11 +1721,10 @@ function stepToggle(oid, idx, checked) {
   if (st) { st.done = checked; st.by = checked ? currentUser().name : null; st.at = checked ? nowTs() : null; }
   else o.steps.push({ s: step, done: checked, by: currentUser().name, at: nowTs() });
   if (checked) logAct('Kitchen', 'step done', o.code + ' · ' + step);
-  if (kind === 'pack' && checked && !o.batch_lot) {
-    o.batch_lot = 'B-' + o.code.replace('TT-', '') + '-' + today(0).replace(/-/g, '').slice(4);
-    o.history.push({ at: nowTs(), what: 'Batch lot label printed: ' + o.batch_lot });
-  }
+  var askPrint = false;
+  if (kind === 'pack' && checked) askPrint = ensureLot(o) || !o.labels;
   store('orders').save(orders);
+  if (askPrint && confirm('Batch lot ' + o.batch_lot + ' is ready.\nPrint the labels now (one per portion)?')) { printLabels(oid); return; }
   openOrder(oid); render();
 }
 
@@ -1913,6 +1926,156 @@ function savePortioning(oid, planned, target, stepName) {
   closeDlg(); openOrder(oid); render();
 }
 
+/* ── Quality control before dispatch + batch lot labels ──
+   QC form: every point OK / not OK, a weight sample against the recipe portion
+   (±5 %), the product temperature (≤ 5 °C) and the child's allergies; PASS
+   closes the QC step and makes the order ready to dispatch, FAIL keeps it at QC.
+   Labels: one per portion, with the batch lot, dates, ingredients and allergens. */
+var QC_CHECKS = [
+  ['label', 'Label matches the order — product, quantity, child'],
+  ['lot', 'Batch lot label printed and stuck on every pack'],
+  ['seal', 'Every jar / box sealed, no leak, no damage'],
+  ['look', 'Look, smell and texture as expected'],
+  ['allergen', 'No ingredient the child is allergic to'],
+  ['pack', 'Packaging clean, cold box and ice pack ready']
+];
+var QC_TEMP_MAX = 5, QC_WEIGHT_TOL = 5;
+var ALLERGEN_WORDS = [
+  [/milk|labneh|yog|cheese|butter|cream|dairy/i, 'Milk'], [/egg/i, 'Egg'], [/flour|wheat|biscuit|bread|semolina|barley/i, 'Gluten (wheat)'],
+  [/walnut|almond|hazelnut|pistachio|cashew|pecan|nut\b|nuts/i, 'Tree nuts'], [/peanut/i, 'Peanut'], [/sesame|tahini/i, 'Sesame'],
+  [/soy/i, 'Soy'], [/fish|salmon|tuna|cod/i, 'Fish']
+];
+var SHELF_DAYS = { purees: 3, meals: 2, cakes: 3 };
+function productIngredients(pid) {
+  var ings = store('ingredients').all(), seen = {};
+  return store('bom').all().filter(function (b) { return b.product === pid; }).map(function (b) { var g = byId(ings, b.ing); return g ? g.name : ''; })
+    .filter(function (n) { if (!n || seen[n]) return false; seen[n] = 1; return true; });
+}
+function productAllergens(pid) {
+  var out = {};
+  productIngredients(pid).forEach(function (n) { ALLERGEN_WORDS.forEach(function (a) { if (a[0].test(n)) out[a[1]] = 1; }); });
+  return Object.keys(out);
+}
+function ensureLot(o) {
+  if (o.batch_lot) return false;
+  o.batch_lot = 'B-' + o.code.replace('TT-', '') + '-' + today(0).replace(/-/g, '').slice(4);
+  o.history.push({ at: nowTs(), what: 'Batch lot created: ' + o.batch_lot });
+  return true;
+}
+function addDays(iso, n) { var d = new Date(iso + 'T12:00:00'); d.setDate(d.getDate() + n); return d.toISOString().slice(0, 10); }
+function dmy(iso) { return iso.split('-').reverse().join('/'); }
+function labelHtml(o) {
+  var products = store('products').all(), child = typeof orderChild === 'function' ? orderChild(o) : null;
+  var made = (o.stage_times && o.stage_times.kitchen) ? new Date(o.stage_times.kitchen).toISOString().slice(0, 10) : today(0);
+  var labels = [];
+  o.items.forEach(function (it) {
+    var p = byId(products, it.product); if (!p) return;
+    var ingr = productIngredients(p.id), al = productAllergens(p.id), use = addDays(made, p.shelf_days || SHELF_DAYS[p.category] || 3);
+    for (var k = 1; k <= it.qty; k++) labels.push(
+      '<div class="lb"><div class="lb-h"><b>Tiny Tummy</b><span>' + esc(p.age || '') + '</span></div>' +
+      '<div class="lb-p">' + esc(p.name) + '</div>' +
+      '<div class="lb-r"><span>Net ' + (p.portion_g || '—') + ' g</span><span>' + k + '/' + it.qty + '</span></div>' +
+      '<div class="lb-i"><b>Ingredients:</b> ' + esc(ingr.join(', ') || '—') + '</div>' +
+      '<div class="lb-a"><b>Allergens:</b> ' + esc(al.length ? al.join(', ') : 'none in the recipe') + '</div>' +
+      '<div class="lb-d"><span>Made ' + dmy(made) + '</span><span><b>Use by ' + dmy(use) + '</b></span></div>' +
+      '<div class="lb-l"><span class="lot">LOT ' + esc(o.batch_lot) + '</span><span>' + esc(o.code) + (child ? ' · ' + esc(child.name) : '') + '</span></div>' +
+      '<div class="lb-k">Keep refrigerated 0–4 °C · eat within 24 h once opened</div></div>');
+  });
+  return '<!doctype html><html><head><meta charset="utf-8"><title>Labels ' + esc(o.batch_lot) + '</title><style>' +
+    '@page{size:62mm 40mm;margin:0}*{box-sizing:border-box}body{margin:0;font-family:Arial,Helvetica,sans-serif;color:#000}' +
+    '.lb{width:62mm;height:40mm;padding:2mm 2.5mm;page-break-after:always;display:flex;flex-direction:column;gap:.6mm;font-size:6.2pt;line-height:1.15;overflow:hidden}' +
+    '.lb-h{display:flex;justify-content:space-between;font-size:7pt}.lb-p{font-size:10pt;font-weight:bold}.lb-r,.lb-d,.lb-l{display:flex;justify-content:space-between}' +
+    '.lb-i{max-height:7.5mm;overflow:hidden}.lb-a{font-weight:bold}.lot{font-weight:bold;font-size:8pt;border:1px solid #000;padding:0 1.5mm;letter-spacing:.4px}.lb-k{font-size:5.6pt;margin-top:auto}' +
+    '</style></head><body>' + labels.join('') + '</body></html>';
+}
+function printLabels(oid) {
+  var orders = store('orders').all(), o = byId(orders, oid); if (!o) return;
+  ensureLot(o);
+  var n = o.items.reduce(function (s, it) { return s + it.qty; }, 0);
+  o.labels = { at: nowTs(), by: currentUser().name, n: n };
+  o.history.push({ at: nowTs(), what: n + ' label' + (n > 1 ? 's' : '') + ' printed · lot ' + o.batch_lot + ' — ' + currentUser().name });
+  store('orders').save(orders);
+  logAct('Kitchen', 'labels printed', o.code + ' · lot ' + o.batch_lot + ' · ' + n);
+  var f = document.getElementById('lbl-frame');
+  if (!f) { f = document.createElement('iframe'); f.id = 'lbl-frame'; f.style.cssText = 'position:fixed;width:0;height:0;border:0;right:0;bottom:0'; document.body.appendChild(f); }
+  var doc = f.contentWindow.document; doc.open(); doc.write(labelHtml(o)); doc.close();
+  setTimeout(function () { try { f.contentWindow.focus(); f.contentWindow.print(); } catch (e) {} }, 250);
+  uToast(n + ' label' + (n > 1 ? 's' : '') + ' sent to the printer · lot ' + o.batch_lot);
+  var dlg = document.getElementById('dlg'); if (dlg && dlg.open && dlg.dataset.order === oid) openOrder(oid);
+}
+function qcStepName(o) { var d = stepDefs(o).filter(function (x) { return stepKind(x.name) === 'qc'; })[0]; return d ? d.name : null; }
+function qcForm(oid) {
+  var orders = store('orders').all(), o = byId(orders, oid); if (!o) return;
+  var qcName = qcStepName(o);
+  var before = openSteps(o).filter(function (d) { return d.name !== qcName; });
+  if (['kitchen', 'portioning', 'qc'].indexOf(o.status) < 0) { alert('QC is done when the kitchen has finished the order.'); return; }
+  if (before.length) { alert('Finish the kitchen steps first: ' + before.map(function (d) { return d.name; }).join(', ') + '.'); return; }
+  if (ensureLot(o)) store('orders').save(orders);
+  var products = store('products').all(), child = typeof orderChild === 'function' ? orderChild(o) : null;
+  var allergies = child && child.allergies && child.allergies.length ? child.allergies : [];
+  var hits = child && typeof orderAllergens === 'function' ? orderAllergens(o, child) : [];
+  var planned = 0, wsum = 0;
+  o.items.forEach(function (it) { var p = byId(products, it.product); if (p) { planned += it.qty; wsum += (p.portion_g || 0) * it.qty; } });
+  var target = planned ? Math.round(wsum / planned) : 0;
+  var last = (o.qc_checks || []).slice(-1)[0];
+  showDlg('<h3>' + ic('shield') + ' Quality check — ' + esc(o.code) + '</h3>' +
+    '<p class="muted">' + o.items.map(function (it) { var p = byId(products, it.product); return it.qty + '× ' + esc(p ? p.name : '?'); }).join(', ') +
+      ' · ' + esc(o.customer) + (child ? ' · for <b>' + esc(child.name) + '</b>' : '') + '</p>' +
+    (last && !last.pass ? '<div class="qc-warn">' + ic('alarm') + ' Previous check FAILED (' + esc(last.at) + ', ' + esc(last.by) + '): ' + esc(last.reasons.join('; ')) + '</div>' : '') +
+    '<div class="qc-lot"><span>Batch lot <b>' + esc(o.batch_lot) + '</b>' + (o.labels ? ' · ' + o.labels.n + ' labels printed ' + esc(o.labels.at) : ' · <b style="color:#b23a48">labels not printed yet</b>') + '</span>' +
+      '<button class="btn o s" onclick="printLabels(\'' + oid + '\');setTimeout(function(){qcForm(\'' + oid + '\')},400)">' + ic('receipt') + ' Print labels</button></div>' +
+    (child ? '<div class="qc-al' + (hits.length ? ' bad' : '') + '">' + ic(hits.length ? 'alarm' : 'shield') + ' ' + esc(child.name) + '\'s allergies: <b>' + esc(allergies.length ? allergies.join(', ') : 'none recorded') + '</b>' +
+      (hits.length ? ' — <b>STOP: this order contains ' + esc(hits.join(', ')) + '</b>' : '') + '</div>' : '') +
+    '<table class="t qc-t"><thead><tr><th>Check</th><th>OK</th><th>Not OK</th></tr></thead><tbody>' +
+    QC_CHECKS.map(function (c) {
+      var na = c[0] === 'allergen' && !child;
+      return '<tr><td>' + esc(c[1]) + (na ? ' <span class="muted">(no child profile linked)</span>' : '') + '</td>' +
+        '<td><input type="radio" name="qc-' + c[0] + '" value="ok"' + (na ? ' checked' : '') + '></td><td><input type="radio" name="qc-' + c[0] + '" value="no"></td></tr>';
+    }).join('') + '</tbody></table>' +
+    '<div class="frm"><div class="row">' +
+      '<label>Weight sample — average per portion (g)<input id="qc-w" type="number" step="1" placeholder="target ' + target + ' g"><small class="muted">target ' + target + ' g · tolerance ±' + QC_WEIGHT_TOL + ' %</small></label>' +
+      '<label>Product temperature before dispatch (°C)<input id="qc-t" type="number" step="0.1" placeholder="≤ ' + QC_TEMP_MAX + '"><small class="muted">critical limit ≤ ' + QC_TEMP_MAX + ' °C</small></label></div>' +
+      '<label>Notes / corrective action<input id="qc-n" placeholder="optional"></label>' +
+      '<div class="pill-row"><button class="btn g" onclick="saveQc(\'' + oid + '\',' + target + ')">' + ic('check') + ' Sign QC</button>' +
+      '<span class="muted">Signed by <b>' + esc(currentUser().name) + '</b> · ' + esc(nowTs()) + '</span></div></div>');
+}
+function saveQc(oid, target) {
+  var orders = store('orders').all(), o = byId(orders, oid); if (!o) return;
+  var ans = {}, missing = [];
+  QC_CHECKS.forEach(function (c) { var el = document.querySelector('input[name="qc-' + c[0] + '"]:checked'); ans[c[0]] = el ? el.value : ''; if (!el) missing.push(c[1]); });
+  var w = document.getElementById('qc-w').value, tv = document.getElementById('qc-t').value;
+  if (missing.length || w === '' || tv === '') { alert('Answer every check and enter the weight and the temperature.'); return; }
+  w = Number(w); tv = Number(tv);
+  var dev = target ? Math.round((w - target) / target * 100) : 0;
+  var reasons = [];
+  QC_CHECKS.forEach(function (c) { if (ans[c[0]] !== 'ok') reasons.push(c[1]); });
+  if (Math.abs(dev) > QC_WEIGHT_TOL) reasons.push('weight ' + w + ' g (' + (dev > 0 ? '+' : '') + dev + ' % vs ' + target + ' g)');
+  if (tv > QC_TEMP_MAX) reasons.push('temperature ' + tv + ' °C (limit ≤ ' + QC_TEMP_MAX + ' °C)');
+  var child = typeof orderChild === 'function' ? orderChild(o) : null, hits = child && typeof orderAllergens === 'function' ? orderAllergens(o, child) : [];
+  if (hits.length) reasons.push('contains the child\'s allergen: ' + hits.join(', '));
+  var rec = { at: nowTs(), ts: Date.now(), by: currentUser().name, pass: !reasons.length, checks: ans, weight_g: w, target_g: target, dev_pct: dev, temp_c: tv,
+    notes: document.getElementById('qc-n').value || '', lot: o.batch_lot, reasons: reasons };
+  o.qc_checks = (o.qc_checks || []).concat(rec); o.qc = rec;
+  o.stage_times = o.stage_times || {};
+  if (rec.pass) {
+    var qn = qcStepName(o);
+    if (qn) { var s = o.steps.find(function (x) { return x.s === qn; }); if (!s) { s = { s: qn }; o.steps.push(s); } s.done = true; s.by = rec.by; s.at = rec.at; }
+    o.status = 'dispatch'; o.stage_times.dispatch = Date.now();
+    o.history.push({ at: nowTs(), what: 'QC PASSED ✓ — weight ' + w + ' g (' + (dev >= 0 ? '+' : '') + dev + ' %), ' + tv + ' °C, lot ' + o.batch_lot + ' — ' + rec.by + ' · ready to dispatch' });
+    logAct('Kitchen', 'QC passed', o.code + ' · lot ' + o.batch_lot + ' · ' + w + ' g · ' + tv + ' °C');
+    pushDemo('Ready to dispatch 📦', o.code + ' passed QC (lot ' + o.batch_lot + ')', 'Role · delivery');
+    uToast(o.code + ' passed QC — ready to dispatch');
+  } else {
+    if (o.status !== 'qc') { o.status = 'qc'; o.stage_times.qc = Date.now(); }
+    o.history.push({ at: nowTs(), what: 'QC FAILED ✗ — ' + reasons.join('; ') + (rec.notes ? ' · note: ' + rec.notes : '') + ' — ' + rec.by });
+    logAct('Kitchen', 'QC failed', o.code + ' · ' + reasons.join('; '));
+    pushDemo('QC failed 🚨', o.code + ': ' + reasons.join('; '), 'Role · manager');
+    alert('QC FAILED — the order stays at QC.\n\n' + reasons.join('\n') + '\n\nApply the corrective action, then check again.');
+  }
+  store('orders').save(orders);
+  closeDlg(); openOrder(oid); render();
+}
+
 function orderAct(oid, act) {
   var orders = store('orders').all(); var o = byId(orders, oid); if (!o) return;
   var prevStatus = o.status;
@@ -1933,7 +2096,7 @@ function orderAct(oid, act) {
     closeOpenSteps(o, 'closed with Kitchen done → QC');
     o.status = 'qc'; log('Kitchen complete — waiting QC');
   }
-  if (act === 'qcpass') { o.status = 'dispatch'; log('QC passed ✓ ready for dispatch'); }
+  if (act === 'qcpass') { if (!(o.qc && o.qc.pass)) { qcForm(oid); return; } o.status = 'dispatch'; log('QC passed ✓ ready for dispatch'); }
   if (act === 'dispatch') {
     var sel = document.getElementById('dl-agent');
     o.agent = DISPATCH_AGENT || (sel ? sel.value : null) || suggestAgent(orders);
