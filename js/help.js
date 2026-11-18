@@ -101,6 +101,10 @@
     'dash-settings': { title: 'Settings', intro: 'Connection to the database and demo data reset.', qa: [] }
   };
   var DASH_COMMON = [
+    ['How do I save a view?', 'save view filters saved default favourite layout', 'Set the filters and layout you want, then press <b>Save view</b> and give it a name. Pick it again from <b>Saved views</b>; the star makes it the default when the page opens.'],
+    ['How do I change my start page?', 'start page home landing open first default page', 'Open the page you want and press <b>Set as start page</b> at the top right. Press it again to go back to Overview.'],
+    ['How do I find a page?', 'find page menu search favourites star group ctrl k', 'Type in <b>Find a page</b> at the top of the menu (or press Ctrl K) and Enter. Star a page in the menu to keep it in your <b>Favourites</b>.'],
+    ['Is every click recorded?', 'click log record trace history activity who did', 'Yes — every click, field change and page opened is written to the <b>Activity Log</b> with your name, the date and the time, next to every action.'],
     ['Is this real data?', 'demo real data saved browser', 'This is demo mode: everything works and is saved in this browser. Once Supabase is connected, data is shared by the whole team with real logins.'],
     ['Why can\'t I see a module?', 'cannot see missing permission locked access', 'Your role doesn\'t hold that permission. A super admin can grant it in <b>Team · Access</b>.'],
     ['How do I switch user?', 'switch user act as login bottom left', 'Use the selector at the bottom-left of the menu (super admin only).']

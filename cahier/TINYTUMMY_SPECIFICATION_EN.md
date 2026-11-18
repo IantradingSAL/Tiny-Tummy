@@ -1,13 +1,13 @@
 ---
 title: "Tiny Tummy — Specification (Cahier des charges)"
-version: "V1.1"
+version: "V1.2"
 date: "18/11/2026"
 lang: en
 ---
 
 # Tiny Tummy — Specification / System protocol
 
-**Version V1.1 — 18/11/2026** · replaces V1.0 of 28/08/2026
+**Version V1.2 — 18/11/2026** · replaces V1.1 of 18/11/2026
 
 This document describes, in plain words, **how the Tiny Tummy platform works
 from end to end**: the public website, the Family Portal and the operations
@@ -21,6 +21,7 @@ which explains each page as you use it.
 |---|---|---|
 | V1.0 | reference version (platform launch) | 28/08/2026 |
 | V1.1 | 01/11/2026 – 18/11/2026 | 18/11/2026 |
+| V1.2 | 18/11/2026 — dashboard working tools and full activity trace | 18/11/2026 |
 
 No change was recorded in September and October 2026. **Numbering.** One
 version per month that contains changes (V1.2, V1.3…); a new set of modules
@@ -35,6 +36,20 @@ particular order, customer or invoice) are not.
 ---
 
 # Part A — What changed since V1.0 (28/08/2026)
+
+**New in V1.2 — working in the dashboard**
+
+- **Every click is recorded**: each click, each field changed and each page
+  opened is written to the Activity Log with the person, date and time
+  (18/11/2026).
+- **A list view and filters on every page**, with sortable columns, a row
+  count and CSV export; more filters on Inventory (18/11/2026).
+- **Saved views**: any combination of filters can be named, re-applied in one
+  click and made the default of its page (18/11/2026).
+- **Start page**: each person chooses the page the dashboard opens on
+  (18/11/2026).
+- **Menu** reorganised: groups that fold, favourites per person, *Find a
+  page* (Ctrl K), only the pages the person may open (18/11/2026).
 
 **Website**
 
@@ -84,7 +99,7 @@ particular order, customer or invoice) are not.
 
 ---
 
-# Part B — The system today (V1.1)
+# Part B — The system today (V1.2)
 
 ## 1. What the system is
 
@@ -169,6 +184,33 @@ answer, within the modules their role allows:
 - an **order or case number** (TT-2026-041, 041, CF-2026-002) opens it.
 
 Each order, client, recipe or ingredient in the answer is a link to it.
+
+## 4 bis. Working in the dashboard
+
+- **Menu.** Grouped by trade — Sales; Kitchen & stock; Delivery; Money;
+  Quality; Team; System — with Overview on top. Groups fold; the group of the
+  page in use stays open, and the others keep the state each person left
+  them in. Each person stars their **favourites**, shown at the top (by
+  default those of their role). **Find a page** (Ctrl K, Enter opens the
+  first match) searches page names and their usual words (e.g. *delivery*,
+  *stock*). Only the pages the person may open are listed.
+- **Lists everywhere.** Every page that shows records offers a **List** view
+  next to its cards or board (Orders, Kitchen, Delivery, Inventory, Recipes,
+  Age programs, ISO 22000, Team), and the pages that are lists by nature
+  (Requisitions, Suppliers, Notifications, Activity Log, Complaints) use the
+  same tools: search, filters, columns sorted by a click on their title, a
+  count of the rows shown, totals where they make sense and **CSV** export of
+  exactly what is on screen.
+- **Inventory filters**: category, storage location, stock level (OK, below
+  minimum, over maximum, lot expiring within 7 days, out of stock) and
+  auto reorder on/off, on the Cards, List and Lots views.
+- **Saved views.** On every page with filters, *Save view* keeps the current
+  filters, search and layout under a name; the list of saved views re-applies
+  one in a click; the star makes it the page's **default view**, applied when
+  the page opens; a view can be deleted. Views belong to each person.
+- **Start page.** *Set as start page*, at the top of every page, makes it
+  the page the dashboard opens on for that person (a link that names a page
+  still opens that page). Clicking it again goes back to Overview.
 
 ## 5. From order to door
 
@@ -258,8 +300,15 @@ Each order, client, recipe or ingredient in the answer is a link to it.
 
 - Every object (order, case, invoice, requisition, lot) carries its own history:
   who did what, and when.
-- The **Activity Log** lists every action in the platform, per user and module,
-  with date and time — filterable, searchable, exportable, append-only.
+- The **Activity Log** records, per person and with date and time: every
+  action of the platform (order moves, kitchen signatures, stock movements,
+  payments, permission changes…), **every click** (button, link, tab, row,
+  switch — with what was clicked and on which record), **every field
+  changed** (filter, selection, entry — with the value) and **every page
+  opened**. It keeps the latest 5,000 entries in this browser until the
+  database is connected. Filters: person, page, type (actions, clicks and
+  changes, pages opened), period; search; CSV export; nothing can be edited
+  or deleted.
 
 ## 11. Notifications and family alerts
 
@@ -295,6 +344,15 @@ Each order, client, recipe or ingredient in the answer is a link to it.
 ---
 
 # Appendix — Version history
+
+### V1.2 — 18/11/2026 (live on 18/11/2026)
+
+- Activity Log: every click, every field changed and every page opened is recorded with the person, date and time, alongside the actions; filters by person, page, type and period; latest 5,000 entries kept (18/11/2026).
+- List view on every page with records (Recipes, Age programs, ISO 22000, Team added; Requisitions, Suppliers, Notifications and Activity Log rebuilt) with search, filters, sortable columns, counts, totals and CSV (18/11/2026).
+- Inventory: filters by category, location, stock level and auto reorder (18/11/2026).
+- Saved views on every page with filters, with a default view per page (18/11/2026).
+- Start page per person (18/11/2026).
+- Menu: groups that fold, favourites, Find a page (Ctrl K), pages limited to the person's access (18/11/2026).
 
 ### V1.1 — from 01/11/2026 to 18/11/2026 (live on 18/11/2026)
 

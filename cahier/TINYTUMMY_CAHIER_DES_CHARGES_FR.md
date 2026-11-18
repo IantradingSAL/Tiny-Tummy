@@ -1,13 +1,13 @@
 ---
 title: "Tiny Tummy — Cahier des charges"
-version: "V1.1"
+version: "V1.2"
 date: "18/11/2026"
 lang: fr
 ---
 
 # Tiny Tummy — Cahier des charges / Protocole du système
 
-**Version V1.1 — 18/11/2026** · remplace la V1.0 du 28/08/2026
+**Version V1.2 — 18/11/2026** · remplace la V1.1 du 18/11/2026
 
 Ce document décrit, en termes simples, **comment la plateforme Tiny Tummy
 fonctionne de bout en bout** : le site public, l'Espace famille et le tableau
@@ -21,6 +21,7 @@ chaque page), qui explique chaque page au fil de l'utilisation.
 |---|---|---|
 | V1.0 | version de référence (lancement de la plateforme) | 28/08/2026 |
 | V1.1 | 01/11/2026 – 18/11/2026 | 18/11/2026 |
+| V1.2 | 18/11/2026 — outils de travail du tableau de bord et traçabilité complète | 18/11/2026 |
 
 Aucune modification n'a été enregistrée en septembre et octobre 2026.
 **Numérotation retenue.** Une version par mois comportant des modifications
@@ -37,6 +38,22 @@ reprises.
 ---
 
 # Partie A — Ce qui a changé depuis la V1.0 (28/08/2026)
+
+**Nouveau en V1.2 — travailler dans le tableau de bord**
+
+- **Chaque clic est enregistré** : chaque clic, chaque champ modifié et
+  chaque page ouverte est inscrit au Journal d'activité avec la personne, la
+  date et l'heure (18/11/2026).
+- **Une vue Liste et des filtres sur chaque page**, avec colonnes triables,
+  nombre de lignes et export CSV ; davantage de filtres sur le Stock
+  (18/11/2026).
+- **Vues enregistrées** : toute combinaison de filtres peut être nommée,
+  réappliquée en un clic et devenir la vue par défaut de sa page (18/11/2026).
+- **Page d'accueil personnelle** : chacun choisit la page sur laquelle
+  s'ouvre le tableau de bord (18/11/2026).
+- **Menu** réorganisé : groupes repliables, favoris par personne, *Trouver
+  une page* (Ctrl K), seulement les pages auxquelles la personne a accès
+  (18/11/2026).
 
 **Site web**
 
@@ -92,7 +109,7 @@ reprises.
 
 ---
 
-# Partie B — Le système aujourd'hui (V1.1)
+# Partie B — Le système aujourd'hui (V1.2)
 
 ## 1. Ce qu'est le système
 
@@ -185,6 +202,37 @@ directement à la réponse, dans les modules autorisés par son rôle :
   l'ouvre.
 
 Chaque commande, client, recette ou ingrédient de la réponse est un lien.
+
+## 4 bis. Travailler dans le tableau de bord
+
+- **Menu.** Regroupé par métier — Ventes ; Cuisine & stock ; Livraison ;
+  Argent ; Qualité ; Équipe ; Système — avec la Vue d'ensemble en tête. Les
+  groupes se replient ; le groupe de la page en cours reste ouvert, les autres
+  gardent l'état laissé par chaque personne. Chacun marque ses **favoris**
+  d'une étoile, affichés en haut (par défaut ceux de son rôle). **Trouver une
+  page** (Ctrl K, Entrée ouvre le premier résultat) cherche dans les noms des
+  pages et leurs mots usuels (ex. *livraison*, *stock*). Seules les pages
+  auxquelles la personne a accès sont listées.
+- **Des listes partout.** Chaque page qui affiche des enregistrements propose
+  une vue **Liste** à côté de ses cartes ou de son tableau (Commandes,
+  Cuisine, Livraison, Stock, Recettes, Programmes par âge, ISO 22000,
+  Équipe), et les pages qui sont des listes par nature (Réquisitions,
+  Fournisseurs, Notifications, Journal d'activité, Réclamations) ont les mêmes
+  outils : recherche, filtres, colonnes triées d'un clic sur leur titre,
+  nombre de lignes affichées, totaux quand ils ont un sens et export **CSV**
+  de exactement ce qui est à l'écran.
+- **Filtres du stock** : catégorie, emplacement, niveau de stock (OK, sous le
+  minimum, au-dessus du maximum, lot qui périme sous 7 jours, rupture) et
+  réapprovisionnement automatique oui/non, sur les vues Cartes, Liste et Lots.
+- **Vues enregistrées.** Sur chaque page avec filtres, *Enregistrer la vue*
+  garde les filtres, la recherche et la disposition sous un nom ; la liste
+  des vues en réapplique une en un clic ; l'étoile en fait la **vue par
+  défaut** de la page, appliquée à son ouverture ; une vue peut être
+  supprimée. Les vues appartiennent à chaque personne.
+- **Page d'accueil.** *Définir comme page d'accueil*, en haut de chaque page,
+  en fait la page sur laquelle s'ouvre le tableau de bord pour cette personne
+  (un lien qui désigne une page ouvre toujours cette page). Un nouveau clic
+  revient à la Vue d'ensemble.
 
 ## 5. De la commande à la porte
 
@@ -287,9 +335,16 @@ Chaque commande, client, recette ou ingrédient de la réponse est un lien.
 
 - Chaque objet (commande, dossier, facture, réquisition, lot) porte son
   propre historique : qui a fait quoi, et quand.
-- Le **Journal d'activité** liste toutes les actions de la plateforme, par
-  utilisateur et par module, avec date et heure — filtrable, consultable,
-  exportable, sans suppression possible.
+- Le **Journal d'activité** enregistre, par personne et avec date et heure :
+  chaque action de la plateforme (mouvements de commande, signatures en
+  cuisine, mouvements de stock, paiements, changements de droits…), **chaque
+  clic** (bouton, lien, onglet, ligne, interrupteur — avec ce qui a été cliqué
+  et sur quel enregistrement), **chaque champ modifié** (filtre, sélection,
+  saisie — avec la valeur) et **chaque page ouverte**. Il garde les 5 000
+  dernières entrées dans ce navigateur tant que la base n'est pas connectée.
+  Filtres : personne, page, type (actions, clics et modifications, pages
+  ouvertes), période ; recherche ; export CSV ; rien ne peut être modifié ni
+  supprimé.
 
 ## 11. Notifications et alertes famille
 
@@ -326,6 +381,15 @@ Chaque commande, client, recette ou ingrédient de la réponse est un lien.
 ---
 
 # Annexe — Historique des versions
+
+### V1.2 — 18/11/2026 (mise en service le 18/11/2026)
+
+- Journal d'activité : chaque clic, chaque champ modifié et chaque page ouverte sont enregistrés avec la personne, la date et l'heure, à côté des actions ; filtres par personne, page, type et période ; 5 000 dernières entrées conservées (18/11/2026).
+- Vue Liste sur chaque page d'enregistrements (Recettes, Programmes par âge, ISO 22000, Équipe ajoutés ; Réquisitions, Fournisseurs, Notifications et Journal d'activité refaits) avec recherche, filtres, colonnes triables, nombres, totaux et CSV (18/11/2026).
+- Stock : filtres par catégorie, emplacement, niveau de stock et réapprovisionnement automatique (18/11/2026).
+- Vues enregistrées sur chaque page avec filtres, avec une vue par défaut par page (18/11/2026).
+- Page d'accueil par personne (18/11/2026).
+- Menu : groupes repliables, favoris, Trouver une page (Ctrl K), pages limitées aux accès de la personne (18/11/2026).
 
 ### V1.1 — du 01/11/2026 au 18/11/2026 (mise en service le 18/11/2026)
 

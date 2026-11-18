@@ -1,0 +1,425 @@
+---
+title: "Tiny Tummy — Cahier des charges"
+version: "V1.2"
+date: "18/11/2026"
+lang: fr
+---
+
+# Tiny Tummy — Cahier des charges / Protocole du système
+
+**Version V1.2 — 18/11/2026** · remplace la V1.1 du 18/11/2026
+
+Ce document décrit, en termes simples, **comment la plateforme Tiny Tummy
+fonctionne de bout en bout** : le site public, l'Espace famille et le tableau
+de bord des opérations — qui fait quoi, où circulent les données et quelles
+règles le système applique. Il complète l'aide intégrée (bouton **Ask me** sur
+chaque page), qui explique chaque page au fil de l'utilisation.
+
+## Suivi des versions
+
+| Version | Période | Date de mise en service |
+|---|---|---|
+| V1.0 | version de référence (lancement de la plateforme) | 28/08/2026 |
+| V1.1 | 01/11/2026 – 18/11/2026 | 18/11/2026 |
+| V1.2 | 18/11/2026 — outils de travail du tableau de bord et traçabilité complète | 18/11/2026 |
+
+Aucune modification n'a été enregistrée en septembre et octobre 2026.
+**Numérotation retenue.** Une version par mois comportant des modifications
+(V1.2, V1.3…) ; un nouvel ensemble de modules ouvre une version majeure (V2.0).
+Le tableau de bord (Système → *Cahier des charges*) propose toujours la
+dernière version ; chaque version antérieure y reste disponible et peut redevenir la
+version en vigueur (voir Partie C).
+
+Le détail daté de chaque version est en annexe (**Historique des versions**).
+Seules les évolutions durables du système y figurent : les corrections
+ponctuelles (une commande, un client, une facture particulière) n'y sont pas
+reprises.
+
+---
+
+# Partie A — Ce qui a changé depuis la V1.0 (28/08/2026)
+
+**Nouveau en V1.2 — travailler dans le tableau de bord**
+
+- **Chaque clic est enregistré** : chaque clic, chaque champ modifié et
+  chaque page ouverte est inscrit au Journal d'activité avec la personne, la
+  date et l'heure (18/11/2026).
+- **Une vue Liste et des filtres sur chaque page**, avec colonnes triables,
+  nombre de lignes et export CSV ; davantage de filtres sur le Stock
+  (18/11/2026).
+- **Vues enregistrées** : toute combinaison de filtres peut être nommée,
+  réappliquée en un clic et devenir la vue par défaut de sa page (18/11/2026).
+- **Page d'accueil personnelle** : chacun choisit la page sur laquelle
+  s'ouvre le tableau de bord (18/11/2026).
+- **Menu** réorganisé : groupes repliables, favoris par personne, *Trouver
+  une page* (Ctrl K), seulement les pages auxquelles la personne a accès
+  (18/11/2026).
+
+**Site web**
+
+- Nouveau design sur toutes les pages publiques : logo de la marque en
+  en-tête et en pied de page, icônes au trait, affichage adapté au téléphone
+  (13/11/2026, #5).
+- Page d'accueil : section et bouton *Espace famille* (13/11/2026, #7).
+- Assistant **Ask me** sur chaque page (d'abord appelé *Aide*) : explique la
+  page et répond aux questions, avec WhatsApp en recours (13/11/2026, #8 ;
+  renommé le 18/11/2026).
+- Un seul numéro de contact partout : +961 70 341 002 (13/11/2026, #10).
+
+**Espace famille (nouveau)**
+
+- Un *carnet de santé* pour chaque enfant, relié à la cuisine : journal
+  alimentaire avec ingrédients et lot de fabrication, aliments goûtés, étapes
+  de diversification, croissance, album photo, vaccins et notes du médecin
+  (13/11/2026, #5).
+- Lien privé pour le médecin, par enfant, avec expiration et révocation
+  (13/11/2026, #5–#6).
+- Thème rose pour une fille, bleu pour un garçon (13/11/2026, #9).
+
+**Tableau de bord des opérations**
+
+- Commandes : tableau par étape (Passée → Livrée), vues kanban et liste ;
+  étapes de cuisine attribuées automatiquement à la confirmation
+  (13/11/2026, #1).
+- Expédition et livraison : livreur le moins occupé proposé, expédition en
+  un geste, liste des livreurs (13/11/2026, #2).
+- Stock : liste « à traiter » et réapprovisionnement automatique sous le
+  minimum (13/11/2026, #3).
+- Stock : **journal des mouvements** (reçu, utilisé par une commande,
+  inventaire ±, mis au rebut) avec date, lot, commande, personne et coût ;
+  vue **Liste** avec saisie des comptages, et **Rapport** de consommation
+  par article, commande, personne, jour ou mois (18/11/2026).
+- Alerte **STOP** allergie quand une commande contient un allergène de
+  l'enfant (13/11/2026, #5).
+- Refonte Équipe & Accès ; même design sur toutes les pages du tableau de
+  bord (13/11/2026, #1, #4).
+- **Cahier des charges** dans le tableau de bord (groupe Système), en
+  français et en anglais, version en vigueur et toutes les versions
+  antérieures, en cartes ou en liste, pour les personnes qui y ont accès
+  (18/11/2026).
+- **Ask me** pour le personnel : répond aux questions sur l'activité en cours
+  (mes commandes, livrées aujourd'hui, à préparer, un client, un article, un
+  numéro de commande) et ouvre la bonne page, commande, fiche client ou
+  article (18/11/2026).
+
+**Sécurité / données**
+
+- Données des familles séparées par famille en base ; les données réservées
+  au personnel ne sont plus lisibles par un parent connecté (13/11/2026, #6).
+
+---
+
+# Partie B — Le système aujourd'hui (V1.2)
+
+## 1. Ce qu'est le système
+
+Une plateforme à trois visages, servie en pages web statiques ; données,
+connexion et stockage des fichiers chez Supabase (Postgres + Auth + Storage) :
+
+- **Site public** — Accueil, Menu, Pourquoi nous, Comment ça marche, Contact.
+  Les commandes passent par WhatsApp.
+- **Espace famille** — l'espace des parents : le dossier alimentaire et de
+  croissance de chaque enfant, partagé avec son médecin.
+- **Tableau de bord des opérations** — l'outil du personnel pour toute
+  l'activité : commandes, cuisine, recettes, stock, achats, livraison, qualité
+  (ISO 22000), réclamations, équipe et accès.
+
+Tant que Supabase n'est pas connecté, le tableau de bord et l'Espace famille
+fonctionnent sur des données de démonstration dans le navigateur ; rien n'est
+perdu et rien n'est partagé.
+
+## 2. Site public
+
+- **Menu** : purées (dès 6 mois), finger food (dès 7 mois) et gâteaux, avec
+  filtres par catégorie. Produits et prix viennent de la base ; si elle est
+  injoignable, le catalogue intégré s'affiche. Un produit sans prix n'affiche
+  simplement pas de prix.
+- **Commande** : par WhatsApp. Commande avant 15 h pour une livraison le
+  lendemain, partout au Liban sauf le dimanche.
+- Bouton **Ask me** sur chaque page : explique la page et répond aux questions
+  courantes ; le reste est renvoyé vers WhatsApp.
+- Un lien discret *Tableau de bord* en pied de page ; il est inutilisable sans
+  identifiant du personnel.
+
+## 3. Espace famille
+
+- Un parent se connecte (code par téléphone en production) et ne voit **que
+  sa propre famille**. Une fiche par enfant : âge, date de naissance,
+  allergies, remarques alimentaires, médecin, photo ; thème rose pour une
+  fille, bleu pour un garçon.
+- **Journal alimentaire** : chaque commande de l'enfant, par mois ; chaque
+  produit montre ses ingrédients, la quantité par portion et le **lot de
+  fabrication**, avec les alertes allergie.
+- **Aliments goûtés** : construits automatiquement à partir des repas livrés,
+  avec la date de la première fois.
+- **Étapes de diversification** : un message *Bravo !* à 6, 7, 9, 12, 18, 24
+  et 36 mois avec ce qu'il faut commencer et les produits adaptés (sans les
+  allergènes de l'enfant).
+- **Croissance** : poids et taille avec courbes selon l'âge ; album photo
+  mensuel (photos compressées dans le navigateur, stockées en privé par
+  famille).
+- **Vaccins et visites** avec rappels ; **notes du médecin**.
+- **Accès médecin** : un lien privé par enfant (copier, WhatsApp, email,
+  révoquer). Le médecin consulte le dossier et ajoute notes et vaccins, qui
+  deviennent des rappels pour la famille. Le lien est aléatoire, conservé
+  uniquement sous forme d'empreinte, expire et peut être révoqué à tout moment
+  ; le médecin n'a pas besoin de compte.
+
+## 4. Tableau de bord des opérations — modules
+
+Le menu est regroupé par métier :
+
+| Groupe | Module | Rôle |
+|---|---|---|
+| — | Vue d'ensemble | La journée sur toute l'activité, conseils, dossiers en attente pour moi |
+| Ventes | Commandes | Circuit des commandes : étapes, vue Tableau et vue Liste (recherche, période, livreur, tri ; client, enfant et STOP allergie, articles, étape, avancement cuisine, lot, livreur et heure d'arrivée, valeur, coût, marge ; totaux ; CSV ; lien vers le stock utilisé par la commande) |
+| Ventes | Programmes par âge | Programmes selon l'âge de l'enfant |
+| Production | Cuisine | Vue Tableau (une carte par commande : chronologie, horloges, étapes) et vue Liste (une ligne par étape de chaque commande en production : commande et articles, STOP allergie, étape et CCP, poste, personne, minutes prévues, statut et minuteur ; filtres à faire / en cours / en retard / faites, personne ou *mes étapes*, poste ; Démarrer, Terminé et Annuler sur la ligne ; totaux : étapes, en cours, en retard, minutes restantes) |
+| Production | Recettes · BOM | Ingrédients, étapes, coût complet |
+| Production | Stock · Lots | Stock par lots, FEFO, péremption, réapprovisionnement |
+| Production | Réquisitions | Demandes d'achat |
+| Livraison | Expédition · Livreurs | Vue Tableau (cartes prêtes / en route, carte en direct, livreurs) et vue Liste (chaque livraison : statut, livreur, adresse et distance, heures prête / départ / arrivée prévue / livrée, minutes de route, à l'heure ou en retard ; filtres statut, période, livreur ; expédier, position, retard et livrée depuis la ligne ; totaux : km, temps moyen, % à l'heure ; CSV) |
+| Finances | Fournisseurs · Dettes | Facture fournisseur = entrée en stock, dettes |
+| Qualité | ISO 22000 | Liste de contrôle clause par clause avec responsable et preuve |
+| Qualité | Réclamations | Registre des avis et réclamations |
+| Équipe | Messagerie, Notifications, Journal d'activité, Équipe · Accès | |
+| Système | Cahier des charges | Ce document : version en vigueur, FR/EN, toutes les versions antérieures |
+| Système | Paramètres | Connexion à la base, données de démonstration |
+
+**Ask me (personnel).** Sur chaque page du tableau de bord, le bouton
+**Ask me** répond aux questions sur l'activité en cours et mène l'employé
+directement à la réponse, dans les modules autorisés par son rôle :
+
+- *Mes commandes / mes tâches* : les étapes de cuisine, livraisons et
+  dossiers attribués à la personne connectée ;
+- *Livrées aujourd'hui*, *à préparer* (avec le total par article), *prêtes à
+  expédier*, *en route*, *en retard*, *nouvelles commandes*, *commandes du
+  jour* ;
+- le **nom d'un client** : ses commandes, ses dossiers et son téléphone ; un
+  **produit** : les commandes ouvertes qui le contiennent et sa recette ; un
+  **ingrédient** : stock et lots (prochain à sortir en premier) ;
+- un **numéro de commande ou de dossier** (TT-2026-041, 041, CF-2026-002)
+  l'ouvre.
+
+Chaque commande, client, recette ou ingrédient de la réponse est un lien.
+
+## 4 bis. Travailler dans le tableau de bord
+
+- **Menu.** Regroupé par métier — Ventes ; Cuisine & stock ; Livraison ;
+  Argent ; Qualité ; Équipe ; Système — avec la Vue d'ensemble en tête. Les
+  groupes se replient ; le groupe de la page en cours reste ouvert, les autres
+  gardent l'état laissé par chaque personne. Chacun marque ses **favoris**
+  d'une étoile, affichés en haut (par défaut ceux de son rôle). **Trouver une
+  page** (Ctrl K, Entrée ouvre le premier résultat) cherche dans les noms des
+  pages et leurs mots usuels (ex. *livraison*, *stock*). Seules les pages
+  auxquelles la personne a accès sont listées.
+- **Des listes partout.** Chaque page qui affiche des enregistrements propose
+  une vue **Liste** à côté de ses cartes ou de son tableau (Commandes,
+  Cuisine, Livraison, Stock, Recettes, Programmes par âge, ISO 22000,
+  Équipe), et les pages qui sont des listes par nature (Réquisitions,
+  Fournisseurs, Notifications, Journal d'activité, Réclamations) ont les mêmes
+  outils : recherche, filtres, colonnes triées d'un clic sur leur titre,
+  nombre de lignes affichées, totaux quand ils ont un sens et export **CSV**
+  de exactement ce qui est à l'écran.
+- **Filtres du stock** : catégorie, emplacement, niveau de stock (OK, sous le
+  minimum, au-dessus du maximum, lot qui périme sous 7 jours, rupture) et
+  réapprovisionnement automatique oui/non, sur les vues Cartes, Liste et Lots.
+- **Vues enregistrées.** Sur chaque page avec filtres, *Enregistrer la vue*
+  garde les filtres, la recherche et la disposition sous un nom ; la liste
+  des vues en réapplique une en un clic ; l'étoile en fait la **vue par
+  défaut** de la page, appliquée à son ouverture ; une vue peut être
+  supprimée. Les vues appartiennent à chaque personne.
+- **Page d'accueil.** *Définir comme page d'accueil*, en haut de chaque page,
+  en fait la page sur laquelle s'ouvre le tableau de bord pour cette personne
+  (un lien qui désigne une page ouvre toujours cette page). Un nouveau clic
+  revient à la Vue d'ensemble.
+
+## 5. De la commande à la porte
+
+1. **Commande** (site / WhatsApp) → confirmée par l'équipe. La commande
+   indique pour quel enfant elle est. Si elle contient un allergène de cet
+   enfant, une alerte rouge **STOP** s'affiche sur la commande et sur la fiche
+   cuisine.
+2. **Cuisine** : dès la confirmation, les étapes sont **attribuées
+   automatiquement** aux personnes qui tiennent le bon poste (rôle cuisine
+   d'abord, les moins chargées et les plus spécialisées d'abord). Un
+   responsable peut modifier ou rééquilibrer.
+3. L'entrée en cuisine **sort le stock en FEFO** (premier périmé, premier
+   sorti) selon les lignes d'ingrédients de la recette, lot par lot, avec
+   trace.
+4. **Points de contrôle qualité** (voir §7), portionnement, CQ final ; une
+   **étiquette de lot** (ex. B-2026-040-0828) est imprimée sur la commande.
+5. **Expédition** : le livreur de service le moins occupé est proposé ; un
+   geste envoie la commande. Le client est prévenu avec une heure d'arrivée
+   calculée sur la distance routière.
+6. **En route** : carte en direct, avis *bientôt chez vous* ; un retard
+   signalé par le livreur ou détecté automatiquement envoie au client une
+   nouvelle heure d'arrivée.
+7. **Livrée** : confirmation horodatée. Chaque étape est horodatée.
+
+## 6. Recettes, stock et achats
+
+- **Recette (BOM)** : lignes d'ingrédients (quantité par portion dans l'unité
+  de la cuisine, convertie dans l'unité de stock), étapes (minutes prévues,
+  poste, taux horaire) et **coût complet** (matières + main-d'œuvre) par
+  portion et par lot, avec marge et % coût matière signalé au-dessus de
+  l'objectif.
+- **Le stock est un ensemble de lots** : chaque lot a sa quantité, sa date de
+  péremption, son emplacement et son coût d'achat. Le prélèvement prend
+  toujours le lot qui périme le premier.
+- **Facture fournisseur = réception** : chaque ligne de facture (article,
+  quantité, coût, lot, péremption) devient un lot. Les dettes vieillissent
+  de façon visible jusqu'à leur paiement.
+- **Journal des mouvements** : chaque mouvement est une ligne — *Reçu*
+  (réception ou facture fournisseur), *Utilisé* (sorti pour une commande en
+  FEFO, avec le numéro de commande et la personne qui l'a envoyée en
+  cuisine), *Inventaire +/−* (comptage physique) et *Mis au rebut* (avec son
+  motif) — avec date et heure, lot, quantité, coût unitaire, valeur,
+  commande ou référence, auteur et note. Le stock peut être reconstitué à
+  partir de lui. Filtres : article, mouvement, commande, personne, dates
+  (aujourd'hui, 7 / 30 jours) ; totaux par type ; export CSV.
+- Vues du stock : **Cartes**, **Liste** (une ligne par article : stock face
+  au min/max, utilisé sur 7 jours, prochain lot à sortir, valeur, statut,
+  réapprovisionnement automatique, et une case **Comptage** : la quantité
+  saisie est comparée au système et l'écart est inscrit au journal, pris sur
+  le lot qui périme en premier ou ajouté au plus récent), **Lots (FEFO)**,
+  **Journal** et **Rapport** (le journal additionné par article, commande,
+  personne, jour ou mois : reçu, utilisé, inventaire ±, mis au rebut, coût
+  d'utilisation ; chaque ligne ouvre ses mouvements).
+- **À traiter** : lots proches de la péremption ou périmés (mise au rebut,
+  motif obligatoire) et articles sous le minimum. Les articles en
+  *réapprovisionnement automatique* reçoivent une réquisition automatiquement,
+  calculée pour remonter au maximum.
+
+## 7. Sécurité des aliments — ISO 22000 / HACCP
+
+| Point | Contrôle | Limite | En cas d'échec |
+|---|---|---|---|
+| Cuisson (CCP) | Température à cœur | ≥ 85 °C | L'étape ne se ferme pas ; échec tracé, responsable alerté |
+| Refroidissement rapide (CCP) | Température en moins de 90 min | ≤ 5 °C | L'étape reste ouverte ; écart enregistré |
+| Portionnement | Portions et poids moyen vs objectif | ± 5 % | Enregistré ; hors tolérance, le responsable est alerté |
+| CQ final | Étiquette vs commande, scellé, poids, chaîne du froid | Conforme | Rien ne part sans la signature CQ |
+
+- Chaque étape a un temps prévu ; s'il est dépassé, l'alarme sonne en cuisine
+  et l'étape passe au rouge.
+- Le module **ISO 22000** contient la liste de contrôle clause par clause (du
+  contexte à l'amélioration, PRP, chaîne HACCP) avec statut, responsable et
+  preuve, et une barre de préparation revue chaque mois. Un exercice de
+  traçabilité (commande livrée → chaque lot d'ingrédient) a lieu deux fois
+  par an.
+- **Traçabilité dans les deux sens** : toute réclamation retrouve ses
+  ingrédients ; tout lot fournisseur retrouve ses clients.
+
+## 8. Réclamations et avis des clients
+
+- Chaque message devient un dossier numéroté (CF-AAAA-NNN) avec catégorie,
+  priorité jusqu'à *critique*, responsable, date de suivi et statut :
+  nouveau → en cours → escaladé → résolu.
+- Les dossiers ouverts accueillent leur responsable à l'ouverture du tableau
+  de bord. Un dossier peut être transmis à une personne ou à un rôle avec une
+  note ; la transmission est tracée.
+- Une réclamation qualité est reliée à la commande et à son lot.
+
+## 9. Personnes, rôles et accès
+
+- L'accès suit une clé par fonction, résolue personne → rôle → super
+  administrateur, et est appliqué en base (sécurité au niveau des lignes),
+  pas seulement à l'écran.
+- **Postes de cuisine** : préparation, cuisson, assemblage, portionnement,
+  refroidissement, conditionnement, CQ. Une personne ne peut lancer que les
+  étapes des postes qu'elle détient.
+- Un super administrateur peut travailler *en tant que* autre utilisateur ;
+  les deux identités sont tracées.
+
+## 10. Traçabilité de chaque action
+
+- Chaque objet (commande, dossier, facture, réquisition, lot) porte son
+  propre historique : qui a fait quoi, et quand.
+- Le **Journal d'activité** enregistre, par personne et avec date et heure :
+  chaque action de la plateforme (mouvements de commande, signatures en
+  cuisine, mouvements de stock, paiements, changements de droits…), **chaque
+  clic** (bouton, lien, onglet, ligne, interrupteur — avec ce qui a été cliqué
+  et sur quel enregistrement), **chaque champ modifié** (filtre, sélection,
+  saisie — avec la valeur) et **chaque page ouverte**. Il garde les 5 000
+  dernières entrées dans ce navigateur tant que la base n'est pas connectée.
+  Filtres : personne, page, type (actions, clics et modifications, pages
+  ouvertes), période ; recherche ; export CSV ; rien ne peut être modifié ni
+  supprimé.
+
+## 11. Notifications et alertes famille
+
+- Le client est prévenu à chaque étape de la livraison (départ de la cuisine,
+  bientôt chez vous, retard, livrée), avec suivi envoyé / reçu / ouvert dans
+  le journal des notifications.
+- Anniversaire : le responsable est alerté pour envoyer un cupcake sans
+  allergène ; les messages d'anniversaire, d'étape et de vaccin partent vers
+  la famille une seule fois chacun.
+
+---
+
+# Partie C — Ce document : versions, téléchargement et retour arrière
+
+- La source de chaque langue est un fichier texte dans `cahier/` du dépôt du
+  site. Une **génération** le transforme en PDF et Word, archive cette version
+  dans `cahier/versions/<version>/` et l'inscrit dans `cahier/versions.json`.
+- La page du tableau de bord **Système → Cahier des charges** propose
+  toujours la version *en vigueur* (français et anglais, PDF et Word) à une
+  adresse fixe : un téléchargement est donc toujours à jour. Elle liste toutes
+  les versions avec leur statut (*En vigueur* / *Archivée*) et leur période,
+  en cartes ou en liste. Elle n'est pas sur le site public.
+- L'accès est un droit comme tout module (*Cahier des charges* dans
+  Équipe · Accès), par rôle ou par personne ; les responsables l'ont par
+  défaut.
+- **Retour arrière** : toute version antérieure peut redevenir la version en
+  vigueur (GitHub → Actions → *Cahier des charges — rollback*, ou
+  `node tools/cahier.mjs rollback V1.0`). Rien n'est supprimé : la version plus
+  récente reste dans la liste et peut être rétablie de la même façon.
+- Toute évolution du fonctionnement du système met à jour ce document (dans
+  les deux langues) dans la même modification : Partie B, une ligne en
+  Partie A si elle est notable, et une ligne datée en annexe.
+
+---
+
+# Annexe — Historique des versions
+
+### V1.2 — 18/11/2026 (mise en service le 18/11/2026)
+
+- Journal d'activité : chaque clic, chaque champ modifié et chaque page ouverte sont enregistrés avec la personne, la date et l'heure, à côté des actions ; filtres par personne, page, type et période ; 5 000 dernières entrées conservées (18/11/2026).
+- Vue Liste sur chaque page d'enregistrements (Recettes, Programmes par âge, ISO 22000, Équipe ajoutés ; Réquisitions, Fournisseurs, Notifications et Journal d'activité refaits) avec recherche, filtres, colonnes triables, nombres, totaux et CSV (18/11/2026).
+- Stock : filtres par catégorie, emplacement, niveau de stock et réapprovisionnement automatique (18/11/2026).
+- Vues enregistrées sur chaque page avec filtres, avec une vue par défaut par page (18/11/2026).
+- Page d'accueil par personne (18/11/2026).
+- Menu : groupes repliables, favoris, Trouver une page (Ctrl K), pages limitées aux accès de la personne (18/11/2026).
+
+### V1.1 — du 01/11/2026 au 18/11/2026 (mise en service le 18/11/2026)
+
+- Tableau de bord : refonte Équipe & Accès (cartes de rôles, interrupteurs de droits, icônes au trait) ; tableau des commandes par étape avec vues kanban et liste ; étapes de cuisine attribuées automatiquement à la confirmation (13/11/2026, #1).
+- Expédition et livraison : indicateurs, livreur le moins occupé proposé, expédition en un geste, cartes « en route » avec heure d'arrivée et retard, liste des livreurs (13/11/2026, #2).
+- Stock : fiches articles, liste « à traiter », réapprovisionnement automatique sous le minimum, registre des lots FEFO (13/11/2026, #3).
+- Même design sur toutes les pages du tableau de bord ; recettes en fiches dépliables avec coût et marge ; avancement ISO 22000 par clause (13/11/2026, #4).
+- Refonte du site avec logo sur chaque page ; création de l'Espace famille (journal alimentaire, aliments goûtés, étapes de diversification, croissance, album, vaccins, lien médecin) ; alerte STOP allergie dans les commandes et en cuisine ; alertes anniversaire et étapes (13/11/2026, #5).
+- Base de données : tables de l'Espace famille avec confidentialité par famille, accès médecin par jeton, stockage privé des photos ; données du personnel fermées aux parents (13/11/2026, #6).
+- Page d'accueil : section Espace famille et bouton dans l'en-tête (13/11/2026, #7).
+- Assistant Aide sur chaque page (13/11/2026, #8).
+- Espace famille : thème rose pour une fille, bleu pour un garçon (13/11/2026, #9).
+- Un seul numéro de contact partout : +961 70 341 002 (13/11/2026, #10).
+- Cahier des charges en français et en anglais, avec toutes les versions précédentes et retour arrière (18/11/2026).
+- Le bouton Aide devient **Ask me** sur toutes les pages (18/11/2026).
+- Ask me pour le personnel : mes commandes, livrées aujourd'hui, à préparer, prêtes / en route / en retard, un client, un produit, un ingrédient ou un numéro de commande — avec des liens qui ouvrent la page, la commande, la fiche client ou l'article (18/11/2026).
+- Le cahier des charges quitte la page d'accueil publique pour le tableau de bord (Système → Cahier des charges), avec son propre droit d'accès, vues cartes et liste (18/11/2026).
+- Stock : journal de tous les mouvements, vue Liste avec comptages, Rapport de consommation par article / commande / personne / jour / mois, export CSV (18/11/2026).
+- Commandes : vue Liste complète (filtres, avancement cuisine, lot, livreur et heure d'arrivée, valeur, coût et marge, totaux, CSV, stock utilisé par la commande) (18/11/2026).
+- Expédition et livraison : vue Liste de chaque livraison avec heures, résultat à l'heure, filtres, totaux et CSV (18/11/2026).
+- Cuisine : vue Liste, une ligne par étape de production avec personne, poste, minuteur et Démarrer / Terminé, filtres (mes étapes, poste, en retard) et totaux (18/11/2026).
+
+### V1.0 — 28/08/2026 (lancement de la plateforme)
+
+- Site de la marque (Accueil, Menu, Pourquoi nous, Comment ça marche, Contact) avec commande par WhatsApp (28/08/2026).
+- Tableau de bord des opérations : circuit des commandes, cuisine avec points HACCP, recettes · BOM avec coût complet, stock par lots en FEFO, réquisitions, fournisseurs et dettes, expédition avec heure d'arrivée, liste ISO 22000, registre des réclamations, messagerie, notifications, utilisateurs et droits (28/08/2026).
+- Journal de toutes les actions avec date et heure ; rapport de projet *The Tiny Tummy Standard* (28/08/2026).
+- Lien discret vers le tableau de bord en pied de page du site (28/08/2026).
+
+---
+
+*Pour le détail de chaque écran, ouvrir la page et cliquer sur **Ask me** :
+l'aide intégrée reste la référence.*

@@ -1,6 +1,18 @@
 {
-  "current": "V1.1",
+  "current": "V1.2",
   "versions": [
+    {
+      "version": "V1.2",
+      "date": "2026-11-18",
+      "fr": {
+        "pdf": "cahier/versions/V1.2/TINYTUMMY_CAHIER_DES_CHARGES_FR.pdf",
+        "docx": "cahier/versions/V1.2/TINYTUMMY_CAHIER_DES_CHARGES_FR.docx"
+      },
+      "en": {
+        "pdf": "cahier/versions/V1.2/TINYTUMMY_SPECIFICATION_EN.pdf",
+        "docx": "cahier/versions/V1.2/TINYTUMMY_SPECIFICATION_EN.docx"
+      }
+    },
     {
       "version": "V1.1",
       "date": "2026-11-18",

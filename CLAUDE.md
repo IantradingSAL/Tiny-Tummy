@@ -24,6 +24,19 @@ the dashboard links to (System → Cahier des charges, permission
 Rollback: `node tools/cahier.mjs rollback V1.0` or GitHub → Actions →
 *Cahier des charges — rollback*. Never delete an archived version.
 
+## Dashboard working tools (`js/dash-ui.js`)
+
+Loaded after the dashboard script. It owns: the Activity Log of **every
+click, field change and page opened** (`logAct(..., kind)`: action / click /
+page; keep it on for every new page), the shared list engine `ttList(cfg)`
+(search, filters, sortable columns, counts, totals, CSV, saved views), saved
+views per person (`SV_VARS[page]` for pages with their own filter variables;
+a new page with filters registers there or uses `ttList`), the start page per
+person and the grouped menu (`NAV`). **Every new page that shows records gets
+a List view through `ttList` and its filters** — treat it as part of "the page
+is finished". Never use the characters ★ ☆ in the dashboard: the emoji layer
+turns them into icons; use `star(on)`.
+
 ## Ask me
 
 `js/help.js` is the floating **Ask me** button on every page (page Q&A).

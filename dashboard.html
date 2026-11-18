@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<script>window.TT_START_HASH = location.hash;</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Tiny Tummy Ops</title>
@@ -2267,6 +2268,33 @@ function saveProduct() {
 
 /* ── Inventory (Bloom-style): Stock by lot + Item master ── */
 var invFilter = 'all', invSearch = '', invTab = 'items';
+var IF = { cat: 'all', loc: 'all', state: 'all', auto: 'all' };
+function ifSet(k, v) { IF[k] = v; render(); }
+function invPass(g, lots) {
+  if (IF.cat !== 'all' && g.cat !== IF.cat) return false;
+  if (IF.auto !== 'all' && (IF.auto === 'on') !== !!g.auto) return false;
+  var st = stockOf(g.id, lots), my = lots.filter(function (l) { return l.ing === g.id && l.qty > 0; });
+  if (IF.loc !== 'all' && !my.some(function (l) { return (l.loc || '') === IF.loc; })) return false;
+  if (IF.state === 'low' && !(st < g.min)) return false;
+  if (IF.state === 'ok' && !(st >= g.min && st <= g.max)) return false;
+  if (IF.state === 'over' && !(st > g.max)) return false;
+  if (IF.state === 'expiring' && !my.some(function (l) { return l.expiry <= today(7); })) return false;
+  if (IF.state === 'empty' && st > 0) return false;
+  return true;
+}
+function invFilterBar(ings, lots) {
+  function sel(k, all, opts) { return '<select aria-label="' + all + '" class="' + (IF[k] !== 'all' ? 'on' : '') + '" onchange="ifSet(\'' + k + '\',this.value)"><option value="all">' + all + '</option>' +
+    opts.map(function (o) { return '<option value="' + esc(o[0]) + '"' + (IF[k] === o[0] ? ' selected' : '') + '>' + esc(o[1]) + '</option>'; }).join('') + '</select>'; }
+  var cats = {}, locs = {}; ings.forEach(function (g) { cats[g.cat] = 1; }); lots.forEach(function (l) { if (l.loc) locs[l.loc] = 1; });
+  var n = ings.filter(function (g) { return invPass(g, lots); }).length;
+  var active = IF.cat !== 'all' || IF.loc !== 'all' || IF.state !== 'all' || IF.auto !== 'all';
+  return '<div class="lg-f tl-bar">' + sel('cat', 'All categories', Object.keys(cats).sort().map(function (c) { return [c, c]; })) +
+    sel('loc', 'All locations', Object.keys(locs).sort().map(function (c) { return [c, c]; })) +
+    sel('state', 'Any stock level', [['ok', 'OK (between min and max)'], ['low', 'Below minimum'], ['over', 'Over maximum'], ['expiring', 'Lot expiring ≤ 7 days'], ['empty', 'Out of stock']]) +
+    sel('auto', 'Auto reorder on / off', [['on', 'Auto reorder on'], ['off', 'Auto reorder off']]) +
+    (active ? '<button class="btn o s" onclick="IF={cat:\'all\',loc:\'all\',state:\'all\',auto:\'all\'};render()">' + ic('x') + ' Clear</button>' : '') +
+    '<span class="tl-n">' + n + ' of ' + ings.length + ' items</span></div>';
+}
 function lotStatus(l, g, lots) {
   if (l.expiry < today(0)) return ['expired', 'open'];
   if (l.expiry <= today(7)) return ['expiring', 'exp'];
@@ -2358,7 +2386,7 @@ RENDER.inventory = function () {
   else if (invTab === 'ledger') body = invLedgerView(ings);
   else if (invTab === 'report') body = invReportView(ings);
   else if (invTab === 'items') {
-    var list = ings.filter(function (g) { return invFilter !== 'low' || stockOf(g.id, lots) < g.min; });
+    var list = ings.filter(function (g) { return (invFilter !== 'low' || stockOf(g.id, lots) < g.min) && invPass(g, lots); });
     body = '<div class="igrid">' + list.map(function (g) {
       var st = Math.round(stockOf(g.id, lots) * 100) / 100;
       var top = Math.max(g.max, st, 1);
@@ -2387,6 +2415,8 @@ RENDER.inventory = function () {
       var g = byId(ings, l.ing); if (!g) return;
       if (invFilter === 'low' && stockOf(g.id, lots) >= g.min) return;
       if (invFilter === 'expiring' && l.expiry > today(7)) return;
+      if (!invPass(g, lots)) return;
+      if (IF.loc !== 'all' && (l.loc || '') !== IF.loc) return;
       flat.push({ l: l, g: g });
     });
     flat.sort(function (a, b) { return a.l.expiry < b.l.expiry ? -1 : 1; });
@@ -2416,6 +2446,7 @@ RENDER.inventory = function () {
       (invTab === 'ledger' || invTab === 'report' ? '' :
       '<div class="u-tabs ichips" style="margin:0">' + chip('all', 'All') + chip('low', 'Low') + (invTab === 'lots' ? chip('expiring', 'Expiring') : '') + '</div>' +
       '<div class="u-search"><span>' + ic('search') + '</span><input placeholder="Search item, lot, location…" value="' + esc(invSearch) + '" oninput="invSearchGo(this.value)"></div>') + '</div>' +
+    (invTab === 'ledger' || invTab === 'report' ? '' : invFilterBar(ings, lots)) +
     body + '<div class="u-empty" id="inv-none" style="display:none"><div>' + ic('search') + '</div>Nothing matches your search.</div>';
 };
 function invGo(f) { invFilter = f; render(); }
@@ -2429,7 +2460,7 @@ function usedSince(ingId, days, mv) {
 }
 function invListView(ings, lots, openReq) {
   var mv = store('moves').all();
-  var list = ings.filter(function (g) { return invFilter !== 'low' || stockOf(g.id, lots) < g.min; })
+  var list = ings.filter(function (g) { return (invFilter !== 'low' || stockOf(g.id, lots) < g.min) && invPass(g, lots); })
     .sort(function (a, b) { return a.name < b.name ? -1 : 1; });
   var rows = list.map(function (g) {
     var st = r3(stockOf(g.id, lots));
@@ -3974,7 +4005,8 @@ RENDER.cahier = function () {
   var head = '<div class="pagehead"><div><h1>📘 Cahier des charges</h1><div class="sub">How the Tiny Tummy platform works — the version in force, in French and English, and every earlier version</div></div></div>';
   if (!m) return head + '<div class="panel"><p class="muted">' + (CAHIER.err ? 'The version list could not be read. ' +
     '<a href="cahier/TINYTUMMY_CAHIER_DES_CHARGES_FR.pdf" target="_blank" rel="noopener">French PDF</a> · <a href="cahier/TINYTUMMY_SPECIFICATION_EN.pdf" target="_blank" rel="noopener">English PDF</a>' : 'Loading…') + '</p></div>';
-  var vs = m.versions.slice().sort(function (a, b) { return a.date < b.date ? 1 : -1; });
+  var vnum = function (v) { var p = String(v).replace(/^V/i, '').split('.'); return Number(p[0]) * 1000 + Number(p[1] || 0); };
+  var vs = m.versions.slice().sort(function (a, b) { return vnum(b.version) - vnum(a.version); });
   var cur = vs.filter(function (x) { return x.version === m.current; })[0] || vs[0];
   // a version is in force from its date until the next one's date (the current one: until today)
   var until = {}; vs.forEach(function (x, i) { until[x.version] = i ? vs[i - 1].date : null; });
@@ -4281,6 +4313,7 @@ function syncActAs() {
   setTimeout(caseWelcome, 400); // "records waiting for you" popup, once per session
 })();
 </script>
+<script src="js/dash-ui.js"></script>
 <script src="js/ask-ops.js"></script>
 <script src="js/help.js"></script>
 </body>
