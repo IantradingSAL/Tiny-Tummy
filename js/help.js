@@ -25,8 +25,7 @@
   ];
 
   var KB = {
-    'site-home': { title: 'Home', intro: 'Welcome to Tiny Tummy: healthy puree and finger meals for babies and toddlers, designed by dietitians, cooked by chefs and delivered fresh across Lebanon.', qa: [
-      ['Where is the cahier des charges?', 'cahier charges specification spec protocol document pdf word download version previous rollback', 'At the bottom of this page, under <b>Cahier des charges</b>: the current version in French and English (PDF or Word), and every previous version below it.']] },
+    'site-home': { title: 'Home', intro: 'Welcome to Tiny Tummy: healthy puree and finger meals for babies and toddlers, designed by dietitians, cooked by chefs and delivered fresh across Lebanon.', qa: [] },
     'site-menu': { title: 'Menu', intro: 'Every meal we make. Use the tabs to filter Purees, Finger Food or Cakes, check the age tag on each product, and tap <b>Order on WhatsApp</b>.', qa: [
       ['How do I filter the menu?', 'filter tab purees finger cakes category show only', 'Use the tabs above the products: <b>All</b>, <b>Purees</b>, <b>Finger Food</b> or <b>Cakes</b>.'],
       ['What does 6M+ mean?', '6m 7m 12m 24m tag label mean plus', 'It is the minimum age: <b>6M+</b> means from 6 months, <b>24M+</b> from 2 years.']] },
@@ -95,6 +94,10 @@
       ['How do I add someone?', 'add team member employee staff new', 'Tap <b>Add team member</b>, choose a role and the kitchen stations they may work.'],
       ['How do I change permissions?', 'permission role access switch allow', 'Open the <b>Role permissions</b> tab and use the switches — they apply to everyone in that role.'],
       ['How do I see what someone sees?', 'view as act as impersonate eye', 'Press the eye button on their card; press <b>Back to super admin</b> (bottom-left) to return.']] },
+    'dash-cahier': { title: 'Cahier des charges', intro: 'How the whole platform works, always in its current version, in French and English (PDF or Word). Every earlier version is listed below.', qa: [
+      ['Is this the latest version?', 'latest current version new updated', 'Yes — this page always opens the version in force; it is updated with every change to the platform.'],
+      ['How do I go back to an older version?', 'rollback previous older version restore back', 'Download it from <b>Previous versions</b>. To make it the version in force again: GitHub → Actions → <b>Cahier des charges — rollback</b>, type the version (e.g. V1.0).'],
+      ['Who can see this page?', 'who access see permission', 'Anyone whose role (or person) holds <b>Cahier des charges</b> in <b>Team · Access</b>; managers by default.']] },
     'dash-settings': { title: 'Settings', intro: 'Connection to the database and demo data reset.', qa: [] }
   };
   var DASH_COMMON = [

@@ -1,7 +1,7 @@
 name: Cahier des charges — rollback
 
 # Make an archived version of the cahier des charges the current one again
-# (home page + fixed download links). Nothing is deleted: run it again with
+# (dashboard + fixed download links). Nothing is deleted: run it again with
 # the newer version to roll forward.
 on:
   workflow_dispatch:

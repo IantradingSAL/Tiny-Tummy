@@ -25,8 +25,8 @@ chaque page), qui explique chaque page au fil de l'utilisation.
 Aucune modification n'a été enregistrée en septembre et octobre 2026.
 **Numérotation retenue.** Une version par mois comportant des modifications
 (V1.2, V1.3…) ; un nouvel ensemble de modules ouvre une version majeure (V2.0).
-La page d'accueil propose toujours la dernière version ; chaque version
-antérieure y reste disponible (**Versions précédentes**) et peut redevenir la
+Le tableau de bord (Système → *Cahier des charges*) propose toujours la
+dernière version ; chaque version antérieure y reste disponible et peut redevenir la
 version en vigueur (voir Partie C).
 
 Le détail daté de chaque version est en annexe (**Historique des versions**).
@@ -48,8 +48,6 @@ reprises.
   page et répond aux questions, avec WhatsApp en recours (13/11/2026, #8 ;
   renommé le 18/11/2026).
 - Un seul numéro de contact partout : +961 70 341 002 (13/11/2026, #10).
-- Page d'accueil : ce **cahier des charges**, en français et en anglais,
-  dernière version et versions précédentes téléchargeables (18/11/2026).
 
 **Espace famille (nouveau)**
 
@@ -74,6 +72,10 @@ reprises.
   l'enfant (13/11/2026, #5).
 - Refonte Équipe & Accès ; même design sur toutes les pages du tableau de
   bord (13/11/2026, #1, #4).
+- **Cahier des charges** dans le tableau de bord (groupe Système), en
+  français et en anglais, version en vigueur et toutes les versions
+  antérieures, en cartes ou en liste, pour les personnes qui y ont accès
+  (18/11/2026).
 - **Ask me** pour le personnel : répond aux questions sur l'activité en cours
   (mes commandes, livrées aujourd'hui, à préparer, un client, un article, un
   numéro de commande) et ouvre la bonne page, commande, fiche client ou
@@ -115,9 +117,6 @@ perdu et rien n'est partagé.
   lendemain, partout au Liban sauf le dimanche.
 - Bouton **Ask me** sur chaque page : explique la page et répond aux questions
   courantes ; le reste est renvoyé vers WhatsApp.
-- **Cahier des charges** : sur la page d'accueil, toujours dans sa dernière
-  version, en français et en anglais (PDF et Word), avec toutes les versions
-  précédentes.
 - Un lien discret *Tableau de bord* en pied de page ; il est inutilisable sans
   identifiant du personnel.
 
@@ -162,7 +161,9 @@ Le menu est regroupé par métier :
 | Finances | Fournisseurs · Dettes | Facture fournisseur = entrée en stock, dettes |
 | Qualité | ISO 22000 | Liste de contrôle clause par clause avec responsable et preuve |
 | Qualité | Réclamations | Registre des avis et réclamations |
-| Équipe | Messagerie, Notifications, Journal d'activité, Équipe · Accès, Paramètres | |
+| Équipe | Messagerie, Notifications, Journal d'activité, Équipe · Accès | |
+| Système | Cahier des charges | Ce document : version en vigueur, FR/EN, toutes les versions antérieures |
+| Système | Paramètres | Connexion à la base, données de démonstration |
 
 **Ask me (personnel).** Sur chaque page du tableau de bord, le bouton
 **Ask me** répond aux questions sur l'activité en cours et mène l'employé
@@ -286,10 +287,14 @@ Chaque commande, client, recette ou ingrédient de la réponse est un lien.
 - La source de chaque langue est un fichier texte dans `cahier/` du dépôt du
   site. Une **génération** le transforme en PDF et Word, archive cette version
   dans `cahier/versions/<version>/` et l'inscrit dans `cahier/versions.json`.
-- La **page d'accueil** propose toujours la version *en vigueur* (français et
-  anglais, PDF et Word) à une adresse fixe : un téléchargement est donc
-  toujours à jour. Toutes les autres versions restent listées sous
-  **Versions précédentes**.
+- La page du tableau de bord **Système → Cahier des charges** propose
+  toujours la version *en vigueur* (français et anglais, PDF et Word) à une
+  adresse fixe : un téléchargement est donc toujours à jour. Elle liste toutes
+  les versions avec leur statut (*En vigueur* / *Archivée*) et leur période,
+  en cartes ou en liste. Elle n'est pas sur le site public.
+- L'accès est un droit comme tout module (*Cahier des charges* dans
+  Équipe · Accès), par rôle ou par personne ; les responsables l'ont par
+  défaut.
 - **Retour arrière** : toute version antérieure peut redevenir la version en
   vigueur (GitHub → Actions → *Cahier des charges — rollback*, ou
   `node tools/cahier.mjs rollback V1.0`). Rien n'est supprimé : la version plus
@@ -314,9 +319,10 @@ Chaque commande, client, recette ou ingrédient de la réponse est un lien.
 - Assistant Aide sur chaque page (13/11/2026, #8).
 - Espace famille : thème rose pour une fille, bleu pour un garçon (13/11/2026, #9).
 - Un seul numéro de contact partout : +961 70 341 002 (13/11/2026, #10).
-- Cahier des charges en français et en anglais sur la page d'accueil, avec toutes les versions précédentes et retour arrière (18/11/2026).
+- Cahier des charges en français et en anglais, avec toutes les versions précédentes et retour arrière (18/11/2026).
 - Le bouton Aide devient **Ask me** sur toutes les pages (18/11/2026).
 - Ask me pour le personnel : mes commandes, livrées aujourd'hui, à préparer, prêtes / en route / en retard, un client, un produit, un ingrédient ou un numéro de commande — avec des liens qui ouvrent la page, la commande, la fiche client ou l'article (18/11/2026).
+- Le cahier des charges quitte la page d'accueil publique pour le tableau de bord (Système → Cahier des charges), avec son propre droit d'accès, vues cartes et liste (18/11/2026).
 
 ### V1.0 — 28/08/2026 (lancement de la plateforme)
 

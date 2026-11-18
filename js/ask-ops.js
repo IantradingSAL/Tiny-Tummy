@@ -172,6 +172,10 @@
       if (c) { window.ttGoCase(c.id); return 'Opening case <b>' + esc(c.code) + '</b> · ' + esc(c.customer).replace(/\.$/, '') + '.'; }
     }
 
+    if (has(q, ['cahier', 'specification', 'spec ', 'protocol'])) {
+      if (!allowed('cahier')) return noAccess('cahier des charges');
+      nav('cahier'); return 'Opening the <b>Cahier des charges</b> — current version in French and English, with every previous version.';
+    }
     if (has(q, ['my ', 'mine', 'mes ', 'mon ', 'assigned to me', 'what should i', 'what do i', 'my$'])) return myWork();
     var words = q.split(/[^a-z0-9àâçéèêëîïôûùüÿœ]+/).filter(function (w) { return w.length >= 3; });
     var match = function (name) { var nw = lc(name).split(/[^a-z0-9àâçéèêëîïôûùüÿœ]+/).filter(function (w) { return w.length >= 3; });

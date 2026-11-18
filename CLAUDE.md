@@ -19,7 +19,8 @@ or invoice), never a customer's or child's name, never a price.
 Then rebuild: `node tools/cahier.mjs build` (needs pandoc + Playwright). It
 writes PDF + Word, archives the version in `cahier/versions/<version>/`,
 records it in `cahier/versions.json` and publishes it at the fixed file names
-the home page links to. Previous versions stay listed on the home page.
+the dashboard links to (System → Cahier des charges, permission
+`cahier_view`; not on the public website). Previous versions stay listed there.
 Rollback: `node tools/cahier.mjs rollback V1.0` or GitHub → Actions →
 *Cahier des charges — rollback*. Never delete an archived version.
 

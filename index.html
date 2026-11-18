@@ -125,39 +125,6 @@
   </div>
 </section>
 
-<section class="block cahier" id="cahier">
-  <div class="wrap cahier-grid">
-    <div>
-      <span class="promo-kicker">Cahier des charges · Specification</span>
-      <h2>How Tiny Tummy works, in writing</h2>
-      <p class="lead">Our cahier des charges describes the whole platform — website, family portal and kitchen operations — and is updated with every change. Download the current version in French or English.</p>
-      <div class="cahier-ver" id="cahier-ver"><span class="tag">Current version</span></div>
-    </div>
-    <div>
-      <div class="cahier-docs">
-        <div class="cahier-doc">
-          <h3><span class="lang">FR</span> Cahier des charges</h3>
-          <div class="row">
-            <a class="btn btn-primary" id="cahier-fr-pdf" href="cahier/TINYTUMMY_CAHIER_DES_CHARGES_FR.pdf" target="_blank" rel="noopener">PDF</a>
-            <a class="btn btn-outline" id="cahier-fr-docx" href="cahier/TINYTUMMY_CAHIER_DES_CHARGES_FR.docx" download>Word</a>
-          </div>
-        </div>
-        <div class="cahier-doc">
-          <h3><span class="lang">EN</span> Specification</h3>
-          <div class="row">
-            <a class="btn btn-primary" id="cahier-en-pdf" href="cahier/TINYTUMMY_SPECIFICATION_EN.pdf" target="_blank" rel="noopener">PDF</a>
-            <a class="btn btn-outline" id="cahier-en-docx" href="cahier/TINYTUMMY_SPECIFICATION_EN.docx" download>Word</a>
-          </div>
-        </div>
-      </div>
-      <details class="cahier-prev" id="cahier-prev" hidden>
-        <summary>Previous versions · Versions précédentes</summary>
-        <table><tbody id="cahier-prev-rows"></tbody></table>
-      </details>
-      <p class="cahier-note">These links always open the version in force. Earlier versions stay available above and can be made current again.</p>
-    </div>
-  </div>
-</section>
 
 <footer class="site">
   <div class="foot">
@@ -173,7 +140,6 @@
         <li><a href="how-it-works.html">How It Works</a></li>
         <li><a href="contact.html">Contact</a></li>
         <li><a href="portal.html">👨‍👩‍👧 Family portal</a></li>
-        <li><a href="#cahier">📋 Cahier des charges</a></li>
         <li><a href="dashboard.html">🔐 Staff dashboard</a></li>
       </ul>
     </div>
@@ -197,30 +163,6 @@
 <script src="js/icons.js"></script>
 <script src="js/site.js"></script>
 <script>ttRenderProducts({ limit: 4 });</script>
-<script>
-/* Cahier des charges: read the version manifest (never cached) so the page always shows the current version. */
-(function () {
-  function fmt(iso) { var p = iso.split('-'); return p[2] + '/' + p[1] + '/' + p[0]; }
-  function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
-  fetch('cahier/versions.json', { cache: 'no-store' }).then(function (r) { return r.json(); }).then(function (m) {
-    var cur = m.versions.filter(function (v) { return v.version === m.current; })[0];
-    if (!cur) return;
-    document.getElementById('cahier-ver').innerHTML = '<span class="tag">' + esc(cur.version) + '</span> <small>in force since · en vigueur depuis le ' + fmt(cur.date) + '</small>';
-    ['fr-pdf', 'fr-docx', 'en-pdf', 'en-docx'].forEach(function (k) {
-      var a = document.getElementById('cahier-' + k);
-      a.href = a.getAttribute('href').split('?')[0] + '?v=' + encodeURIComponent(cur.version);
-    });
-    var others = m.versions.filter(function (v) { return v.version !== m.current; });
-    if (!others.length) return;
-    document.getElementById('cahier-prev-rows').innerHTML = others.map(function (v) {
-      return '<tr><td><b>' + esc(v.version) + '</b><br><span class="muted">' + fmt(v.date) + '</span></td><td>' +
-        '<a href="' + esc(v.fr.pdf) + '" target="_blank" rel="noopener">FR · PDF</a><a href="' + esc(v.fr.docx) + '" download>FR · Word</a><br>' +
-        '<a href="' + esc(v.en.pdf) + '" target="_blank" rel="noopener">EN · PDF</a><a href="' + esc(v.en.docx) + '" download>EN · Word</a></td></tr>';
-    }).join('');
-    document.getElementById('cahier-prev').hidden = false;
-  }).catch(function () { /* keep the fixed links to the current version */ });
-})();
-</script>
 <script src="js/help.js"></script>
 </body>
 </html>

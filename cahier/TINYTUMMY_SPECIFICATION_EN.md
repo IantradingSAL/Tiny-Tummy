@@ -24,9 +24,9 @@ which explains each page as you use it.
 
 No change was recorded in September and October 2026. **Numbering.** One
 version per month that contains changes (V1.2, V1.3…); a new set of modules
-opens a major version (V2.0). The latest version is always the one offered on
-the home page; every earlier version stays available there (**Previous
-versions**) and can be made the current one again (see Part C).
+opens a major version (V2.0). The latest version is always the one offered in
+the dashboard (System → *Cahier des charges*); every earlier version stays
+available there and can be made the current one again (see Part C).
 
 The dated detail of each version is in the appendix (**Version history**).
 Only lasting changes to the system are listed there: one-off corrections (a
@@ -45,8 +45,6 @@ particular order, customer or invoice) are not.
   and answers questions, with WhatsApp as a fallback (13/11/2026, #8;
   renamed 18/11/2026).
 - One contact number everywhere: +961 70 341 002 (13/11/2026, #10).
-- Home page: this **cahier des charges**, French and English, latest version
-  and previous versions downloadable (18/11/2026).
 
 **Family Portal (new)**
 
@@ -68,6 +66,9 @@ particular order, customer or invoice) are not.
   (13/11/2026, #5).
 - Team & Access redesign; same design on every dashboard page (13/11/2026,
   #1, #4).
+- **Cahier des charges** in the dashboard (System group), French and
+  English, version in force and every earlier version, in cards or list
+  view, for the people given access (18/11/2026).
 - **Ask me** for staff: answers questions on the live operation (my orders,
   delivered today, what to prepare, a client, an item, an order number) and
   opens the right page, order, client or item (18/11/2026).
@@ -107,8 +108,6 @@ data in the browser; nothing is lost and nothing is shared.
   everywhere in Lebanon except Sundays.
 - **Ask me** button on every page: explains the page and answers common
   questions; anything else is sent to WhatsApp.
-- **Cahier des charges**: on the home page, always the latest version, in
-  French and English (PDF and Word), with every previous version.
 - A discreet *Staff dashboard* link in the footer; the dashboard is useless
   without a staff login.
 
@@ -148,7 +147,9 @@ The menu is grouped by trade:
 | Finance | Suppliers · Payables | Supplier invoices = stock entry, payables |
 | Quality | ISO 22000 | Clause-by-clause checklist with owner and evidence |
 | Quality | Complaints | Feedback & complaints register |
-| Team | Team Chat, Notifications, Activity Log, Team · Access, Settings | |
+| Team | Team Chat, Notifications, Activity Log, Team · Access | |
+| System | Cahier des charges | This document: version in force, FR/EN, every earlier version |
+| System | Settings | Database connection, demo data |
 
 **Ask me (staff).** On every dashboard page, the **Ask me** button answers
 questions about the live operation and takes the employee straight to the
@@ -257,9 +258,13 @@ Each order, client, recipe or ingredient in the answer is a link to it.
   repository. A **build** turns it into PDF and Word, archives that version
   under `cahier/versions/<version>/`, and records it in
   `cahier/versions.json`.
-- The **home page** always offers the *current* version (French and English,
-  PDF and Word) at a fixed address, so a download is always up to date.
-  Every other version stays listed under **Previous versions**.
+- The dashboard page **System → Cahier des charges** always offers the
+  *current* version (French and English, PDF and Word) at a fixed address,
+  so a download is always up to date, and lists every version with its
+  status (*In force* / *Archived*) and the period it was in force, as cards
+  or as a list. It is not on the public website.
+- Access is a permission like any module (*Cahier des charges* in
+  Team · Access), per role or per person; managers have it by default.
 - **Rollback**: any earlier version can be made the current one again
   (GitHub → Actions → *Cahier des charges — rollback*, or
   `node tools/cahier.mjs rollback V1.0`). Nothing is deleted: the newer
@@ -284,9 +289,10 @@ Each order, client, recipe or ingredient in the answer is a link to it.
 - Help assistant on every page (13/11/2026, #8).
 - Family Portal: pink theme for a girl, blue for a boy (13/11/2026, #9).
 - One contact number everywhere: +961 70 341 002 (13/11/2026, #10).
-- Cahier des charges in French and English on the home page, with every previous version and rollback (18/11/2026).
+- Cahier des charges in French and English, with every previous version and rollback (18/11/2026).
 - The Help button is renamed **Ask me** on every page (18/11/2026).
 - Ask me for staff: my orders, delivered today, what to prepare, ready / on the road / late, a client, a product, an ingredient or an order number — with links that open the page, order, client or item (18/11/2026).
+- Cahier des charges moved from the public home page into the dashboard (System → Cahier des charges), with its own permission, cards and list views (18/11/2026).
 
 ### V1.0 — 28/08/2026 (platform launch)
 

@@ -12,7 +12,7 @@
  *
  * The version and date come from each .md's front matter (version: / date:).
  * The current version is always published at fixed names in cahier/, so the
- * home page download link never changes:
+ * dashboard download link never changes:
  *   cahier/TINYTUMMY_CAHIER_DES_CHARGES_FR.{pdf,docx}
  *   cahier/TINYTUMMY_SPECIFICATION_EN.{pdf,docx}
  * `build` needs pandoc and Playwright; `rollback` and `list` need only Node.
@@ -155,7 +155,7 @@ async function build(srcDir) {
   m.current = version;
   writeManifest(m);
   publishCurrent(version);
-  console.log(`✓ ${version} is now the current version (home page + fixed download links)`);
+  console.log(`✓ ${version} is now the current version (dashboard + fixed download links)`);
 }
 
 function rollback(version) {

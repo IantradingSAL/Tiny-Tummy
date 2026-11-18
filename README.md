@@ -15,7 +15,7 @@ with a Supabase-backed production dashboard.
 | `contact.html` | Phone / WhatsApp / email + message form |
 | `dashboard.html` | **Ops dashboard** — full operation: orders pipeline (order → kitchen → portioning → QC → dispatch → delivery), lot inventory with BOM + FEFO and auto-requisitions, profit margins, ISO 22000 checklist, complaints with escalation, team chat, push log (sent/delivered/opened), age programs, users & permission matrix. Runs on demo data in the browser until Supabase is connected. |
 | `supabase/schema2_operations.sql` | Operations tables (`tt_*`) with `tt_has_perm()` RLS + FEFO consume function + seeds |
-| `cahier/` | **Cahier des charges** (FR) + Specification (EN): `.md` sources, current PDF/Word at fixed names, every version archived in `cahier/versions/`, listed in `versions.json` and on the home page. `node tools/cahier.mjs build` / `rollback V1.0` |
+| `cahier/` | **Cahier des charges** (FR) + Specification (EN): `.md` sources, current PDF/Word at fixed names, every version archived in `cahier/versions/`, listed in `versions.json` and in the dashboard (System → Cahier des charges). `node tools/cahier.mjs build` / `rollback V1.0` |
 | `iso22000-checklist.csv` | ISO 22000 template sheet (clause / requirement / status / owner / evidence) |
 | `js/products-data.js` | Static catalog (fallback until Supabase is connected) |
 | `js/supabase-config.js` | Paste your Supabase URL + anon key here |

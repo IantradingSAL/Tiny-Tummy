@@ -524,6 +524,39 @@ table.pm tfoot td { font-size:.74rem; font-weight:700; color:var(--soft); border
   .u-role { display:none; }
 }
 @media (prefers-reduced-motion:reduce){ .u-card,.u-kpi,.u-ib,.u-toast,.sw span,.sw span::before { transition:none; } }
+/* Cahier des charges */
+.cah-hero { display:grid; grid-template-columns:minmax(200px,.8fr) 2fr; gap:22px; align-items:center; background:linear-gradient(135deg,#0e3345,#17455e 60%,#1d5674); color:#e9eef1; border-radius:18px; padding:22px 24px; margin-bottom:22px; box-shadow:0 10px 30px rgba(14,51,69,.18); }
+.cah-k { font-size:.7rem; font-weight:800; letter-spacing:.16em; text-transform:uppercase; color:#f0b64b; }
+.cah-v { font-family:'Baloo 2',sans-serif; font-size:2.6rem; font-weight:800; color:#fff; line-height:1.1; }
+.cah-d { font-size:.85rem; color:#b9ccd6; }
+.cah-hero-r { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.cah-doc { background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.14); border-radius:14px; padding:14px 16px; }
+.cah-doc b { color:#fff; display:block; } .cah-doc small { color:#b9ccd6; display:block; margin-bottom:10px; }
+.cah-doc > div { display:flex; gap:8px; flex-wrap:wrap; }
+.cah-btn { display:inline-flex; align-items:center; gap:6px; background:#f0b64b; color:#0e3345; font-weight:800; font-size:.8rem; border-radius:999px; padding:7px 13px; text-decoration:none; }
+.cah-btn.ghost { background:transparent; color:#fff; border:1.5px solid rgba(255,255,255,.45); }
+.cah-btn:hover { filter:brightness(1.06); }
+.cah-chip { display:inline-flex; align-items:center; gap:4px; font-size:.72rem; font-weight:800; border-radius:999px; padding:3px 10px; background:#eef2f4; color:#64808e; white-space:nowrap; }
+.cah-chip.on { background:#e6f4ef; color:#226a58; }
+.cah-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(270px,1fr)); gap:14px; }
+.cah-card { background:#fff; border:1px solid #e7e1d2; border-radius:16px; padding:16px 18px; box-shadow:0 4px 16px rgba(23,69,94,.06); }
+.cah-card.cur { border-color:#f0b64b; box-shadow:0 0 0 3px rgba(240,182,75,.25), 0 4px 16px rgba(23,69,94,.06); }
+.cah-ch { display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; }
+.cah-ver { font-family:'Baloo 2',sans-serif; font-weight:800; font-size:1.5rem; color:#17455e; }
+.cah-per { font-size:.82rem; color:#64808e; margin-bottom:12px; display:flex; align-items:center; gap:6px; }
+.cah-row { display:flex; align-items:center; gap:8px; flex-wrap:wrap; padding:8px 0; border-top:1px solid #f0ebdf; }
+.cah-row > span { font-size:.7rem; font-weight:800; background:#123c56; color:#fff; border-radius:6px; padding:2px 7px; }
+.cah-a { display:inline-flex; align-items:center; gap:5px; font-weight:700; font-size:.82rem; color:#17455e; text-decoration:none; border:1px solid #d9e2e7; border-radius:8px; padding:5px 10px; background:#fff; white-space:nowrap; }
+.cah-a:hover { background:#f3f7f9; } .cah-a.ghost { color:#64808e; }
+.cah-tbl { width:100%; border-collapse:collapse; font-size:.9rem; }
+.cah-tbl th { background:#17455e; color:#fff; text-align:left; padding:11px 16px; font-size:.72rem; letter-spacing:.08em; text-transform:uppercase; }
+.cah-tbl td { padding:12px 16px; border-top:1px solid #efe9dc; vertical-align:middle; }
+.cah-tbl b { font-family:'Baloo 2',sans-serif; font-size:1.1rem; color:#17455e; }
+.cah-tbl tr.cur td { background:#fffaf0; }
+.cah-tbl td:nth-child(3) { white-space:nowrap; }
+.cah-tbl td.cah-l { white-space:nowrap; } .cah-tbl td.cah-l a { margin-right:6px; }
+@media (max-width:900px) { .cah-hero { grid-template-columns:1fr; } }
+@media (max-width:560px) { .cah-hero-r { grid-template-columns:1fr; } .cah-v { font-size:2.1rem; } }
 </style>
 </head>
 <body>
@@ -553,6 +586,8 @@ table.pm tfoot td { font-size:.74rem; font-weight:700; color:var(--soft); border
     <a data-m="notify"><span>🔔</span><em>Notifications</em></a>
     <a data-m="audit"><span>📜</span><em>Activity Log</em></a>
     <a data-m="users"><span>👥</span><em>Team · Access</em></a>
+    <div class="grp">System</div>
+    <a data-m="cahier"><span>📘</span><em>Cahier des charges</em></a>
     <a data-m="settings"><span>⚙️</span><em>Settings</em></a>
   </nav>
   <div class="who">
@@ -663,12 +698,13 @@ var PERM_KEYS = [
   ['push_send', 'Send push notifications'],
   ['reports_view', 'Margins & reports'],
   ['audit_view', 'Activity log (who did what, when)'],
-  ['users_manage', 'Users & permissions']
+  ['users_manage', 'Users & permissions'],
+  ['cahier_view', 'Cahier des charges (specification)']
 ];
 var ROLES = ['super_admin', 'manager', 'kitchen', 'delivery', 'support'];
 SEED.role_perms = (function () {
   var def = {
-    manager: ['orders_manage','kitchen_manage','inventory_manage','bom_manage','delivery_manage','suppliers_manage','iso_manage','complaints_manage','programs_manage','chat_use','push_send','reports_view','audit_view'],
+    manager: ['orders_manage','kitchen_manage','inventory_manage','bom_manage','delivery_manage','suppliers_manage','iso_manage','complaints_manage','programs_manage','chat_use','push_send','reports_view','audit_view','cahier_view'],
     kitchen: ['kitchen_manage','inventory_manage','chat_use'],
     delivery: ['delivery_manage','chat_use'],
     support: ['orders_manage','complaints_manage','chat_use']
@@ -1030,14 +1066,19 @@ function can(key) {
   if (u.role === 'super_admin') return true;
   var rp = store('role_perms').all();
   for (var i = 0; i < rp.length; i++) if (rp[i].role === u.role && rp[i].key === key) return rp[i].allowed;
-  return false;
+  // a permission added after this browser saved its roles: use the role's default until someone sets it
+  return roleDefault(u.role, key);
+}
+function roleDefault(role, key) {
+  var d = SEED.role_perms.filter(function (x) { return x.role === role && x.key === key; })[0];
+  return d ? d.allowed : false;
 }
 var MODULE_PERMS = {
   overview: 'reports_view', orders: 'orders_manage', programs: 'programs_manage',
   kitchen: 'kitchen_manage', bom: 'bom_manage', inventory: 'inventory_manage',
   requisitions: 'inventory_manage', delivery: 'delivery_manage', suppliers: 'suppliers_manage', iso: 'iso_manage',
   complaints: 'complaints_manage', chat: 'chat_use', notify: 'push_send',
-  audit: 'audit_view', users: 'users_manage', settings: null
+  audit: 'audit_view', users: 'users_manage', cahier: 'cahier_view', settings: null
 };
 
 /* ── FEFO consumption + auto-requisition ── */
@@ -1122,7 +1163,7 @@ function goCases(f) { caseFilter = f; caseCat = 'all'; nav('complaints'); }
 function goSup(f) { supFilter = f; nav('suppliers'); }
 
 /* ── router ── */
-var VIEWS = ['overview','orders','programs','kitchen','bom','inventory','requisitions','delivery','suppliers','iso','complaints','chat','notify','audit','users','settings'];
+var VIEWS = ['overview','orders','programs','kitchen','bom','inventory','requisitions','delivery','suppliers','iso','complaints','chat','notify','audit','users','cahier','settings'];
 var current = 'overview';
 function nav(m) {
   current = m; location.hash = m;
@@ -3155,7 +3196,7 @@ var PERM_ICON = {
   orders_manage: 'cart', kitchen_manage: 'chef', inventory_manage: 'box', bom_manage: 'clipboard',
   delivery_manage: 'truck', suppliers_manage: 'factory', iso_manage: 'shield', complaints_manage: 'megaphone',
   programs_manage: 'baby', chat_use: 'chat', push_send: 'bell', reports_view: 'chart',
-  audit_view: 'history', users_manage: 'users'
+  audit_view: 'history', users_manage: 'users', cahier_view: 'book'
 };
 var UV = { tab: 'team', role: 'all', q: '' };
 function roleMeta(r) { return ROLE_META[r] || { e: 'users', l: r, d: '', c: '#555', bg: '#eee' }; }
@@ -3249,7 +3290,7 @@ RENDER.users = function () {
     var cells = ROLES.map(function (r) {
       var row = rp.find(function (x) { return x.role === r && x.key === pk[0]; });
       var lock = r === 'super_admin';
-      var on = lock || (row && row.allowed);
+      var on = lock || (row ? row.allowed : roleDefault(r, pk[0]));
       return '<td><label class="sw" title="' + (lock ? 'Super admin always has this' : roleMeta(r).l + ' · ' + pk[1]) + '">' +
         '<input type="checkbox" ' + (on ? 'checked' : '') + (lock || !admin ? ' disabled' : '') +
         ' onchange="setPerm(\'' + r + '\',\'' + pk[0] + '\',this.checked)" aria-label="' + roleMeta(r).l + ': ' + esc(pk[1]) + '"><span></span></label></td>';
@@ -3364,6 +3405,61 @@ function setPerm(role, key, allowed) {
 }
 
 /* ── Settings ── */
+/* ── Cahier des charges: always the current version (cahier/versions.json), FR + EN, every earlier version ── */
+var CAHIER = { m: null, err: false };
+function cahierLoad() {
+  fetch('cahier/versions.json', { cache: 'no-store' }).then(function (r) { return r.json(); })
+    .then(function (m) { CAHIER.m = m; CAHIER.err = false; if (current === 'cahier') render(); })
+    .catch(function () { CAHIER.err = true; if (current === 'cahier') render(); });
+}
+function cahierDate(iso) { var p = String(iso).split('-'); return p[2] + '/' + p[1] + '/' + p[0]; }
+var CAH_VIEW = (function () { try { return localStorage.getItem('ttops_cahier_view') || 'cards'; } catch (e) { return 'cards'; } })();
+function cahView(v) { CAH_VIEW = v; try { localStorage.setItem('ttops_cahier_view', v); } catch (e) {} render(); }
+function cahLinks(x, lang, cls, short) {
+  var d = x[lang], L = lang.toUpperCase(), pre = short ? '' : L + ' · ';
+  return '<a class="' + cls + '" href="' + esc(d.pdf) + '" target="_blank" rel="noopener" title="Open the ' + L + ' PDF">' + ic('eye') + ' ' + pre + 'PDF</a>' +
+    '<a class="' + cls + ' ghost" href="' + esc(d.docx) + '" download title="Download the ' + L + ' Word file">' + ic('save') + ' ' + pre + 'Word</a>';
+}
+RENDER.cahier = function () {
+  if (!CAHIER.m && !CAHIER.err) cahierLoad();
+  var m = CAHIER.m;
+  var head = '<div class="pagehead"><div><h1>📘 Cahier des charges</h1><div class="sub">How the Tiny Tummy platform works — the version in force, in French and English, and every earlier version</div></div></div>';
+  if (!m) return head + '<div class="panel"><p class="muted">' + (CAHIER.err ? 'The version list could not be read. ' +
+    '<a href="cahier/TINYTUMMY_CAHIER_DES_CHARGES_FR.pdf" target="_blank" rel="noopener">French PDF</a> · <a href="cahier/TINYTUMMY_SPECIFICATION_EN.pdf" target="_blank" rel="noopener">English PDF</a>' : 'Loading…') + '</p></div>';
+  var vs = m.versions.slice().sort(function (a, b) { return a.date < b.date ? 1 : -1; });
+  var cur = vs.filter(function (x) { return x.version === m.current; })[0] || vs[0];
+  // a version is in force from its date until the next one's date (the current one: until today)
+  var until = {}; vs.forEach(function (x, i) { until[x.version] = i ? vs[i - 1].date : null; });
+  var fixed = { fr: { pdf: 'cahier/TINYTUMMY_CAHIER_DES_CHARGES_FR.pdf?v=' + encodeURIComponent(cur.version), docx: 'cahier/TINYTUMMY_CAHIER_DES_CHARGES_FR.docx?v=' + encodeURIComponent(cur.version) },
+                en: { pdf: 'cahier/TINYTUMMY_SPECIFICATION_EN.pdf?v=' + encodeURIComponent(cur.version), docx: 'cahier/TINYTUMMY_SPECIFICATION_EN.docx?v=' + encodeURIComponent(cur.version) } };
+  function status(x) { return x.version === cur.version ? '<span class="cah-chip on">' + ic('check') + ' In force</span>' : '<span class="cah-chip">Archived</span>'; }
+  function period(x) { return cahierDate(x.date) + ' → ' + (x.version === cur.version ? 'today' : until[x.version] ? cahierDate(until[x.version]) : '—'); }
+
+  var hero = '<div class="cah-hero"><div class="cah-hero-l"><span class="cah-k">Version in force</span>' +
+    '<div class="cah-v">' + esc(cur.version) + '</div><div class="cah-d">since ' + cahierDate(cur.date) + ' · ' + vs.length + ' version' + (vs.length > 1 ? 's' : '') + ' on file</div></div>' +
+    '<div class="cah-hero-r"><div class="cah-doc"><b>Français</b><small>Cahier des charges</small><div>' + cahLinks(fixed, 'fr', 'cah-btn') + '</div></div>' +
+    '<div class="cah-doc"><b>English</b><small>Specification</small><div>' + cahLinks(fixed, 'en', 'cah-btn') + '</div></div></div></div>';
+
+  var bar = '<div class="u-bar"><h3 style="margin:0">All versions <span class="muted" style="font-weight:600">(' + vs.length + ')</span></h3>' +
+    '<div class="u-tabs" style="margin:0"><button class="' + (CAH_VIEW === 'cards' ? 'on' : '') + '" onclick="cahView(\'cards\')">' + ic('grid') + ' Cards</button>' +
+    '<button class="' + (CAH_VIEW === 'list' ? 'on' : '') + '" onclick="cahView(\'list\')">' + ic('clipboard') + ' List</button></div></div>';
+
+  var body = CAH_VIEW === 'list'
+    ? '<div class="panel" style="padding:0;overflow:hidden"><div class="tblwrap"><table class="cah-tbl"><thead><tr><th>Version</th><th>Status</th><th>In force</th><th>French</th><th>English</th></tr></thead><tbody>' +
+      vs.map(function (x) {
+        return '<tr' + (x.version === cur.version ? ' class="cur"' : '') + '><td><b>' + esc(x.version) + '</b></td><td>' + status(x) + '</td><td>' + period(x) + '</td>' +
+          '<td class="cah-l">' + cahLinks(x, 'fr', 'cah-a', 1) + '</td><td class="cah-l">' + cahLinks(x, 'en', 'cah-a', 1) + '</td></tr>';
+      }).join('') + '</tbody></table></div></div>'
+    : '<div class="cah-grid">' + vs.map(function (x) {
+        return '<div class="cah-card' + (x.version === cur.version ? ' cur' : '') + '"><div class="cah-ch"><span class="cah-ver">' + esc(x.version) + '</span>' + status(x) + '</div>' +
+          '<div class="cah-per">' + ic('history') + ' ' + period(x) + '</div>' +
+          '<div class="cah-row"><span>FR</span>' + cahLinks(x, 'fr', 'cah-a') + '</div><div class="cah-row"><span>EN</span>' + cahLinks(x, 'en', 'cah-a') + '</div></div>';
+      }).join('') + '</div>';
+
+  var foot = '<div class="u-tip" style="margin-top:16px"><span>' + ic('info') + '</span><div><b>Going back to an earlier version.</b> Every version stays on file. To make one the version in force again: GitHub → Actions → <b>Cahier des charges — rollback</b>, type the version (e.g. V1.0). Run it again with the newer version to return.</div></div>';
+  return head + hero + bar + body + foot;
+};
+
 RENDER.settings = function () {
   return '<div class="pagehead"><div><h1>⚙️ Settings</h1></div></div>' +
     '<div class="panel"><h3>🔌 Supabase</h3>' +
@@ -3436,6 +3532,7 @@ function closeDlg() { document.getElementById('dlg').close(); }
     wheat: '<path d="M2 22 16 8"/><path d="M3.47 12.53 5 11l1.53 1.53a3.5 3.5 0 0 1 0 4.94L5 19l-1.53-1.53a3.5 3.5 0 0 1 0-4.94Z"/><path d="M7.47 8.53 9 7l1.53 1.53a3.5 3.5 0 0 1 0 4.94L9 15l-1.53-1.53a3.5 3.5 0 0 1 0-4.94Z"/><path d="M11.47 4.53 13 3l1.53 1.53a3.5 3.5 0 0 1 0 4.94L13 11l-1.53-1.53a3.5 3.5 0 0 1 0-4.94Z"/><path d="M20 2h2v2a4 4 0 0 1-4 4h-2V6a4 4 0 0 1 4-4Z"/>',
     cherry: '<path d="M2 17a5 5 0 0 0 10 0c0-2.76-2.5-5-5-3-2.5-2-5 .24-5 3Z"/><path d="M12 17a5 5 0 0 0 10 0c0-2.76-2.5-5-5-3-2.5-2-5 .24-5 3Z"/><path d="M7 14c3.22-2.91 4.29-8.75 5-12 1.66 2.38 4.94 9 5 12"/><path d="M22 9c-4.29 0-7.14-2.33-10-7 5.71 0 10 4.67 10 7Z"/>'
   };
+  add.book = '<path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/><path d="M8 7h8"/><path d="M8 11h6"/>';
   for (var k in add) ICONS[k] = add[k];
 })();
 var EMOJI_ICON = {
@@ -3443,7 +3540,7 @@ var EMOJI_ICON = {
   '🚚': 'truck', '🏭': 'factory', '🛡': 'shield', '📣': 'megaphone', '💬': 'chat', '🔔': 'bell', '📜': 'history',
   '👥': 'users', '⚙': 'settings', '👑': 'crown', '🥕': 'sprout', '🎭': 'eye', '🔪': 'utensils', '🔥': 'flame',
   '🥣': 'bowl', '⚖': 'scale', '❄': 'snow', '✅': 'checkc', '⏰': 'alarm', '⚠': 'alert', '⚽': 'forward',
-  '⏱': 'timer', '👷': 'hardhat', '💡': 'bulb', '⏳': 'hourglass', '👤': 'user', '⚡': 'zap', '📋': 'clipboard',
+  '📘': 'book', '⏱': 'timer', '👷': 'hardhat', '💡': 'bulb', '⏳': 'hourglass', '👤': 'user', '⚡': 'zap', '📋': 'clipboard',
   '🔒': 'lock', '🔐': 'lock', '📍': 'pin', '🛵': 'bike', '🚫': 'ban', '❓': 'help', '👍': 'thumb', '🧪': 'flask',
   '🚨': 'siren', '💵': 'cash', '❤': 'heart', '🎉': 'sparkles', '💰': 'wallet', '🔎': 'search', '🔍': 'search',
   '☑': 'checksq', '🏁': 'flag', '📐': 'ruler', '🔮': 'target', '🌡': 'thermo', '✍': 'pen', '💼': 'briefcase',
