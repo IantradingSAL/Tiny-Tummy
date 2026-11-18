@@ -568,6 +568,9 @@ table.pm tfoot td { font-size:.74rem; font-weight:700; color:var(--soft); border
 .il-cnt input { width:78px; padding:6px 8px; border:1px solid #d9e2e7; border-radius:8px; font:inherit; }
 .ol-bar { display:block; width:90px; }
 .t.ol td { padding-top:12px; padding-bottom:12px; }
+.t.dl .stp-sel { max-width:130px; }
+.t.dl td:nth-child(3) { max-width:170px; }
+.t.dl .il-acts .btn.s { padding-left:10px; padding-right:10px; }
 .t.ol td .il-sub { white-space:normal; max-width:220px; }
 .t.ol td:nth-child(2) .il-sub.muted { max-width:200px; }
 .il-acts { display:flex; gap:6px; align-items:center; justify-content:flex-end; flex-wrap:nowrap; } .il-acts > * { margin:0 !important; flex:none; }
@@ -964,6 +967,8 @@ SEED.orders = [
     history: [{ at: nowTs(), what: 'Order placed' }, { at: nowTs(), what: 'Kitchen complete · QC passed' }, { at: nowTs(), what: 'Dispatched with Ali H.' }], created: today(-1) },
   { id: 'o4', code: 'TT-2026-038', customer: 'Joelle S.', phone: '+961 81 224 678', address: 'Baabda',
     items: [{ product: 'p4', qty: 3 }, { product: 'p2', qty: 3 }], status: 'delivered', agent: 'a2', program: 'pr1',
+    stage_times: { 'new': Date.now() - 30 * 3600000, dispatch: Date.now() - 26.5 * 3600000, delivering: Date.now() - 26 * 3600000, delivered: Date.now() - 25.62 * 3600000 },
+    track: { p: 100, km: roadKm('TT-2026-038'), eta_min: etaMin(roadKm('TT-2026-038')), started: Date.now() - 26 * 3600000, promised: Date.now() - 25.55 * 3600000, delayed: false },
     steps: KITCHEN_STEPS.map(function (s) { return { s: s, done: true }; }),
     history: [{ at: nowTs(), what: 'Weekly program order (First Tastes)' }, { at: nowTs(), what: 'Delivered by Marwan D. ✓' }], created: today(-1) }
 ];
@@ -2737,6 +2742,108 @@ function saveAgent() {
 }
 function dayStart() { var d = new Date(); d.setHours(0, 0, 0, 0); return d.getTime(); }
 
+/* Dispatch & Delivery · Board / List */
+var DV = { view: (function () { try { return localStorage.getItem('ttops_delivery_view') || 'board'; } catch (e) { return 'board'; } })(),
+  st: 'active', period: '0', agent: 'all', q: '' };
+function dvSet(k, v) { DV[k] = v; if (k === 'view') { try { localStorage.setItem('ttops_delivery_view', v); } catch (e) {} } render(); }
+function dvBar() {
+  return '<div class="u-bar"><div class="u-tabs" style="margin:0"><button class="' + (DV.view === 'board' ? 'on' : '') + '" onclick="dvSet(\'view\',\'board\')">' + ic('grid') + ' Board</button>' +
+    '<button class="' + (DV.view === 'list' ? 'on' : '') + '" onclick="dvSet(\'view\',\'list\')">' + ic('clipboard') + ' List</button></div></div>';
+}
+function dlInfo(o) {
+  var st = o.stage_times || {}, t = o.track || null;
+  var out = st.delivering || null, done = st.delivered || null;
+  var promised = t && t.promised ? t.promised : null;
+  var mins = out && done ? Math.round((done - out) / 60000) : null;
+  var onTime = done && promised ? done <= promised + 60000 : null;
+  var state = o.status === 'dispatch' ? ['Ready', '#2f6fb0'] : o.status === 'delivering' ? (t && (t.delayed || (promised && promised < Date.now())) ? ['Delayed', '#c98a1b'] : ['On the road', '#17455e']) : ['Delivered', '#2e8770'];
+  return { ready: st.dispatch || null, out: out, done: done, promised: promised, mins: mins, onTime: onTime, state: state, km: t && t.km ? t.km : roadKm(o.code) };
+}
+function dlRows(orders) {
+  var q = DV.q.trim().toLowerCase(), from = DV.period === 'all' ? 0 : new Date(today(-Number(DV.period)) + 'T00:00:00').getTime();
+  return orders.filter(function (o) {
+    if (['dispatch', 'delivering', 'delivered'].indexOf(o.status) < 0) return false;
+    if (DV.st === 'active' && o.status === 'delivered') return false;
+    if (DV.st === 'delivered' && o.status !== 'delivered') return false;
+    if (DV.st === 'delayed' && dlInfo(o).state[0] !== 'Delayed') return false;
+    if (DV.agent !== 'all' && (DV.agent === '__none__' ? o.agent : o.agent !== DV.agent)) return false;
+    if (from && o.status === 'delivered') {
+      var d = dlInfo(o).done || new Date(o.created + 'T12:00:00').getTime();
+      if (d < from) return false;
+    }
+    if (q && [o.code, o.customer, o.phone, o.address].join(' ').toLowerCase().indexOf(q) < 0) return false;
+    return true;
+  }).sort(function (a, b) {
+    var ord = { dispatch: 0, delivering: 1, delivered: 2 }, x = ord[a.status] - ord[b.status];
+    if (x) return x;
+    var ia = dlInfo(a), ib = dlInfo(b);
+    return a.status === 'delivered' ? (ib.done || 0) - (ia.done || 0) : (ia.ready || ia.out || 0) - (ib.ready || ib.out || 0);
+  });
+}
+function dlListView(orders, agents, onDuty, load, sugg) {
+  function opt(v, l, cur) { return '<option value="' + esc(v) + '"' + (cur === v ? ' selected' : '') + '>' + esc(l) + '</option>'; }
+  var filters = '<div class="lg-f">' +
+    '<div class="u-search" style="margin:0"><span>' + ic('search') + '</span><input placeholder="Search order, customer, phone, address…" value="' + esc(DV.q) + '" onchange="dvSet(\'q\',this.value)"></div>' +
+    '<span class="lg-q">' + [['active', 'Ready + on the road'], ['delayed', 'Delayed'], ['delivered', 'Delivered'], ['all', 'All']].map(function (x) {
+      return '<button class="' + (DV.st === x[0] ? 'on' : '') + '" onclick="dvSet(\'st\',\'' + x[0] + '\')">' + x[1] + '</button>'; }).join('') + '</span>' +
+    (DV.st === 'delivered' || DV.st === 'all' ? '<span class="lg-q">' + [['0', 'Today'], ['7', '7 d'], ['30', '30 d'], ['all', 'Any date']].map(function (x) {
+      return '<button class="' + (DV.period === x[0] ? 'on' : '') + '" onclick="dvSet(\'period\',\'' + x[0] + '\')">' + x[1] + '</button>'; }).join('') + '</span>' : '') +
+    '<select onchange="dvSet(\'agent\',this.value)">' + opt('all', 'All drivers', DV.agent) + opt('__none__', 'No driver yet', DV.agent) +
+      agents.map(function (a) { return opt(a.id, a.name + (a.active ? '' : ' (off duty)'), DV.agent); }).join('') + '</select>' +
+    '<button class="btn o s" onclick="dlCsv()">' + ic('save') + ' CSV</button></div>';
+  var rows = dlRows(orders), sum = { km: 0, n: 0, mins: 0, timed: 0, ontime: 0, judged: 0 };
+  var agentOpts = function (sel) { return onDuty.map(function (a) { return '<option value="' + a.id + '"' + (sel === a.id ? ' selected' : '') + '>' + esc(a.name) + ' (' + (load[a.id] || 0) + ')</option>'; }).join(''); };
+  var body = rows.map(function (o) {
+    var x = dlInfo(o), a = byId(agents, o.agent);
+    sum.n++; sum.km += Number(x.km) || 0;
+    if (x.mins != null) { sum.mins += x.mins; sum.timed++; }
+    if (x.onTime != null) { sum.judged++; if (x.onTime) sum.ontime++; }
+    var timing;
+    if (o.status === 'dispatch') timing = x.ready ? 'waiting ' + ago(x.ready) : '—';
+    else if (o.status === 'delivering') {
+      var left = x.promised ? Math.round((x.promised - Date.now()) / 60000) : null;
+      timing = 'out ' + (x.out ? fmtClock(x.out) : '—') + '<div class="il-sub">' + (x.promised ? 'ETA <b>' + fmtClock(x.promised) + '</b>' + (left >= 0 ? ' · ' + left + ' min left' : ' · ' + (-left) + ' min over') : '') + '</div>' +
+        (o.track ? '<span class="stp-bar ol-bar" style="margin-top:4px"><i style="width:' + (o.track.p || 0) + '%"></i></span>' : '');
+    } else timing = (x.done ? fmtClock(x.done) + ' · ' + String(new Date(x.done).toISOString().slice(0, 10)).split('-').reverse().join('/') : '<span class="muted">time not recorded</span>') +
+      '<div class="il-sub">' + (x.mins != null ? x.mins + ' min on the road' : '') + '</div>';
+    var result = x.onTime == null ? '<span class="muted">—</span>' : x.onTime ? '<span class="ostat" style="--sc:#2e8770">' + ic('check') + ' On time</span>' : '<span class="ostat" style="--sc:#b23a48">' + ic('alarm') + ' Late</span>';
+    var drv = a ? '<span class="stp-av" style="margin-right:6px">' + initials(a.name) + '</span>' + esc(a.name) : '<span class="muted">—</span>';
+    var acts;
+    if (o.status === 'dispatch') acts = onDuty.length
+      ? '<select id="dlsel-' + o.id + '" class="stp-sel" onclick="event.stopPropagation()">' + agentOpts(sugg) + '</select><button class="btn p s" onclick="event.stopPropagation();dispatchTo(\'' + o.id + '\',document.getElementById(\'dlsel-' + o.id + '\').value)">' + ic('truck') + ' Dispatch</button>'
+      : '<span class="chip open">No agent on duty</span>';
+    else if (o.status === 'delivering') acts = '<button class="u-ib" title="Update location (agent GPS ping)" onclick="event.stopPropagation();trackPing(\'' + o.id + '\')">' + ic('pin') + '</button>' +
+      '<button class="u-ib" title="Report a 15 min delay — the customer is told" onclick="event.stopPropagation();trackDelay(\'' + o.id + '\')">' + ic('alarm') + '</button>' +
+      '<button class="btn g s" onclick="event.stopPropagation();orderAct(\'' + o.id + '\',\'delivered\')">' + ic('check') + ' Delivered</button>';
+    else acts = '<button class="btn o s" onclick="event.stopPropagation();openOrder(\'' + o.id + '\')">Open</button>';
+    return '<tr class="rowlink" onclick="openOrder(\'' + o.id + '\')">' +
+      '<td><b>' + esc(o.code) + '</b>' + (o.batch_lot ? '<div><code class="lotc">' + esc(o.batch_lot) + '</code></div>' : '') + '</td>' +
+      '<td><b>' + esc(o.customer) + '</b><div class="il-sub"><a class="dtel" href="tel:' + esc(String(o.phone || '').replace(/\s/g, '')) + '" onclick="event.stopPropagation()">' + ic('phone') + ' ' + esc(o.phone || '') + '</a></div></td>' +
+      '<td>' + ic('pin') + ' ' + esc(o.address || '—') + '<div class="il-sub muted">' + x.km + ' km · ~' + etaMin(x.km) + ' min</div></td>' +
+      '<td><span class="ostat" style="--sc:' + x.state[1] + '">' + x.state[0] + '</span></td>' +
+      '<td style="white-space:nowrap">' + drv + '</td>' +
+      '<td>' + timing + (x.onTime == null ? '' : '<div style="margin-top:4px">' + result + '</div>') + '</td>' +
+      '<td><div class="il-acts">' + acts + '</div></td></tr>';
+  }).join('');
+  var foot = '<tfoot><tr><td><b>' + sum.n + ' deliver' + (sum.n === 1 ? 'y' : 'ies') + '</b></td><td></td><td><b>' + Math.round(sum.km * 10) / 10 + ' km</b></td><td colspan="2"></td>' +
+    '<td>' + (sum.timed ? '<b>' + Math.round(sum.mins / sum.timed) + ' min</b> <span class="muted">average on the road</span>' : '') +
+      (sum.judged ? '<div><b>' + Math.round(sum.ontime / sum.judged * 100) + '%</b> <span class="muted">on time</span></div>' : '') + '</td><td></td></tr></tfoot>';
+  return filters + '<div class="panel" style="padding:0;overflow:hidden"><div class="tbl-scroll"><table class="t reg il ol dl"><thead><tr>' +
+    '<th>Order</th><th>Customer</th><th>Address</th><th>Status</th><th>Driver</th><th>Time · result</th><th></th></tr></thead><tbody>' +
+    (body || '<tr><td colspan="7" class="muted" style="text-align:center;padding:26px">No deliveries match these filters.</td></tr>') + '</tbody>' + foot + '</table></div></div>';
+}
+function dlCsv() {
+  var agents = store('agents').all();
+  var lines = [['Order', 'Customer', 'Phone', 'Address', 'Km', 'Status', 'Driver', 'Ready at', 'Out at', 'Promised', 'Delivered at', 'Minutes on the road', 'On time']]
+    .concat(dlRows(store('orders').all()).map(function (o) {
+      var x = dlInfo(o), a = byId(agents, o.agent), f = function (ms) { return ms ? new Date(ms).toISOString().slice(0, 16).replace('T', ' ') : ''; };
+      return [o.code, o.customer, o.phone, o.address, x.km, x.state[0], a ? a.name : '', f(x.ready), f(x.out), f(x.promised), f(x.done), x.mins == null ? '' : x.mins, x.onTime == null ? '' : x.onTime ? 'yes' : 'no'];
+    })).map(function (r) { return r.map(function (c) { c = String(c == null ? '' : c); return /[",;\n]/.test(c) ? '"' + c.replace(/"/g, '""') + '"' : c; }).join(','); }).join('\n');
+  var el = document.createElement('a');
+  el.href = URL.createObjectURL(new Blob(['﻿' + lines], { type: 'text/csv;charset=utf-8' }));
+  el.download = 'tinytummy-deliveries-' + today(0) + '.csv'; el.click();
+  logAct('Delivery', 'list export', dlRows(store('orders').all()).length + ' deliveries');
+}
 RENDER.delivery = function () {
   checkDelays();
   var agents = store('agents').all(), orders = store('orders').all();
@@ -2802,7 +2909,8 @@ RENDER.delivery = function () {
 
   return '<div class="pagehead"><div><h1>Dispatch &amp; Delivery</h1><div class="sub">Ready orders get the least-busy agent automatically — one tap dispatches. Track every delivery live; customers are notified on dispatch, near arrival and on any delay.</div></div>' +
     '<span class="pill-row">' + (ready.length > 1 && onDuty.length ? '<button class="btn o" onclick="dispatchAll()">' + ic('zap') + ' Dispatch all ready</button>' : '') +
-    '<button class="btn p" onclick="newAgent()">' + ic('plus') + ' Add agent</button></span></div>' + kpis +
+    '<button class="btn p" onclick="newAgent()">' + ic('plus') + ' Add agent</button></span></div>' + kpis + dvBar() +
+    (DV.view === 'list' ? dlListView(orders, agents, onDuty, load, sugg) :
     '<div class="dgrid"><div>' +
       '<div class="panel"><div class="dh"><h3>' + ic('box') + ' Ready to dispatch <span class="dcount">' + ready.length + '</span></h3></div>' + readyCards + '</div>' +
       '<div class="panel"><div class="dh"><h3>' + ic('truck') + ' On the road <span class="dcount">' + out.length + '</span></h3></div>' + outCards + '</div>' +
@@ -2810,7 +2918,7 @@ RENDER.delivery = function () {
       '<div class="panel"><div class="dh"><h3>' + ic('map') + ' Live map</h3><span class="muted">' + CITY_SPEED_KMH + ' km/h city average · road ×' + ROAD_FACTOR + '</span></div>' + deliveryMap(out, agents) +
         '<div class="dlegend"><span><i style="background:#12394e"></i>Kitchen</span><span><i style="background:#17455e;border-radius:50%"></i>Agent</span><span><i style="background:#fff;border:3px solid #d95d76;border-radius:50%"></i>Customer</span></div></div>' +
       '<div class="panel"><div class="dh"><h3>' + ic('users') + ' Delivery agents</h3><span class="muted">switch = on duty</span></div>' + (agentCards || '<p class="muted">No agents yet.</p>') + '</div>' +
-    '</div></div>';
+    '</div></div>');
 };
 
 /* ── Suppliers · Payables ─────────────────────────────────────────────

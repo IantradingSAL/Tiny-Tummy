@@ -147,7 +147,7 @@ The menu is grouped by trade:
 | Production | Recipes · BOM | Ingredients, process steps, full cost |
 | Production | Inventory · Lots | Stock as lots, FEFO, expiry, reorder |
 | Production | Requisitions | Purchase requests |
-| Delivery | Dispatch · Agents | Dispatch, live map, ETA, agents |
+| Delivery | Dispatch · Agents | Board (ready / on the road cards, live map, agents) and List (every delivery: status, driver, address and distance, ready / out / ETA / delivered times, minutes on the road, on time or late; filters by status, period, driver; dispatch, ping, delay and delivered from the row; totals: km, average time, % on time; CSV) |
 | Finance | Suppliers · Payables | Supplier invoices = stock entry, payables |
 | Quality | ISO 22000 | Clause-by-clause checklist with owner and evidence |
 | Quality | Complaints | Feedback & complaints register |
@@ -314,6 +314,7 @@ Each order, client, recipe or ingredient in the answer is a link to it.
 - Cahier des charges moved from the public home page into the dashboard (System → Cahier des charges), with its own permission, cards and list views (18/11/2026).
 - Inventory: stock ledger of every movement, List view with stock counts, consumption Report by item / order / person / day / month, CSV export (18/11/2026).
 - Orders: professional List view (filters, kitchen progress, batch lot, driver and ETA, value, cost and margin, totals, CSV, stock used by the order) (18/11/2026).
+- Dispatch & Delivery: List view of every delivery with times, on-time result, filters, totals and CSV (18/11/2026).
 
 ### V1.0 — 28/08/2026 (platform launch)
 

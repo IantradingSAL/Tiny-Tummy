@@ -161,7 +161,7 @@ Le menu est regroupé par métier :
 | Production | Recettes · BOM | Ingrédients, étapes, coût complet |
 | Production | Stock · Lots | Stock par lots, FEFO, péremption, réapprovisionnement |
 | Production | Réquisitions | Demandes d'achat |
-| Livraison | Expédition · Livreurs | Expédition, carte en direct, heure d'arrivée, livreurs |
+| Livraison | Expédition · Livreurs | Vue Tableau (cartes prêtes / en route, carte en direct, livreurs) et vue Liste (chaque livraison : statut, livreur, adresse et distance, heures prête / départ / arrivée prévue / livrée, minutes de route, à l'heure ou en retard ; filtres statut, période, livreur ; expédier, position, retard et livrée depuis la ligne ; totaux : km, temps moyen, % à l'heure ; CSV) |
 | Finances | Fournisseurs · Dettes | Facture fournisseur = entrée en stock, dettes |
 | Qualité | ISO 22000 | Liste de contrôle clause par clause avec responsable et preuve |
 | Qualité | Réclamations | Registre des avis et réclamations |
@@ -345,6 +345,7 @@ Chaque commande, client, recette ou ingrédient de la réponse est un lien.
 - Le cahier des charges quitte la page d'accueil publique pour le tableau de bord (Système → Cahier des charges), avec son propre droit d'accès, vues cartes et liste (18/11/2026).
 - Stock : journal de tous les mouvements, vue Liste avec comptages, Rapport de consommation par article / commande / personne / jour / mois, export CSV (18/11/2026).
 - Commandes : vue Liste complète (filtres, avancement cuisine, lot, livreur et heure d'arrivée, valeur, coût et marge, totaux, CSV, stock utilisé par la commande) (18/11/2026).
+- Expédition et livraison : vue Liste de chaque livraison avec heures, résultat à l'heure, filtres, totaux et CSV (18/11/2026).
 
 ### V1.0 — 28/08/2026 (lancement de la plateforme)
 
