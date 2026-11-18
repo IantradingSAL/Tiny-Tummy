@@ -275,6 +275,14 @@ Chaque commande, client, recette ou ingrédient de la réponse est un lien.
    Un Not OK ou une température au-dessus de la limite est enregistré comme
    *Contrôle de livraison non conforme* avec les motifs, et le responsable
    est alerté.
+   **Preuve de livraison** : une photo de la commande à la porte (appareil
+   photo du téléphone, compressée sur l'appareil) et la **signature du
+   client** à l'écran, sous la déclaration *« En signant, je déclare avoir reçu
+   la commande TT-… — articles — complète, scellée et en bon état, à la bonne
+   température »*, sont toutes deux exigées. Si le client est absent, *Client
+   absent* remplace la signature (photo toujours exigée). Photo, signature et
+   déclaration sont conservées avec la commande (*Preuve de livraison* dans la
+   fenêtre de la commande et la liste Livraison).
 
 ## 6. Recettes, stock et achats
 
@@ -461,6 +469,7 @@ Chaque commande, client, recette ou ingrédient de la réponse est un lien.
 - Menu : titres de groupes sans compteur (18/11/2026).
 - Formulaire CQ : chaque point validé par un bouton OK / Not OK ; un bloc par produit avec son poids, sa température et les contrôles de sa recette ; Sign QC verrouillé tant que tout n'est pas rempli ; réglages CQ par recette (grammes de la portion, tolérance, température maximale, conservation, contrôles supplémentaires) (18/11/2026).
 - Contrôle à la livraison (points OK / Not OK, température ≤ 8 °C, reçu par, signature) avant qu'une commande soit livrée ; résultat affiché dans la liste Livraison et sur la commande (18/11/2026).
+- Preuve de livraison : photo et signature du client à l'écran sous une déclaration de réception (client absent : photo seule), conservées avec la commande (18/11/2026).
 - Commandes : contrôle du stock à la prise de commande et à la confirmation ; un manque ouvre une réquisition d'achat pour la commande et bloque l'envoi en cuisine jusqu'à réception (dérogation super administrateur tracée) ; libération automatique à la réception (18/11/2026).
 
 ### V1.1 — du 01/11/2026 au 18/11/2026 (mise en service le 18/11/2026)

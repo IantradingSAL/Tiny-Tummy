@@ -247,6 +247,14 @@ Each order, client, recipe or ingredient in the answer is a link to it.
    received it. Sign stays locked until complete; the order is then
    delivered. A Not OK or a temperature over the limit is recorded as
    *Delivery check failed* with the reasons and the manager is alerted.
+   **Proof of delivery**: a photo of the order at the door (camera on a
+   phone, compressed on the device) and the **customer's signature** on the
+   screen, under the declaration *"By signing, I declare that I have
+   received order TT-… — items — complete, sealed and in good condition, at
+   the right temperature"*, are both required. If the customer is not
+   available, *Customer not available* replaces the signature (photo still
+   required). Photo, signature and declaration are kept with the order
+   (*Proof of delivery* in the order window and the Delivery list).
 
 ## 6. Recipes, stock and purchasing
 
@@ -416,6 +424,7 @@ Each order, client, recipe or ingredient in the answer is a link to it.
 - Menu: group headers without counts (18/11/2026).
 - QC form: each point validated with an OK / Not OK button; one block per product with its own weight, temperature and recipe checks; Sign QC locked until complete; QC settings per recipe (portion grams, tolerance, max temperature, shelf life, extra checks) (18/11/2026).
 - Delivery check at the door (OK / Not OK points, temperature ≤ 8 °C, received by, signature) before an order is marked delivered; result shown in the Delivery list and the order (18/11/2026).
+- Proof of delivery: photo and customer signature on screen under a receipt declaration (customer not available: photo only), kept with the order (18/11/2026).
 - Orders: stock check when placed and confirmed; a shortfall opens a purchase requisition for the order and blocks Send to kitchen until received (super admin override recorded); released automatically on receipt (18/11/2026).
 
 ### V1.1 — from 01/11/2026 to 18/11/2026 (live on 18/11/2026)
