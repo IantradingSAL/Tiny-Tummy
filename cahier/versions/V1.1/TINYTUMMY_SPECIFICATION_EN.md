@@ -143,7 +143,7 @@ The menu is grouped by trade:
 | — | Overview | Today across the operation, advisor tips, records waiting for me |
 | Sales | Orders | Order pipeline: stage tiles, Board, and List (search, period, driver, sort; customer, child and allergy STOP, items, stage, kitchen progress, batch lot, driver and ETA, value, cost, margin; totals; CSV; link to the stock the order used) |
 | Sales | Age Programs | Programmes by age of the child |
-| Production | Kitchen | Production steps, timers, stations |
+| Production | Kitchen | Board (one card per order: timeline, clocks, steps) and List (one row per step of every order in production: order and items, allergy STOP, step and CCP, station, person, planned minutes, status and timer; filters to do / running / overdue / done, person or *my steps*, station; Start, Done and Undo on the row; totals: steps, running, overdue, minutes still to do) |
 | Production | Recipes · BOM | Ingredients, process steps, full cost |
 | Production | Inventory · Lots | Stock as lots, FEFO, expiry, reorder |
 | Production | Requisitions | Purchase requests |
@@ -315,6 +315,7 @@ Each order, client, recipe or ingredient in the answer is a link to it.
 - Inventory: stock ledger of every movement, List view with stock counts, consumption Report by item / order / person / day / month, CSV export (18/11/2026).
 - Orders: professional List view (filters, kitchen progress, batch lot, driver and ETA, value, cost and margin, totals, CSV, stock used by the order) (18/11/2026).
 - Dispatch & Delivery: List view of every delivery with times, on-time result, filters, totals and CSV (18/11/2026).
+- Kitchen: List view, one row per production step with person, station, timer and Start / Done, filters (my steps, station, overdue) and totals (18/11/2026).
 
 ### V1.0 — 28/08/2026 (platform launch)
 

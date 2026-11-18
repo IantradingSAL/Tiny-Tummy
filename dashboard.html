@@ -569,6 +569,10 @@ table.pm tfoot td { font-size:.74rem; font-weight:700; color:var(--soft); border
 .ol-bar { display:block; width:90px; }
 .t.ol td { padding-top:12px; padding-bottom:12px; }
 .t.dl .stp-sel { max-width:130px; }
+.t.kl .stp-sel { max-width:150px; }
+.t.kl tr.kl-now td { background:#fffaf0; }
+.t.kl tr.kl-late td { background:#fdf0f0; }
+.kl-n { display:inline-block; font-size:.7rem; font-weight:800; color:#64808e; background:#efe9dc; border-radius:6px; padding:1px 6px; }
 .t.dl td:nth-child(3) { max-width:170px; }
 .t.dl .il-acts .btn.s { padding-left:10px; padding-right:10px; }
 .t.ol td .il-sub { white-space:normal; max-width:220px; }
@@ -1971,6 +1975,90 @@ function checkKitchenAlarms() {
   });
   if (changed) store('orders').save(orders);
 }
+/* Kitchen · Board / List — the list is one row per production step */
+var KV = { view: (function () { try { return localStorage.getItem('ttops_kitchen_view') || 'board'; } catch (e) { return 'board'; } })(),
+  show: 'todo', who: 'all', station: 'all', q: '' };
+function kvSet(k, v) { KV[k] = v; if (k === 'view') { try { localStorage.setItem('ttops_kitchen_view', v); } catch (e) {} } render(); }
+function kvBar() {
+  return '<div class="u-bar"><div class="u-tabs" style="margin:0"><button class="' + (KV.view === 'board' ? 'on' : '') + '" onclick="kvSet(\'view\',\'board\')">' + ic('grid') + ' Board</button>' +
+    '<button class="' + (KV.view === 'list' ? 'on' : '') + '" onclick="kvSet(\'view\',\'list\')">' + ic('clipboard') + ' List</button></div></div>';
+}
+function klTasks(active, products) {
+  var tasks = [];
+  active.slice().sort(function (a, b) { return (a.kitchen_start || 0) - (b.kitchen_start || 0); }).forEach(function (o) {
+    var defs = stepDefs(o), cur = currentStep(o, products);
+    defs.forEach(function (def, i) {
+      var st = o.steps.find(function (x) { return x.s === def.name; }) || {};
+      var done = !!st.done, running = !!(st.started_at && !done);
+      var rem = running ? Math.round((st.started_at + (Number(def.min) || 0) * 60000 - Date.now()) / 60000) : null;
+      var late = !done && ((running && rem < 0) || (o.kitchen_due && Date.now() > o.kitchen_due));
+      tasks.push({ o: o, def: def, i: i, n: defs.length, st: st, done: done, running: running, rem: rem, now: def.name === cur, late: late,
+        station: stepStation(def.name), who: done ? (st.by || st.assigned || '') : (st.assigned || '') });
+    });
+  });
+  return tasks;
+}
+function klListView(active, products) {
+  var me = currentUser().name, staff = store('staff').all().map(normStaff), all = klTasks(active, products);
+  var q = KV.q.trim().toLowerCase();
+  var tasks = all.filter(function (t) {
+    if (KV.show === 'todo' && t.done) return false;
+    if (KV.show === 'running' && !t.running) return false;
+    if (KV.show === 'late' && !t.late) return false;
+    if (KV.show === 'done' && !t.done) return false;
+    if (KV.who === 'me' && t.who !== me) return false;
+    if (KV.who === '__none__' && t.who) return false;
+    if (KV.who !== 'all' && KV.who !== 'me' && KV.who !== '__none__' && t.who !== KV.who) return false;
+    if (KV.station !== 'all' && t.station !== KV.station) return false;
+    if (q && [t.o.code, t.o.customer, t.def.name, t.who].join(' ').toLowerCase().indexOf(q) < 0) return false;
+    return true;
+  });
+  function opt(v, l, cur) { return '<option value="' + esc(v) + '"' + (cur === v ? ' selected' : '') + '>' + esc(l) + '</option>'; }
+  var stations = {}; all.forEach(function (t) { stations[t.station] = 1; });
+  var filters = '<div class="lg-f">' +
+    '<div class="u-search" style="margin:0"><span>' + ic('search') + '</span><input placeholder="Search order, customer, step…" value="' + esc(KV.q) + '" onchange="kvSet(\'q\',this.value)"></div>' +
+    '<span class="lg-q">' + [['todo', 'To do'], ['running', 'Running'], ['late', 'Overdue'], ['done', 'Done'], ['all', 'All']].map(function (x) {
+      return '<button class="' + (KV.show === x[0] ? 'on' : '') + '" onclick="kvSet(\'show\',\'' + x[0] + '\')">' + x[1] + '</button>'; }).join('') + '</span>' +
+    '<select onchange="kvSet(\'who\',this.value)">' + opt('all', 'Everyone', KV.who) + opt('me', 'My steps (' + me + ')', KV.who) + opt('__none__', 'Unassigned', KV.who) +
+      staff.map(function (u) { return opt(u.name, u.name, KV.who); }).join('') + '</select>' +
+    '<select onchange="kvSet(\'station\',this.value)">' + opt('all', 'All stations', KV.station) +
+      Object.keys(stations).map(function (s) { return opt(s, stLabel(s), KV.station); }).join('') + '</select></div>';
+  var sum = { n: 0, min: 0, late: 0, running: 0 };
+  var rows = tasks.map(function (t) {
+    var o = t.o, def = t.def, i = t.i;
+    sum.n++; if (!t.done) sum.min += Number(def.min) || 0; if (t.running) sum.running++; if (t.late) sum.late++;
+    var eligible = staff.filter(function (u) { return u.role === 'super_admin' || u.role === 'manager' || (u.stations || []).indexOf(t.station) >= 0; });
+    var person = t.done ? (t.who ? '<span class="stp-av" style="margin-right:6px">' + initials(t.who) + '</span>' + esc(t.who) : '<span class="muted">—</span>')
+      : '<select class="stp-sel" onclick="event.stopPropagation()" onchange="stepAssign(\'' + o.id + '\',' + i + ',this.value)"><option value="">Unassigned</option>' +
+        eligible.map(function (u) { return '<option' + (t.who === u.name ? ' selected' : '') + ' value="' + esc(u.name) + '">' + esc(u.name) + '</option>'; }).join('') + '</select>' +
+        (t.who && t.st.auto ? ' <span class="stp-auto" title="Assigned automatically">' + ic('zap') + '</span>' : '');
+    var state = t.done ? '<span class="ostat" style="--sc:#2e8770">' + ic('check') + ' Done</span><div class="il-sub muted">' + esc((t.st.at || '').split(',').pop().trim()) + '</div>'
+      : t.running ? (t.rem >= 0 ? '<span class="ostat" style="--sc:#2f6fb0">' + ic('hourglass') + ' ' + t.rem + ' min left</span>' : '<span class="ostat" style="--sc:#b23a48">' + ic('alarm') + ' +' + (-t.rem) + ' min over</span>')
+      : t.now ? '<span class="ostat" style="--sc:#c98a1b">' + ic('forward') + ' Next</span>' : '<span class="ostat" style="--sc:#8a979e">Waiting</span>';
+    if (t.late && !t.running) state += '<div class="il-sub" style="color:#b23a48">' + ic('alarm') + ' order past its due time</div>';
+    var acts = t.done
+      ? '<button class="btn o s" title="Re-open this step" onclick="event.stopPropagation();stepToggle(\'' + o.id + '\',' + i + ',false)">' + ic('undo') + '</button>'
+      : (t.running ? '' : '<button class="btn p s" onclick="event.stopPropagation();stepStart(\'' + o.id + '\',' + i + ')">' + ic('timer') + ' Start</button>') +
+        '<button class="btn g s" onclick="event.stopPropagation();stepToggle(\'' + o.id + '\',' + i + ',true)">' + ic('check') + ' Done</button>';
+    var child = typeof orderChild === 'function' ? orderChild(o) : null, stop = child && typeof orderAllergens === 'function' ? orderAllergens(o, child) : [];
+    var ccp = /cook|chill/i.test(def.name);
+    return '<tr class="rowlink' + (t.now && !t.done ? ' kl-now' : '') + (t.late ? ' kl-late' : '') + '" onclick="openOrder(\'' + o.id + '\')">' +
+      '<td><b>' + esc(o.code) + '</b> <span class="muted">· ' + esc(o.customer) + '</span><div class="il-sub">' + o.items.map(function (it) { var p = byId(products, it.product); return it.qty + '× ' + esc(p ? p.name : '?'); }).join(', ') + '</div>' +
+        (stop.length ? '<span class="chip alarm">STOP · ' + esc(stop.join(', ')) + '</span>' : '') + '</td>' +
+      '<td><span class="kl-n">' + (i + 1) + '/' + t.n + '</span> <b>' + esc(def.name) + '</b>' + (ccp ? ' <span class="chip exp" title="Critical control point: temperature recorded">CCP</span>' : '') + '</td>' +
+      '<td><span class="lt-i">' + ic(STATION_SVG[t.station] || 'chef') + '</span>' + esc(stLabel(t.station)) + '</td>' +
+      '<td style="white-space:nowrap">' + person + '</td>' +
+      '<td class="num">' + (Number(def.min) || 0) + ' min</td>' +
+      '<td>' + state + '</td>' +
+      '<td><div class="il-acts">' + acts + '</div></td></tr>';
+  }).join('');
+  return filters + '<div class="panel" style="padding:0;overflow:hidden"><div class="tbl-scroll"><table class="t reg il ol kl"><thead><tr>' +
+    '<th>Order · items</th><th>Step</th><th>Station</th><th>Person</th><th class="num">Planned</th><th>Status</th><th></th></tr></thead><tbody>' +
+    (rows || '<tr><td colspan="7" class="muted" style="text-align:center;padding:26px">' + (all.length ? 'No steps match these filters.' : 'Nothing in production. Confirm an order and send it to the kitchen.') + '</td></tr>') + '</tbody>' +
+    '<tfoot><tr><td><b>' + sum.n + ' step' + (sum.n === 1 ? '' : 's') + '</b></td><td colspan="3"><span class="muted">' + sum.running + ' running' + (sum.late ? ' · <b style="color:#b23a48">' + sum.late + ' overdue</b>' : '') + '</span></td>' +
+    '<td class="num"><b>' + sum.min + ' min</b><div class="il-sub muted">still to do</div></td><td colspan="2"></td></tr></tfoot></table></div></div>' +
+    '<p class="muted" style="margin:8px 2px 0">' + ic('info') + ' Cook and Blast chill are critical control points: Done asks for the measured temperature. Click a row to open the order.</p>';
+}
 RENDER.kitchen = function () {
   autoAssignAll();
   checkKitchenAlarms();
@@ -2021,9 +2109,10 @@ RENDER.kitchen = function () {
     '<div class="kpi b-navy"><div class="v">' + active.length + '</div><div class="l">Orders in production</div></div>' +
     '<div class="kpi b-blue"><div class="v">' + portions + '</div><div class="l">Portions in production</div></div>' +
     '<div class="kpi b-gold"><div class="v">' + minsQueued + ' min</div><div class="l">Work queued</div></div>' +
-    '<div class="kpi ' + (overdueN ? 'bad b-red' : 'good b-green') + '"><div class="v">' + overdueN + '</div><div class="l">⏰ Overdue</div></div></div>' +
+    '<div class="kpi ' + (overdueN ? 'bad b-red' : 'good b-green') + '"><div class="v">' + overdueN + '</div><div class="l">⏰ Overdue</div></div></div>' + kvBar() +
+    (KV.view === 'list' ? klListView(active, products) :
     (stationRows.length ? '<div class="panel" style="padding:14px 18px"><div class="toolbar" style="margin-bottom:8px"><h3 style="font-size:1rem">🏭 Station load</h3><span class="muted">minutes of work remaining per step</span></div>' + hBarChart(stationRows, CHART.blue, function (v) { return v + ' min'; }) + '</div>' : '') +
-    (cards || '<div class="panel"><p class="muted">Nothing in production. Confirm an order and send it to the kitchen — the production clock starts at that moment.</p></div>');
+    (cards || '<div class="panel"><p class="muted">Nothing in production. Confirm an order and send it to the kitchen — the production clock starts at that moment.</p></div>'));
 };
 
 /* CCP readings, portioning record and sign-offs shown on the card */

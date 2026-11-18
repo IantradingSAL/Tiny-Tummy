@@ -157,7 +157,7 @@ Le menu est regroupé par métier :
 | — | Vue d'ensemble | La journée sur toute l'activité, conseils, dossiers en attente pour moi |
 | Ventes | Commandes | Circuit des commandes : étapes, vue Tableau et vue Liste (recherche, période, livreur, tri ; client, enfant et STOP allergie, articles, étape, avancement cuisine, lot, livreur et heure d'arrivée, valeur, coût, marge ; totaux ; CSV ; lien vers le stock utilisé par la commande) |
 | Ventes | Programmes par âge | Programmes selon l'âge de l'enfant |
-| Production | Cuisine | Étapes de production, minuteurs, postes |
+| Production | Cuisine | Vue Tableau (une carte par commande : chronologie, horloges, étapes) et vue Liste (une ligne par étape de chaque commande en production : commande et articles, STOP allergie, étape et CCP, poste, personne, minutes prévues, statut et minuteur ; filtres à faire / en cours / en retard / faites, personne ou *mes étapes*, poste ; Démarrer, Terminé et Annuler sur la ligne ; totaux : étapes, en cours, en retard, minutes restantes) |
 | Production | Recettes · BOM | Ingrédients, étapes, coût complet |
 | Production | Stock · Lots | Stock par lots, FEFO, péremption, réapprovisionnement |
 | Production | Réquisitions | Demandes d'achat |
@@ -346,6 +346,7 @@ Chaque commande, client, recette ou ingrédient de la réponse est un lien.
 - Stock : journal de tous les mouvements, vue Liste avec comptages, Rapport de consommation par article / commande / personne / jour / mois, export CSV (18/11/2026).
 - Commandes : vue Liste complète (filtres, avancement cuisine, lot, livreur et heure d'arrivée, valeur, coût et marge, totaux, CSV, stock utilisé par la commande) (18/11/2026).
 - Expédition et livraison : vue Liste de chaque livraison avec heures, résultat à l'heure, filtres, totaux et CSV (18/11/2026).
+- Cuisine : vue Liste, une ligne par étape de production avec personne, poste, minuteur et Démarrer / Terminé, filtres (mes étapes, poste, en retard) et totaux (18/11/2026).
 
 ### V1.0 — 28/08/2026 (lancement de la plateforme)
 
