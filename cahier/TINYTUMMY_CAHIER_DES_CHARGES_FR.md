@@ -283,6 +283,14 @@ Chaque commande, client, recette ou ingrédient de la réponse est un lien.
    absent* remplace la signature (photo toujours exigée). Photo, signature et
    déclaration sont conservées avec la commande (*Preuve de livraison* dans la
    fenêtre de la commande et la liste Livraison).
+   **Export** : *Export proofs of delivery* (Expédition · Livreurs) télécharge
+   un fichier HTML avec, pour chaque commande livrée, les contrôles, la
+   température, la personne qui a reçu, le résultat CQ, la photo, la
+   déclaration et la signature — il s'ouvre dans tout navigateur, s'imprime
+   ou s'enregistre en PDF et peut être classé n'importe où ; *Download this
+   proof* fait de même pour une commande. Tant que la base n'est pas
+   connectée, les preuves restent sur l'appareil qui les a prises : il faut
+   donc les exporter régulièrement.
 
 ## 6. Recettes, stock et achats
 
@@ -470,6 +478,7 @@ Chaque commande, client, recette ou ingrédient de la réponse est un lien.
 - Formulaire CQ : chaque point validé par un bouton OK / Not OK ; un bloc par produit avec son poids, sa température et les contrôles de sa recette ; Sign QC verrouillé tant que tout n'est pas rempli ; réglages CQ par recette (grammes de la portion, tolérance, température maximale, conservation, contrôles supplémentaires) (18/11/2026).
 - Contrôle à la livraison (points OK / Not OK, température ≤ 8 °C, reçu par, signature) avant qu'une commande soit livrée ; résultat affiché dans la liste Livraison et sur la commande (18/11/2026).
 - Preuve de livraison : photo et signature du client à l'écran sous une déclaration de réception (client absent : photo seule), conservées avec la commande (18/11/2026).
+- Export des preuves de livraison : un fichier HTML (toutes les livraisons ou une commande) avec contrôles, photo, déclaration et signature (18/11/2026).
 - Commandes : contrôle du stock à la prise de commande et à la confirmation ; un manque ouvre une réquisition d'achat pour la commande et bloque l'envoi en cuisine jusqu'à réception (dérogation super administrateur tracée) ; libération automatique à la réception (18/11/2026).
 
 ### V1.1 — du 01/11/2026 au 18/11/2026 (mise en service le 18/11/2026)

@@ -255,6 +255,12 @@ Each order, client, recipe or ingredient in the answer is a link to it.
    available, *Customer not available* replaces the signature (photo still
    required). Photo, signature and declaration are kept with the order
    (*Proof of delivery* in the order window and the Delivery list).
+   **Export**: *Export proofs of delivery* (Dispatch · Agents) downloads one
+   HTML file with every delivered order's checks, temperature, receiver,
+   QC result, photo, declaration and signature — it opens in any browser,
+   prints or saves as PDF, and can be filed anywhere; *Download this proof*
+   does the same for one order. Until the database is connected, proofs are
+   kept on the device that took them, so they should be exported regularly.
 
 ## 6. Recipes, stock and purchasing
 
@@ -425,6 +431,7 @@ Each order, client, recipe or ingredient in the answer is a link to it.
 - QC form: each point validated with an OK / Not OK button; one block per product with its own weight, temperature and recipe checks; Sign QC locked until complete; QC settings per recipe (portion grams, tolerance, max temperature, shelf life, extra checks) (18/11/2026).
 - Delivery check at the door (OK / Not OK points, temperature ≤ 8 °C, received by, signature) before an order is marked delivered; result shown in the Delivery list and the order (18/11/2026).
 - Proof of delivery: photo and customer signature on screen under a receipt declaration (customer not available: photo only), kept with the order (18/11/2026).
+- Export proofs of delivery: one HTML file (all deliveries, or one order) with checks, photo, declaration and signature (18/11/2026).
 - Orders: stock check when placed and confirmed; a shortfall opens a purchase requisition for the order and blocks Send to kitchen until received (super admin override recorded); released automatically on receipt (18/11/2026).
 
 ### V1.1 — from 01/11/2026 to 18/11/2026 (live on 18/11/2026)

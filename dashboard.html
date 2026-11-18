@@ -2376,11 +2376,55 @@ function dqPhoto(input) {
   };
   rd.readAsDataURL(f);
 }
+/* Export proofs of delivery: one self-contained HTML file (opens anywhere,
+   prints / saves as PDF) with checks, photo, declaration and signature. */
+function proofHtml(orders) {
+  var products = store('products').all(), agents = store('agents').all(), photos = store('dphotos').all();
+  function e(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  var cards = orders.map(function (o) {
+    var ph = photos.filter(function (x) { return x.order === o.id; }).slice(-1)[0] || {};
+    var a = o.agent ? byId(agents, o.agent) : null, d = o.dqc, q = o.qc;
+    var items = o.items.map(function (it) { var p = byId(products, it.product); return it.qty + '× ' + (p ? p.name : '?'); }).join(', ');
+    var checks = DQ_CHECKS.map(function (c) { var v = d.checks && d.checks[c[0]]; return '<tr><td>' + e(c[1]) + '</td><td class="' + (v === 'ok' ? 'ok' : 'no') + '">' + (v === 'ok' ? 'OK' : 'NOT OK') + '</td></tr>'; }).join('');
+    return '<section class="pod"><header><h2>' + e(o.code) + '</h2><span class="res ' + (d.pass ? 'ok' : 'no') + '">' + (d.pass ? 'Delivery check OK' : 'Delivery check FAILED') + '</span></header>' +
+      '<table class="kv"><tr><th>Customer</th><td>' + e(o.customer) + ' · ' + e(o.phone || '') + '</td></tr><tr><th>Address</th><td>' + e(o.address || '') + '</td></tr>' +
+      '<tr><th>Items</th><td>' + e(items) + '</td></tr><tr><th>Batch lot</th><td>' + e(o.batch_lot || '—') + '</td></tr>' +
+      '<tr><th>QC before dispatch</th><td>' + (q ? (q.pass ? 'PASSED' : 'FAILED') + ' · ' + e(q.at) + ' · ' + e(q.by) + ((q.lines || []).length ? ' · ' + e(q.lines.map(function (l) { return l.name + ' ' + l.weight_g + ' g ' + l.temp_c + ' °C'; }).join(' / ')) : '') : '—') + '</td></tr>' +
+      '<tr><th>Driver</th><td>' + e(a ? a.name : '—') + '</td></tr><tr><th>Delivered</th><td>' + e(d.at) + ' · signed off by ' + e(d.by) + '</td></tr>' +
+      '<tr><th>Temperature at the door</th><td>' + e(d.temp_c) + ' °C (limit ≤ ' + DQ_TMAX + ' °C)</td></tr><tr><th>Received by</th><td>' + e(d.received_by) + (d.absent ? ' — customer not available' : '') + '</td></tr>' +
+      (d.notes ? '<tr><th>Notes</th><td>' + e(d.notes) + '</td></tr>' : '') + (d.pass ? '' : '<tr><th>Reasons</th><td class="no">' + e(d.reasons.join('; ')) + '</td></tr>') + '</table>' +
+      '<h3>Checks at the door</h3><table class="ck">' + checks + '</table>' +
+      '<div class="media">' + (ph.data ? '<figure><img src="' + ph.data + '" alt="Delivery photo"><figcaption>Delivery photo · ' + e(ph.at) + '</figcaption></figure>' : '') +
+      (ph.sig ? '<figure><p class="decl">' + e(ph.declaration || d.declaration || '') + '</p><img class="sig" src="' + ph.sig + '" alt="Customer signature"><figcaption>Customer signature — ' + e(d.received_by) + '</figcaption></figure>'
+        : '<figure><p class="decl">' + (d.absent ? 'Customer not available — no signature.' : 'No signature recorded.') + '</p></figure>') + '</div></section>';
+  }).join('');
+  return '<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Tiny Tummy — proofs of delivery</title><style>' +
+    'body{font-family:Arial,Helvetica,sans-serif;color:#17455e;margin:0;padding:24px;background:#f8f4ea}h1{margin:0 0 4px}.sub{color:#64808e;margin-bottom:18px}' +
+    '.pod{background:#fff;border:1px solid #e7e1d2;border-radius:12px;padding:16px 18px;margin:0 0 18px;page-break-inside:avoid}.pod header{display:flex;align-items:center;justify-content:space-between;gap:10px}' +
+    'h2{margin:0}h3{margin:14px 0 6px;font-size:1rem}.res{font-weight:bold;border-radius:999px;padding:4px 12px}.res.ok{background:#e6f4ef;color:#226a58}.res.no{background:#fdeaea;color:#b23a48}' +
+    'table{border-collapse:collapse;width:100%;font-size:.9rem}.kv th{text-align:left;width:190px;color:#64808e;font-weight:600;padding:4px 8px 4px 0;vertical-align:top}.kv td{padding:4px 0}' +
+    '.ck td{border-top:1px solid #efe9dc;padding:5px 4px}.ck td:last-child{width:80px;font-weight:bold;text-align:right}.ok{color:#226a58}.no{color:#b23a48}' +
+    '.media{display:flex;gap:16px;flex-wrap:wrap;margin-top:12px}figure{margin:0;flex:1 1 280px}figure img{max-width:100%;border-radius:10px;border:1px solid #e7e1d2}img.sig{background:#fff}' +
+    'figcaption{font-size:.8rem;color:#64808e;margin-top:4px}.decl{background:#f6f2e8;border-left:4px solid #f0b64b;padding:8px 10px;margin:0 0 8px;font-size:.88rem}' +
+    '@media print{body{background:#fff;padding:0}.pod{border:none;border-bottom:1px solid #ccc;border-radius:0}}</style></head><body>' +
+    '<h1>Tiny Tummy — proofs of delivery</h1><div class="sub">' + orders.length + ' deliver' + (orders.length === 1 ? 'y' : 'ies') + ' · exported ' + e(nowTs()) + ' by ' + e(currentUser().name) + '</div>' +
+    (cards || '<p>No proof of delivery yet.</p>') + '</body></html>';
+}
+function exportProofs(oid) {
+  var orders = store('orders').all().filter(function (o) { return o.dqc && (!oid || o.id === oid); })
+    .sort(function (a, b) { return (b.dqc.ts || 0) - (a.dqc.ts || 0); });
+  if (!orders.length) { alert('No proof of delivery to export yet.'); return; }
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([proofHtml(orders)], { type: 'text/html;charset=utf-8' }));
+  a.download = 'tinytummy-proof-of-delivery-' + (oid ? orders[0].code : today(0)) + '.html'; a.click();
+  logAct('Delivery', 'proofs exported', oid ? orders[0].code : orders.length + ' deliveries');
+  uToast(orders.length + ' proof' + (orders.length > 1 ? 's' : '') + ' of delivery exported');
+}
 function dqPhotoView(oid) {
   var ph = store('dphotos').all().filter(function (x) { return x.order === oid; }).slice(-1)[0];
   var o = byId(store('orders').all(), oid);
   if (!ph) { alert('No delivery photo for this order.'); return; }
-  showDlg('<h3>' + ic('camera') + ' Proof of delivery — ' + esc(o ? o.code : '') + '</h3><p class="muted">' + esc(ph.at) + ' · ' + esc(ph.by) + (o && o.dqc ? ' · received by ' + esc(o.dqc.received_by) : '') + '</p>' +
+  showDlg('<h3>' + ic('camera') + ' Proof of delivery — ' + esc(o ? o.code : '') + '</h3><p><button class="btn o s" onclick="exportProofs(\'' + oid + '\')">' + ic('save') + ' Download this proof</button></p><p class="muted">' + esc(ph.at) + ' · ' + esc(ph.by) + (o && o.dqc ? ' · received by ' + esc(o.dqc.received_by) : '') + '</p>' +
     '<img src="' + ph.data + '" alt="Delivery photo" style="max-width:100%;border-radius:12px;margin-top:8px">' +
     (ph.sig ? '<h4 style="margin-top:12px">Customer signature' + (o && o.dqc ? ' — ' + esc(o.dqc.received_by) : '') + '</h4>' + (ph.declaration ? '<p class="dq-decl">' + esc(ph.declaration) + '</p>' : '') + '<img src="' + ph.sig + '" alt="Customer signature" style="max-width:100%;background:#fff;border:1px solid #e7e1d2;border-radius:10px">'
       : ph.absent ? '<p class="muted" style="margin-top:10px">Customer not available — no signature (left at the door / with someone).</p>' : ''));
@@ -3784,6 +3828,7 @@ RENDER.delivery = function () {
 
   return '<div class="pagehead"><div><h1>Dispatch &amp; Delivery</h1><div class="sub">Ready orders get the least-busy agent automatically — one tap dispatches. Track every delivery live; customers are notified on dispatch, near arrival and on any delay.</div></div>' +
     '<span class="pill-row">' + (ready.length > 1 && onDuty.length ? '<button class="btn o" onclick="dispatchAll()">' + ic('zap') + ' Dispatch all ready</button>' : '') +
+    '<button class="btn o" onclick="exportProofs()" title="One file with every delivery check, photo and signature">' + ic('save') + ' Export proofs of delivery</button>' +
     '<button class="btn p" onclick="newAgent()">' + ic('plus') + ' Add agent</button></span></div>' + kpis + dvBar() +
     (DV.view === 'list' ? dlListView(orders, agents, onDuty, load, sugg) :
     '<div class="dgrid"><div>' +
