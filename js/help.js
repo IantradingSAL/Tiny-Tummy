@@ -1,5 +1,5 @@
 /* Tiny Tummy — Help assistant (every page)
-   A floating "Help" button that explains the page you are on and answers
+   A floating "Ask me" button that explains the page you are on and answers
    questions about it. Answers come from the knowledge base below, matched
    by keywords, so it works on the static site with no server. The
    dashboard's help follows the module that is open.
@@ -25,7 +25,8 @@
   ];
 
   var KB = {
-    'site-home': { title: 'Home', intro: 'Welcome to Tiny Tummy: healthy puree and finger meals for babies and toddlers, designed by dietitians, cooked by chefs and delivered fresh across Lebanon.', qa: [] },
+    'site-home': { title: 'Home', intro: 'Welcome to Tiny Tummy: healthy puree and finger meals for babies and toddlers, designed by dietitians, cooked by chefs and delivered fresh across Lebanon.', qa: [
+      ['Where is the cahier des charges?', 'cahier charges specification spec protocol document pdf word download version previous rollback', 'At the bottom of this page, under <b>Cahier des charges</b>: the current version in French and English (PDF or Word), and every previous version below it.']] },
     'site-menu': { title: 'Menu', intro: 'Every meal we make. Use the tabs to filter Purees, Finger Food or Cakes, check the age tag on each product, and tap <b>Order on WhatsApp</b>.', qa: [
       ['How do I filter the menu?', 'filter tab purees finger cakes category show only', 'Use the tabs above the products: <b>All</b>, <b>Purees</b>, <b>Finger Food</b> or <b>Cakes</b>.'],
       ['What does 6M+ mean?', '6m 7m 12m 24m tag label mean plus', 'It is the minimum age: <b>6M+</b> means from 6 months, <b>24M+</b> from 2 years.']] },
@@ -167,9 +168,9 @@
   function build() {
     var st = document.createElement('style'); st.textContent = css; document.head.appendChild(st);
     var btn = document.createElement('button');
-    btn.className = 'tth-btn'; btn.type = 'button'; btn.setAttribute('aria-label', 'Help'); btn.setAttribute('aria-expanded', 'false');
-    btn.innerHTML = svg('help') + '<span>Help</span>';
-    panel = document.createElement('div'); panel.className = 'tth-panel'; panel.setAttribute('role', 'dialog'); panel.setAttribute('aria-label', 'Help');
+    btn.className = 'tth-btn'; btn.type = 'button'; btn.setAttribute('aria-label', 'Ask me'); btn.setAttribute('aria-expanded', 'false');
+    btn.innerHTML = svg('help') + '<span>Ask me</span>';
+    panel = document.createElement('div'); panel.className = 'tth-panel'; panel.setAttribute('role', 'dialog'); panel.setAttribute('aria-label', 'Ask me');
     document.body.appendChild(btn); document.body.appendChild(panel);
     btn.addEventListener('click', function () {
       var on = !panel.classList.contains('on');
@@ -180,8 +181,8 @@
   }
   function open() {
     var id = pageId(), e = entry(id); lastId = id;
-    panel.innerHTML = '<div class="tth-h"><span class="bi">' + svg('bot') + '</span><div><b>Help · ' + esc(e.title) + '</b><small>Ask anything about this page</small></div>' +
-      '<button type="button" aria-label="Close help">' + svg('x') + '</button></div>' +
+    panel.innerHTML = '<div class="tth-h"><span class="bi">' + svg('bot') + '</span><div><b>Ask me · ' + esc(e.title) + '</b><small>Ask anything about this page</small></div>' +
+      '<button type="button" aria-label="Close Ask me">' + svg('x') + '</button></div>' +
       '<div class="tth-body"><div class="tth-intro">' + e.intro + '</div><div class="tth-chips">' +
       e.qa.slice(0, 6).map(function (q, i) { return '<button type="button" data-i="' + i + '">' + esc(q[0]) + '</button>'; }).join('') + '</div></div>' +
       '<form class="tth-f"><input placeholder="Type your question…" aria-label="Your question" autocomplete="off"><button type="submit" aria-label="Send">' + svg('send') + '</button></form>';

@@ -398,3 +398,27 @@ nav.links a.nav-portal:hover { background:var(--gold); color:var(--brand); }
 .pc-row span { color: var(--soft); }
 .pc-rem { background: #fff8e6; border: 1px solid #f3dca6; border-radius: 12px; padding: 10px 12px; font-weight: 700; font-size: .88rem; }
 .pc-rem .i { color: #c98f1c; }
+
+/* Cahier des charges — always the current version, FR + EN, with previous versions */
+.cahier { background: var(--paper); border-top: 1px solid var(--line); }
+.cahier-grid { display: grid; grid-template-columns: .9fr 1.1fr; gap: 40px; align-items: start; }
+@media (max-width: 820px) { .cahier-grid { grid-template-columns: 1fr; gap: 24px; } }
+.cahier h2 { font-size: clamp(1.5rem, 3.2vw, 2.1rem); margin-bottom: 10px; }
+.cahier .lead { color: var(--soft); max-width: 52ch; margin-bottom: 14px; }
+.cahier-ver { display: inline-flex; align-items: center; gap: 8px; flex-wrap: wrap; font-weight: 700; color: var(--brand); }
+.cahier-ver .tag { background: var(--gold); color: var(--brand); border-radius: 999px; padding: 3px 12px; font-size: .85rem; }
+.cahier-ver small { color: var(--soft); font-weight: 600; }
+.cahier-docs { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+@media (max-width: 520px) { .cahier-docs { grid-template-columns: 1fr; } }
+.cahier-doc { border: 1px solid var(--line); border-radius: var(--radius); padding: 18px; background: var(--cream); display: flex; flex-direction: column; gap: 10px; }
+.cahier-doc h3 { font-size: 1.1rem; color: var(--brand); display: flex; align-items: center; gap: 8px; }
+.cahier-doc h3 .lang { font: 700 .72rem Quicksand, sans-serif; letter-spacing: .08em; background: var(--brand); color: #fff; border-radius: 6px; padding: 2px 7px; }
+.cahier-doc .row { display: flex; gap: 8px; flex-wrap: wrap; }
+.cahier-doc .btn { margin: 0; padding: 9px 16px; font-size: .9rem; }
+.cahier-prev { margin-top: 18px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--paper); }
+.cahier-prev summary { cursor: pointer; padding: 14px 18px; font-weight: 700; color: var(--brand); }
+.cahier-prev table { width: 100%; border-collapse: collapse; font-size: .9rem; }
+.cahier-prev td { padding: 10px 18px; border-top: 1px solid var(--line); vertical-align: middle; }
+.cahier-prev td a { font-weight: 700; color: var(--brand); margin-right: 10px; white-space: nowrap; }
+.cahier-prev .muted { color: var(--soft); }
+.cahier-note { color: var(--soft); font-size: .85rem; margin-top: 12px; }
