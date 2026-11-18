@@ -573,6 +573,7 @@ table.pm tfoot td { font-size:.74rem; font-weight:700; color:var(--soft); border
 .t.kl .stp-sel { max-width:150px; }
 .t.kl tr.kl-now td { background:#fffaf0; }
 .t.kl tr.kl-late td { background:#fdf0f0; }
+.stp-note { color:#a3720d; background:#fff7e6; border:1px solid #f3dcae; border-radius:8px; padding:4px 10px; font-size:.8rem; }
 .kl-n { display:inline-block; font-size:.7rem; font-weight:800; color:#64808e; background:#efe9dc; border-radius:6px; padding:1px 6px; }
 .t.dl td:nth-child(3) { max-width:170px; }
 .t.dl .il-acts .btn.s { padding-left:10px; padding-right:10px; }
@@ -1728,7 +1729,10 @@ function stepControls(o) {
   }).join('');
   var pct = defs.length ? Math.round(doneN / defs.length * 100) : 0;
   return '<div class="stp-head"><span><b>' + doneN + ' of ' + defs.length + '</b> steps done</span>' +
-    '<span class="stp-bar"><i style="width:' + pct + '%"></i></span><span class="muted">' + ic('zap') + ' people are assigned automatically — change anyone from the list</span></div>' + rows;
+    '<span class="stp-bar"><i style="width:' + pct + '%"></i></span>' +
+    (o.status === 'new'
+      ? '<span class="stp-note">' + ic('info') + ' People are assigned automatically as soon as you <b>Confirm order</b> — or pick someone now from the list.</span>'
+      : '<span class="muted">' + ic('zap') + ' people are assigned automatically — change anyone from the list</span>') + '</div>' + rows;
 }
 /* Automatic assignment: every step of an active order gets the best
    eligible person for its station the moment the order is confirmed —
