@@ -244,6 +244,8 @@ Chaque commande, client, recette ou ingrédient de la réponse est un lien.
    automatiquement** aux personnes qui tiennent le bon poste (rôle cuisine
    d'abord, les moins chargées et les plus spécialisées d'abord). Un
    responsable peut modifier ou rééquilibrer.
+   Les commandes confirmées attendent dans **Cuisine → En attente d'envoi en
+   cuisine** jusqu'au clic sur **Envoyer en cuisine**, là ou sur la commande.
 3. L'entrée en cuisine **sort le stock en FEFO** (premier périmé, premier
    sorti) selon les lignes d'ingrédients de la recette, lot par lot, avec
    trace.
@@ -390,6 +392,7 @@ Chaque commande, client, recette ou ingrédient de la réponse est un lien.
 - Vues enregistrées sur chaque page avec filtres, avec une vue par défaut par page (18/11/2026).
 - Page d'accueil par personne (18/11/2026).
 - Menu : groupes repliables, favoris, Trouver une page (Ctrl K), pages limitées aux accès de la personne (18/11/2026).
+- Commandes : l'étape suivante (Confirmer, Envoyer en cuisine, Cuisine terminée → CQ, CQ conforme, Expédier, Livrée) est un bouton sur chaque commande — dans la barre en haut de la fenêtre, sur chaque carte du tableau et sur chaque ligne de la liste ; la Cuisine affiche les commandes confirmées qui attendent d'être envoyées, avec leur bouton Envoyer en cuisine (18/11/2026).
 
 ### V1.1 — du 01/11/2026 au 18/11/2026 (mise en service le 18/11/2026)
 

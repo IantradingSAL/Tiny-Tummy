@@ -221,6 +221,8 @@ Each order, client, recipe or ingredient in the answer is a link to it.
    automatically** to people holding the right station (kitchen role first,
    least loaded and most specialised first). A manager can override or
    re-balance.
+   Confirmed orders wait in **Kitchen → Waiting to be sent to the kitchen**
+   until someone presses **Send to kitchen** there or on the order.
 3. Entering the kitchen **consumes stock FEFO** (first-expired, first-out)
    from the recipe's ingredient lines, logged lot by lot.
 4. **Quality gates** (see §7), portioning, final QC; a **batch lot label**
@@ -353,6 +355,7 @@ Each order, client, recipe or ingredient in the answer is a link to it.
 - Saved views on every page with filters, with a default view per page (18/11/2026).
 - Start page per person (18/11/2026).
 - Menu: groups that fold, favourites, Find a page (Ctrl K), pages limited to the person's access (18/11/2026).
+- Orders: the next step (Confirm, Send to kitchen, Kitchen done → QC, QC pass, Dispatch, Delivered) is a button on every order — in the order window's top bar, on each board card and on each list row; Kitchen shows the confirmed orders waiting to be sent, with their Send to kitchen button (18/11/2026).
 
 ### V1.1 — from 01/11/2026 to 18/11/2026 (live on 18/11/2026)
 

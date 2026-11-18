@@ -573,6 +573,8 @@ table.pm tfoot td { font-size:.74rem; font-weight:700; color:var(--soft); border
 .t.kl .stp-sel { max-width:150px; }
 .t.kl tr.kl-now td { background:#fffaf0; }
 .t.kl tr.kl-late td { background:#fdf0f0; }
+.oc-next { margin-top:8px; } .oc-next .btn { width:100%; justify-content:center; }
+.kwait .ia .pill-row { margin-left:auto; flex-wrap:nowrap; }
 .o-next { display:flex; align-items:center; gap:12px; flex-wrap:wrap; background:#fff7e6; border:1px solid #f3dcae; border-radius:12px; padding:10px 12px; margin:12px 0 4px; }
 .o-next-l { font-size:.7rem; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:#a3720d; }
 .o-next .pill-row { margin:0; }
@@ -1482,7 +1484,7 @@ function ordListView(orders, shown, info) {
       '<td class="num"><b>' + money(x.t.rev) + '</b><div class="il-sub muted">cost ' + money(x.t.cost) + '</div></td>' +
       '<td class="num"><span class="ostat" style="--sc:' + pctC + '">' + x.t.pct + '%</span></td>' +
       '<td><div class="il-acts"><button class="u-ib" title="Stock used by this order (ledger)" onclick="event.stopPropagation();ordLedger(\'' + esc(o.code) + '\')">' + ic('history') + '</button>' +
-        '<button class="btn p s" onclick="event.stopPropagation();openOrder(\'' + o.id + '\')">Open</button></div></td></tr>';
+        nextStepBtn(o) + '<button class="btn o s" onclick="event.stopPropagation();openOrder(\'' + o.id + '\')">Open</button></div></td></tr>';
   }).join('');
   var pct = tot.rev ? Math.round((tot.rev - tot.cost) / tot.rev * 100) : 0;
   return filters + '<div class="panel" style="padding:0;overflow:hidden"><div class="tbl-scroll"><table class="t reg il ol"><thead><tr>' +
@@ -1559,7 +1561,8 @@ RENDER.orders = function () {
           '<div class="oc-top"><b>' + esc(o.code) + '</b>' + (late ? '<span class="chip alarm">late</span>' : x.since ? '<small>' + ic('timer') + ' ' + ago(x.since) + '</small>' : '') + '</div>' +
           '<div class="oc-cust">' + ic('user') + ' ' + esc(o.customer) + '</div>' +
           '<div class="oc-items">' + esc(x.items) + '</div>' + steps +
-          '<div class="oc-foot"><b>' + money(x.t.rev) + '</b>' + (x.ag ? '<small>' + ic('truck') + ' ' + esc(x.ag) + '</small>' : '<small>' + esc(o.created) + '</small>') + '</div></div>';
+          '<div class="oc-foot"><b>' + money(x.t.rev) + '</b>' + (x.ag ? '<small>' + ic('truck') + ' ' + esc(x.ag) + '</small>' : '<small>' + esc(o.created) + '</small>') + '</div>' +
+          (NEXT_STEP[o.status] ? '<div class="oc-next">' + nextStepBtn(o) + '</div>' : '') + '</div>';
       }).join('');
       return '<div class="ocol" style="--sc:' + m.c + '"><div class="ocol-h">' + ic(m.i) + ' ' + m.l + '<span>' + (counts[st] || 0) + '</span></div>' +
         (cards || '<div class="ocol-empty">No orders</div>') + '</div>';
@@ -1575,6 +1578,49 @@ RENDER.orders = function () {
       (counts.cancelled ? '<span class="muted">' + counts.cancelled + ' cancelled</span>' : '') + '</div>' + body;
 };
 
+/* Next step of an order, as one button (lists, cards, kitchen) */
+var NEXT_STEP = {
+  'new':      ['confirm',   'Confirm',           'check',  'p'],
+  confirmed:  ['tokitchen', 'Send to kitchen',   'chef',   'p'],
+  kitchen:    ['qc',        'Kitchen done → QC', 'shield', 'p'],
+  portioning: ['qc',        'Kitchen done → QC', 'shield', 'p'],
+  qc:         ['qcpass',    'QC pass',           'check',  'g'],
+  dispatch:   ['dispatch',  'Dispatch',          'truck',  'p'],
+  delivering: ['delivered', 'Delivered',         'flag',   'g']
+};
+function nextStepBtn(o) {
+  var n = NEXT_STEP[o.status]; if (!n) return '';
+  return '<button class="btn ' + n[3] + ' s" title="Next step: ' + n[1] + '" onclick="event.stopPropagation();orderStep(\'' + o.id + '\')">' + ic(n[2]) + ' ' + n[1] + '</button>';
+}
+function orderStep(oid) {
+  var o = byId(store('orders').all(), oid); if (!o) return;
+  var n = NEXT_STEP[o.status]; if (!n) return;
+  if (n[0] === 'dispatch') {
+    var ag = suggestAgent();
+    if (!ag) { alert('No delivery agent on duty — switch one on in Dispatch · Agents.'); return; }
+    dispatchTo(oid, ag);
+  } else orderAct(oid, n[0]);
+  closeDlg(); render();
+  var o2 = byId(store('orders').all(), oid);
+  if (o2 && o2.status !== o.status) uToast(o2.code + ' → ' + ((STAGE_META[o2.status] || {}).l || o2.status));
+}
+/* Kitchen: confirmed orders waiting for "Send to kitchen" */
+function kitchenWaiting(products) {
+  var w = store('orders').all().filter(function (o) { return o.status === 'confirmed'; });
+  if (!w.length) return '';
+  return '<div class="panel kwait"><div class="dh"><h3>' + ic('timer') + ' Waiting to be sent to the kitchen <span class="dcount">' + w.length + '</span></h3>' +
+    '<span class="muted">confirmed — the stock is taken and the clock starts when sent</span></div>' +
+    w.map(function (o) {
+      var since = o.stage_times && o.stage_times.confirmed;
+      var who = {}; (o.steps || []).forEach(function (s) { if (s.assigned) who[s.assigned] = 1; });
+      var child = typeof orderChild === 'function' ? orderChild(o) : null, stop = child && typeof orderAllergens === 'function' ? orderAllergens(o, child) : [];
+      return '<div class="ia"><span class="ia-i">' + ic('chef') + '</span><div><b>' + esc(o.code) + '</b> · ' + esc(o.customer) + ' — ' +
+        o.items.map(function (it) { var p = byId(products, it.product); return it.qty + '× ' + esc(p ? p.name : '?'); }).join(', ') +
+        (stop.length ? ' <span class="chip alarm">STOP · ' + esc(stop.join(', ')) + '</span>' : '') +
+        '<small>' + (since ? 'confirmed ' + ago(since) + ' ago · ' : '') + (Object.keys(who).length ? 'team: ' + Object.keys(who).map(esc).join(', ') : 'no one assigned yet') + '</small></div>' +
+        '<span class="pill-row"><button class="btn o s" onclick="openOrder(\'' + o.id + '\')">Open</button>' + nextStepBtn(o) + '</span></div>';
+    }).join('') + '</div>';
+}
 function openOrder(id) {
   autoAssignAll();
   var orders = store('orders').all(); var o = byId(orders, id); if (!o) return;
@@ -2117,7 +2163,7 @@ RENDER.kitchen = function () {
     '<div class="kpi b-navy"><div class="v">' + active.length + '</div><div class="l">Orders in production</div></div>' +
     '<div class="kpi b-blue"><div class="v">' + portions + '</div><div class="l">Portions in production</div></div>' +
     '<div class="kpi b-gold"><div class="v">' + minsQueued + ' min</div><div class="l">Work queued</div></div>' +
-    '<div class="kpi ' + (overdueN ? 'bad b-red' : 'good b-green') + '"><div class="v">' + overdueN + '</div><div class="l">⏰ Overdue</div></div></div>' + kvBar() +
+    '<div class="kpi ' + (overdueN ? 'bad b-red' : 'good b-green') + '"><div class="v">' + overdueN + '</div><div class="l">⏰ Overdue</div></div></div>' + kitchenWaiting(products) + kvBar() +
     (KV.view === 'list' ? klListView(active, products) :
     (stationRows.length ? '<div class="panel" style="padding:14px 18px"><div class="toolbar" style="margin-bottom:8px"><h3 style="font-size:1rem">🏭 Station load</h3><span class="muted">minutes of work remaining per step</span></div>' + hBarChart(stationRows, CHART.blue, function (v) { return v + ' min'; }) + '</div>' : '') +
     (cards || '<div class="panel"><p class="muted">Nothing in production. Confirm an order and send it to the kitchen — the production clock starts at that moment.</p></div>'));
