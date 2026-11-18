@@ -21,7 +21,7 @@ which explains each page as you use it.
 |---|---|---|
 | V1.0 | reference version (platform launch) | 28/08/2026 |
 | V1.1 | 01/11/2026 – 18/11/2026 | 18/11/2026 |
-| V1.2 | 18/11/2026 — dashboard working tools and full activity trace | 18/11/2026 |
+| V1.2 | 18/11/2026 — dashboard working tools, full activity trace, invoice scanning, supplier file, roles & page access, GDPR for children's names | 18/11/2026 |
 
 No change was recorded in September and October 2026. **Numbering.** One
 version per month that contains changes (V1.2, V1.3…); a new set of modules
@@ -92,10 +92,29 @@ particular order, customer or invoice) are not.
   delivered today, what to prepare, a client, an item, an order number) and
   opens the right page, order, client or item (18/11/2026).
 
+**New in V1.2 — receiving, suppliers, access (18/11/2026, #11)**
+
+- **Scan the supplier's invoice** when the goods arrive (photo or PDF): the
+  invoice form fills itself in — supplier, number, dates, every line with
+  quantity, cost, lot and expiry — and posting puts everything into stock.
+- **Many lines at once**: one invoice number for all its items, typed in a
+  table or pasted from Excel or a list; items picked from a drop-down of the
+  existing items, so the same item is never created twice (*Carot* is
+  received as *Carrots*); a truly new item is created after confirmation.
+- **Put-away location filled automatically** for every lot received.
+- **A file per supplier**: statement of account with running balance,
+  payments (also partial), invoices, items supplied with price changes,
+  details, ageing; printable statement.
+- **Team & Access**: roles can be created; access to each page by role and
+  by person (new pages appear automatically); per-person permissions.
+
 **Security / data**
 
 - Family data separated per family in the database; staff-only data can no
   longer be read by a signed-in parent (13/11/2026, #6).
+- **Children's names (GDPR)**: shown only to people given access *and* who
+  signed the confidentiality agreement; everyone else sees a code; allergies
+  stay visible for food safety (18/11/2026, #11).
 
 ---
 
@@ -163,7 +182,7 @@ The menu is grouped by trade:
 | Production | Inventory · Lots | Stock as lots, FEFO, expiry, reorder |
 | Production | Requisitions | Purchase requests |
 | Delivery | Dispatch · Agents | Board (ready / on the road cards, live map, agents) and List (every delivery: status, driver, address and distance, ready / out / ETA / delivered times, minutes on the road, on time or late; filters by status, period, driver; dispatch, ping, delay and delivered from the row; totals: km, average time, % on time; CSV) |
-| Finance | Suppliers · Payables | Supplier invoices = stock entry, payables |
+| Finance | Suppliers · Payables | Supplier invoices = stock entry (scanned or typed), payables; one file per supplier (statement, payments, invoices, items, details) |
 | Quality | ISO 22000 | Clause-by-clause checklist with owner and evidence |
 | Quality | Complaints | Feedback & complaints register |
 | Team | Team Chat, Notifications, Activity Log, Team · Access | |
@@ -271,7 +290,44 @@ Each order, client, recipe or ingredient in the answer is a link to it.
 - **Stock is a set of lots**: each lot has its quantity, expiry, location and
   purchase cost. Picking always takes the first-expired lot.
 - **Supplier invoice = receiving**: each invoice line (item, quantity, cost,
-  lot, expiry) becomes a lot. Payables age visibly until marked paid.
+  lot, expiry, put-away location) becomes a lot. Payables age visibly until
+  paid.
+- **Scan the invoice** (Inventory, Suppliers, Receive stock — *Scan supplier
+  invoice*): a photo or the supplier's PDF is read on the device (PDF text,
+  otherwise text recognition, English and French). The invoice form opens
+  filled in: supplier (by name or phone), invoice number, invoice date, due
+  date (or date + supplier terms), and one line per item with quantity, unit
+  cost, lot and expiry; units are converted to the item's unit (g → kg,
+  dozen → pieces) and a lost decimal point is corrected from the line total.
+  The person checks it — the text read is shown under each line, the lines
+  are added up against the invoice total, an invoice number already posted
+  is flagged — then posts. The scan stays on the invoice; the item chosen
+  for a printed name is remembered for that supplier.
+- **Typing many lines**: the invoice form is a table — one invoice number,
+  as many lines as needed (*+ 10 lines*), or *Paste many lines* from Excel
+  (item, qty, unit, unit cost, lot, expiry, location) or a typed list.
+- **No duplicate items**: the item of a line is chosen from a drop-down of
+  the items in stock, or *New item*. A new name close to an existing item
+  (spelling, plural, French name: *Carot*, *Courgettes*) is received on the
+  existing item; a truly new item is created only after confirmation, once
+  even if spelled two ways in the same invoice. *New item* in Inventory warns
+  the same way.
+- **Put-away location**: filled automatically for every lot — where the item
+  was last stored, else by category (vegetables and fruit Fridge A, dairy
+  Fridge B, dry goods Dry store) — and can be changed on the line. Empty
+  expiry: the item's usual shelf life.
+- **Supplier file** (click a supplier): balance due, overdue, invoiced over
+  12 months, paid, average days to pay, last delivery, ageing (not due,
+  1–30, 31–60, 61–90, 90+ days). Tabs: *Statement* (opening balance,
+  invoices, payments, running balance, period with balance brought forward,
+  CSV, printable statement / PDF), *Invoices* (paid, left to pay, partly
+  paid, overdue, scan), *Payments* (date, amount, method — transfer, cash,
+  cheque, OMT / Whish… — reference, invoices settled; cancellable),
+  *Items supplied* (quantity, spend, last price and change), *Details*
+  (contact, address, VAT / MOF no., bank, terms, opening balance, ISO
+  approval and certificate date, notes). A payment settles the oldest
+  invoices first or the one chosen; *Mark paid* and *Unpay* on the invoice
+  list keep the statement balanced.
 - **Stock ledger**: every movement is a line — *Received* (receipt or
   supplier invoice), *Used* (consumed by an order, FEFO, with the order
   number and the person who sent it to the kitchen), *Count +/−* (physical
@@ -364,6 +420,29 @@ Each order, client, recipe or ingredient in the answer is a link to it.
 - **Kitchen stations**: prep, cooking, assembly, portioning, chilling,
   packaging, QC. A person can only start steps of the stations they hold.
 - A super admin can work *as* another user; both identities are logged.
+- **Roles**: the built-in roles plus roles created in Team & Access
+  (*Roles* tab: name, description, colour, permissions copied from an
+  existing role); a role with people cannot be deleted.
+- **Page access**: the *Page access* tab lists every page of the dashboard,
+  automatically (a new page appears the day it is added); per role each page
+  is *Default* (follows the page's permission), *Allowed* or *Blocked*.
+  **Access** on a person sets their role and, for that person only, each
+  permission and each page (Default / Allowed / Blocked). Rule: person,
+  then role, then default; super admin always. The menu shows each person
+  only the pages they may open.
+- **Children's names and health data (GDPR)**: shown only to a person who
+  holds the permission *Children's names & health data* (by role, or granted
+  per person) **and** has signed the confidentiality agreement (version
+  GDPR-CONF-1.0: need to know, no copying or sharing, security, report any
+  breach within 24 h, duty after leaving, monitoring, consequences; GDPR
+  Art. 5, 9, 28(3)(b), 29, 32(4) and Lebanese Law 81/2018). Signing: read,
+  tick two statements, type the full name, draw the signature. Signed
+  agreements are kept, can be printed and revoked (with reason). Everyone
+  else sees a code (*Child #K7Q2*) on orders, kitchen, QC, labels, advisor,
+  notifications history and activity log; **allergies stay visible to
+  everyone** as a food-safety control. Register of who may see names at the
+  bottom of Team & Access. In the database, staff read children through a
+  view that returns the code unless the person is allowed.
 
 ## 10. Traceability of every action
 
@@ -433,6 +512,12 @@ Each order, client, recipe or ingredient in the answer is a link to it.
 - Proof of delivery: photo and customer signature on screen under a receipt declaration (customer not available: photo only), kept with the order (18/11/2026).
 - Export proofs of delivery: one HTML file (all deliveries, or one order) with checks, photo, declaration and signature (18/11/2026).
 - Orders: stock check when placed and confirmed; a shortfall opens a purchase requisition for the order and blocks Send to kitchen until received (super admin override recorded); released automatically on receipt (18/11/2026).
+- Inventory: Scan supplier invoice (photo or PDF read on the device) fills the invoice form — supplier, number, dates, lines with quantity, cost, lot, expiry; check and post to receive into stock; scan kept on the invoice (18/11/2026, #11).
+- Invoice form as a table: many lines under one invoice number, paste from Excel or a list, item drop-down of existing items + New item; close names received on the existing item, new items created after confirmation (18/11/2026, #11).
+- Put-away location filled automatically for each lot received; default expiry from the item's usual shelf life (18/11/2026, #11).
+- Supplier file: statement of account with running balance and printable statement, payments with method and reference (partial payments), invoices, items supplied with price change, details, ageing (18/11/2026, #11).
+- Children's names shown only with the permission and a signed GDPR confidentiality agreement; code for everyone else; allergies always visible (18/11/2026, #11).
+- Team & Access: roles can be created; page access per role and per person, every page listed automatically; per-person permissions (18/11/2026, #11).
 
 ### V1.1 — from 01/11/2026 to 18/11/2026 (live on 18/11/2026)
 
