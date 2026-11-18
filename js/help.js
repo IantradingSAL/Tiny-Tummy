@@ -70,6 +70,10 @@
       ['What do the step names do?', 'step name cook chill portion pack ccp', 'Names containing <i>cook</i> or <i>chill</i> become temperature checks, <i>portion</i> opens the portioning sheet and <i>pack</i> prints the lot label.']] },
     'dash-inventory': { title: 'Inventory', intro: 'Every ingredient and lot. Low items are re-ordered automatically and lots are used first-expired-first-out.', qa: [
       ['How do I receive stock?', 'receive delivery stock arrived lot add', 'Tap <b>Receive stock</b>, pick the item, then enter lot number, quantity, expiry and location.'],
+      ['How do I scan a supplier invoice?', 'scan invoice photo pdf supplier goods arrived camera ocr facture', 'When the goods arrive tap <b>Scan supplier invoice</b>, take a photo of the invoice or pick the PDF. The form opens filled in (supplier, number, dates, every line with quantity, cost, lot, expiry and where to put it away). Check it and tap <b>Post invoice</b>: everything goes into stock at once and the invoice into payables.'],
+      ['How do I enter many items at once?', 'many lines bulk paste excel list several items one invoice', 'In <b>Post invoice</b> (or after a scan) type the lines in the table — <b>＋ 10 lines</b> adds more — or open <b>Paste many lines at once</b> and paste from Excel or a typed list. One invoice number covers all the lines.'],
+      ['Will it create a duplicate item (Carot / Carrots)?', 'duplicate item spelling carot new item create', 'No. A name close to an existing item is matched to it (shown as → Carrots). Only an item that is really not in the inventory is created, and you confirm it first.'],
+      ['Where is each lot put away?', 'location fridge shelf put away place store', 'Filled automatically: where that item was last stored, else by its category (vegetables and fruit Fridge A, dairy Fridge B, dry goods Dry store). You can change it on the line.'],
       ['What does Auto reorder do?', 'auto reorder requisition automatic minimum', 'When the item falls below its minimum, a requisition opens automatically to refill it to its maximum.'],
       ['What is FEFO / next out?', 'fefo next out expire first', 'First-Expired-First-Out: the kitchen always uses the lot that expires soonest — marked <b>next out</b>.'],
       ['How do I write off a lot?', 'write off expired damaged remove bin', 'Tap the bin icon on the lot (or <b>Write off</b> in Needs attention) and give the reason.']] },
@@ -81,6 +85,7 @@
       ['How do I take a driver off duty?', 'off duty switch driver agent', 'Use the switch next to the driver in <b>Delivery agents</b>. Off-duty drivers are never chosen.']] },
     'dash-suppliers': { title: 'Suppliers · Payables', intro: 'Suppliers and staff payments in one book: invoices, paid/unpaid/overdue, spend charts. Posting a goods invoice receives its lots into stock.', qa: [
       ['How do I post an invoice?', 'post invoice add bill', 'Tap <b>Post invoice</b>, choose the provider and add the lines; goods lines go straight into stock.'],
+      ['Can I scan an invoice?', 'scan invoice photo pdf camera ocr', 'Yes — <b>Scan supplier invoice</b> reads a photo or PDF and fills the form; you check and post. The scan stays on the invoice (camera icon on its row).'],
       ['How do I mark it paid?', 'paid pay mark unpay', 'Tap <b>Mark paid</b> on the invoice row (or <b>Unpay</b> to undo).']] },
     'dash-iso': { title: 'ISO 22000', intro: 'The food-safety readiness checklist, clause by clause. Set each item to done, in progress or not done, with owner and evidence.', qa: [
       ['How do I update an item?', 'update flag status done progress', 'Change the coloured dropdown on the row and fill owner and evidence reference.']] },

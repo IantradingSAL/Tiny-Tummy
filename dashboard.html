@@ -224,6 +224,13 @@ table.t tbody tr:nth-child(even) td { background:#fffdf9; }
 .pill-row { display:flex; gap:6px; flex-wrap:wrap; }
 dialog { border:none; border-radius:var(--radius); box-shadow:0 12px 50px rgba(0,0,0,.25); padding:20px; max-width:640px; width:92vw; max-height:85vh; overflow-y:auto; }
 dialog::backdrop { background:rgba(61,50,41,.45); }
+dialog:has(.iv-grid) { max-width:1180px; width:96vw; }
+.iv-grid th { white-space:nowrap; }
+.iv-grid td { padding:5px 4px !important; vertical-align:top; }
+.iv-grid input, .iv-grid select { padding:7px 8px; font-size:.86rem; min-width:0; }
+.iv-grid td:nth-child(1) { min-width:190px; } .iv-grid td:nth-child(2) { min-width:70px; } .iv-grid td:nth-child(3) { min-width:62px; }
+.iv-grid td:nth-child(4) { min-width:80px; } .iv-grid td:nth-child(5) { min-width:110px; } .iv-grid td:nth-child(6) { min-width:132px; }
+.iv-grid td:nth-child(7) { min-width:100px; } .iv-grid td:nth-child(8) { white-space:nowrap; padding-top:12px !important; }
 .frm { display:grid; gap:10px; }
 .frm label { font-weight:700; font-size:.82rem; display:grid; gap:4px; }
 .frm .row { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
@@ -3482,6 +3489,8 @@ function newIngredient() {
 function saveIngredient() {
   var name = document.getElementById('ni-name').value.trim();
   if (!name) { alert('Name required'); return; }
+  var dupe = ingResolve(name);
+  if (dupe && dupe.g && !confirm('"' + dupe.g.name + '" is already in the inventory' + (ingNorm(dupe.g.name) === ingNorm(name) ? '' : ' (same item, different spelling?)') + '.\n\nCreate "' + name + '" as a separate item anyway?')) return;
   var ings = store('ingredients').all();
   ings.push(normIng({ id: uid(), name: name, unit: document.getElementById('ni-unit').value,
     cost: Number(document.getElementById('ni-cost').value) || 0,
@@ -3496,7 +3505,7 @@ function receiveLot(ingId) {
     '<div class="row"><label>Lot number<input id="rl-lot" placeholder="e.g. CAR-240901"></label>' +
     '<label>Quantity (' + g.unit + ')<input id="rl-qty" type="number" step="0.1"></label></div>' +
     '<div class="row"><label>Expiry date<input id="rl-exp" type="date" value="' + today(7) + '"></label>' +
-    '<label>Location / Shelf<select id="rl-loc"><option>Fridge A</option><option>Fridge B</option><option>Freezer</option><option>Dry store</option></select></label></div>' +
+    '<label>Location / Shelf<select id="rl-loc">' + invLocs().map(function (x) { return '<option' + (x === ingLoc(g) ? ' selected' : '') + '>' + esc(x) + '</option>'; }).join('') + '</select></label></div>' +
     '<button class="btn p" onclick="saveLot(\'' + ingId + '\')">Receive into stock</button></div>');
 }
 function saveLot(ingId) {
@@ -4021,40 +4030,164 @@ function saveProvider() {
   closeDlg(); render();
 }
 
-/* — invoice entry: goods lines land in stock the moment the invoice posts — */
+/* — invoice entry: one invoice number, as many lines as needed, typed fast,
+   pasted from Excel / a text list, or filled from a scan (js/inv-scan.js).
+   Each line's item is resolved against the item master so a misspelling
+   ("Carot") lands on the existing item (Carrots) — only an item that truly
+   isn't in the inventory is created, after confirmation. Each lot gets its
+   storage location automatically (where the item was last stored, else by
+   category). Goods lines land in stock the moment the invoice posts. — */
+var LOC_BY_CAT = { Vegetables: 'Fridge A', Fruit: 'Fridge A', Dairy: 'Fridge B', Meat: 'Fridge B', Fish: 'Fridge B', 'Dry goods': 'Dry store', Bakery: 'Dry store', Packaging: 'Dry store', Frozen: 'Freezer' };
+var INV_LOCS = ['Fridge A', 'Fridge B', 'Freezer', 'Dry store'];
+var INV_UNITS = ['kg', 'g', 'L', 'ml', 'pc', 'dozen'];
+function ingLoc(g) { // where this item is put away: its usual place, else by category
+  if (!g) return '';
+  if (g.loc) return g.loc;
+  var mine = store('lots').all().filter(function (l) { return l.ing === g.id && l.loc; })
+    .sort(function (a, b) { return a.received < b.received ? 1 : -1; });
+  if (mine.length) return mine[0].loc;
+  return LOC_BY_CAT[g.cat] || 'Dry store';
+}
+function invLocs() {
+  var s = {}; INV_LOCS.forEach(function (x) { s[x] = 1; });
+  store('lots').all().forEach(function (l) { if (l.loc) s[l.loc] = 1; });
+  store('ingredients').all().forEach(function (g) { if (g.loc) s[g.loc] = 1; });
+  return Object.keys(s);
+}
+function ingShelfExpiry(g) { // no expiry typed: the item's usual shelf life (from its newest lot), else 7 days
+  var mine = g ? store('lots').all().filter(function (l) { return l.ing === g.id && l.expiry && l.received; })
+    .sort(function (a, b) { return a.received < b.received ? 1 : -1; }) : [];
+  if (mine.length) {
+    var d = Math.round((new Date(mine[0].expiry) - new Date(mine[0].received)) / 864e5);
+    if (d >= 1 && d <= 730) return today(d);
+  }
+  return today(g && g.cat === 'Packaging' ? 365 : 7);
+}
+function ingNorm(s) { return String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, ' ').trim(); }
+/* The item a typed / printed name means: exact name, then the scanner's fuzzy matcher (misspellings, plurals, French names, learned names). */
+function ingResolve(name, provId) {
+  var n = ingNorm(name); if (!n) return null;
+  var ings = store('ingredients').all().map(normIng);
+  var ex = ings.filter(function (g) { return ingNorm(g.name) === n || ingNorm(g.name).replace(/s\b/g, '') === n.replace(/s\b/g, ''); })[0];
+  if (ex) return { g: ex, how: 'exact' };
+  if (window.ttMatchIng) { var m = window.ttMatchIng(name, ings, provId); if (m) return { g: byId(ings, m.ing), how: m.how }; }
+  return null;
+}
+function ingGuessCat(name) {
+  var n = ingNorm(name);
+  if (/milk|lait|yog|laban|cheese|butter|cream|egg|oeuf/.test(n)) return 'Dairy';
+  if (/mango|apple|banana|pear|berry|fruit|date|fig|peach|apricot|grape|avocado/.test(n)) return 'Fruit';
+  if (/chicken|beef|lamb|meat|turkey/.test(n)) return 'Meat';
+  if (/fish|salmon/.test(n)) return 'Fish';
+  if (/frozen|surgel/.test(n)) return 'Frozen';
+  if (/jar|lid|box|bag|label|bottle|pack|carton/.test(n)) return 'Packaging';
+  if (/biscuit|bread|cookie|cracker/.test(n)) return 'Bakery';
+  if (/flour|rice|oat|millet|quinoa|lentil|bean|nut|seed|sugar|salt|cocoa|molass|oil|pasta|spice|powder|dried/.test(n)) return 'Dry goods';
+  return 'Vegetables';
+}
+function invUnitFactor(u, gUnit) {
+  u = String(u || '').toLowerCase(); gUnit = String(gUnit || '').toLowerCase();
+  if (!u || u === gUnit) return 1;
+  if (gUnit === 'kg' && u === 'g') return 0.001;
+  if (gUnit === 'l' && u === 'ml') return 0.001;
+  if (gUnit === 'pc' && u === 'dozen') return 12;
+  if (gUnit === 'g' && u === 'kg') return 1000;
+  if (gUnit === 'ml' && u === 'l') return 1000;
+  return 1;
+}
 var invDraftLines = [];
 function newInvoice() {
-  invDraftLines = [{}];
+  invDraftLines = [{}, {}, {}];
   invoiceDlg();
 }
 function invoiceDlg() {
-  var provs = store('providers').all(), ings = store('ingredients').all();
+  var provs = store('providers').all(), ings = store('ingredients').all().map(normIng);
   var provOpts = provs.map(function (p) {
     return '<option value="' + p.id + '">' + (p.type === 'employee' ? '👷 ' : '🏭 ') + esc(p.name) + '</option>';
   }).join('');
   var kind = document.getElementById('iv-kind') ? document.getElementById('iv-kind').value : 'goods';
-  var linesHtml = invDraftLines.map(function (l, i) {
-    if (kind === 'service') {
-      return '<div class="row"><label>Description<input data-l="' + i + '" data-f="desc" value="' + esc(l.desc || '') + '"></label>' +
+  var linesHtml;
+  if (kind === 'service') {
+    linesHtml = invDraftLines.map(function (l, i) {
+      return '<div class="row" data-row="' + i + '"><label>Description<input data-l="' + i + '" data-f="desc" value="' + esc(l.desc || '') + '"></label>' +
         '<label>Amount ($)<input data-l="' + i + '" data-f="amount" type="number" step="0.01" value="' + esc(l.amount || '') + '"></label></div>';
-    }
-    var ingOpts = ings.map(function (g) {
-      return '<option value="' + g.id + '"' + (l.ing === g.id ? ' selected' : '') + '>' + esc(g.name) + ' (' + g.unit + ')</option>';
     }).join('');
-    return '<div class="row" style="grid-template-columns:2fr 1fr"><label>Ingredient<select data-l="' + i + '" data-f="ing">' + ingOpts + '</select></label>' +
-      '<label>Qty<input data-l="' + i + '" data-f="qty" type="number" step="0.1" value="' + esc(l.qty || '') + '"></label></div>' +
-      '<div class="row" style="grid-template-columns:1fr 1fr 1fr"><label>Unit cost ($)<input data-l="' + i + '" data-f="cost" type="number" step="0.01" value="' + esc(l.cost || '') + '"></label>' +
-      '<label>Lot no.<input data-l="' + i + '" data-f="lot" value="' + esc(l.lot || '') + '" placeholder="e.g. CAR-240901"></label>' +
-      '<label>Expiry<input data-l="' + i + '" data-f="expiry" type="date" value="' + esc(l.expiry || today(7)) + '"></label></div><hr style="border:none;border-top:1px solid var(--line)">';
-  }).join('');
+  } else {
+    var sorted = ings.slice().sort(function (a, b) { return a.name < b.name ? -1 : 1; });
+    var ingOpts = function (sel) { return sorted.map(function (g) { return '<option value="' + g.id + '"' + (sel === g.id ? ' selected' : '') + '>' + esc(g.name) + ' (' + esc(g.unit) + ')</option>'; }).join(''); };
+    var cell = function (i, f, v, attrs) { return '<td><input data-l="' + i + '" data-f="' + f + '" value="' + esc(v == null ? '' : v) + '" ' + (attrs || '') + '></td>'; };
+    linesHtml = '<div class="tbl-scroll"><table class="t reg iv-grid"><thead><tr><th>Item</th><th class="num">Qty</th><th>Unit</th><th class="num">Unit cost $</th><th>Lot no.</th><th>Expiry</th><th>Put away in</th><th class="num">Line $</th><th></th></tr></thead><tbody>' +
+      invDraftLines.map(function (l, i) {
+        var isNew = l.ing === '__new';
+        return '<tr data-row="' + i + '">' +
+          '<td><div style="display:grid;gap:4px"><select data-l="' + i + '" data-f="ing" onchange="invLineFill(' + i + ')">' +
+            '<option value="">— choose item —</option>' + ingOpts(l.ing) + '<option value="__new"' + (isNew ? ' selected' : '') + '>＋ New item (not in the list)…</option></select>' +
+          '<input data-l="' + i + '" data-f="name" value="' + esc(isNew ? l.name || '' : '') + '" placeholder="New item name" oninput="invLineHint(' + i + ')" style="' + (isNew ? '' : 'display:none') + '"></div>' +
+          '<div class="il-sub" id="iv-h' + i + '"></div></td>' +
+          cell(i, 'qty', l.qty, 'type="number" step="any" oninput="invLineHint(' + i + ')"') +
+          cell(i, 'unit', l.unit, 'list="iv-units" placeholder="' + esc(l.ing && byId(ings, l.ing) ? byId(ings, l.ing).unit : 'kg') + '"') +
+          cell(i, 'cost', l.cost, 'type="number" step="any" oninput="invLineHint(' + i + ')"') +
+          cell(i, 'lot', l.lot, 'placeholder="auto"') +
+          cell(i, 'expiry', l.expiry, 'type="date" title="Empty: the item\'s usual shelf life"') +
+          cell(i, 'loc', l.loc, 'list="iv-locs" placeholder="auto"') +
+          '<td class="num" id="iv-t' + i + '"></td>' +
+          '<td><button class="u-ib" title="Remove this line" onclick="invDelLine(' + i + ')">✕</button></td></tr>';
+      }).join('') + '</tbody><tfoot><tr><td colspan="7"><b id="iv-n"></b></td><td class="num"><b id="iv-sum"></b></td><td></td></tr></tfoot></table></div>' +
+      '<datalist id="iv-units">' + INV_UNITS.map(function (u) { return '<option value="' + u + '">'; }).join('') + '</datalist>' +
+      '<datalist id="iv-locs">' + invLocs().map(function (u) { return '<option value="' + esc(u) + '">'; }).join('') + '</datalist>' +
+      '<details class="iv-paste" style="margin-top:6px"><summary style="cursor:pointer;font-weight:700">Paste many lines at once (Excel, WhatsApp, a list)</summary>' +
+      '<textarea id="iv-paste" rows="5" style="width:100%;margin-top:6px" placeholder="One item per line — copied from Excel (columns: item, qty, unit, unit cost, lot, expiry, location) or typed, e.g.&#10;Carrots 10 kg 1.15 lot CAR-1101 exp 25/11/2026&#10;Zucchini 6 kg 1.45&#10;Eggs 5 dozen 2.10"></textarea>' +
+      '<button class="btn o s" onclick="invPaste()">＋ Add these lines</button></details>';
+  }
   showDlg('<h3>＋ Post invoice</h3><div class="frm" style="margin-top:10px">' +
     '<div class="row"><label>Provider<select id="iv-prov">' + provOpts + '</select></label>' +
     '<label>Invoice type<select id="iv-kind" onchange="invKindChange()"><option value="goods"' + (kind === 'goods' ? ' selected' : '') + '>📦 Goods (updates stock)</option><option value="service"' + (kind === 'service' ? ' selected' : '') + '>🧾 Service / salary</option></select></label></div>' +
     '<div class="row"><label>Invoice no.<input id="iv-code" placeholder="INV-…"></label><label>Due date<input id="iv-due" type="date" value="' + today(15) + '"></label></div>' +
     linesHtml +
-    '<div class="pill-row"><button class="btn o s" onclick="invAddLine()">＋ Add line</button></div>' +
-    (kind === 'goods' ? '<p class="muted">Each goods line becomes a stock lot the moment you post — FEFO picks it by its expiry, the ingredient\'s cost updates to this price, and any open requisition for it closes.</p>' : '') +
+    '<div class="pill-row"><button class="btn o s" onclick="invAddLine(1)">＋ Add line</button>' + (kind === 'goods' ? '<button class="btn o s" onclick="invAddLine(10)">＋ 10 lines</button>' : '') + '</div>' +
+    (kind === 'goods' ? '<p class="muted">All lines share this invoice number. Each line becomes a stock lot the moment you post — put away where it says (filled automatically), FEFO picks it by its expiry, the item\'s cost updates to this price and any open requisition for it closes. A name close to an existing item is matched to it; a truly new item is created.</p>' : '') +
     '<button class="btn p" onclick="saveInvoice()">Post invoice</button></div>');
+  if (kind === 'goods') invDraftLines.forEach(function (l, i) { invLineHint(i, true); });
+}
+/* live: which item the line will go to, its unit, put-away place and line total */
+function invLineHint(i, quiet) {
+  var get = function (f) { var el = document.querySelector('#dlg [data-l="' + i + '"][data-f="' + f + '"]'); return el ? el.value : ''; };
+  var h = document.getElementById('iv-h' + i); if (!h) return;
+  var ingId = get('ing'), ings = store('ingredients').all().map(normIng), g = ingId && ingId !== '__new' ? byId(ings, ingId) : null;
+  var name = get('name').trim(), prov = (document.getElementById('iv-prov') || {}).value;
+  var nameEl = document.querySelector('#dlg [data-l="' + i + '"][data-f="name"]');
+  if (nameEl) nameEl.style.display = ingId === '__new' ? '' : 'none';
+  if (g) h.innerHTML = '<span style="color:#2e8770">' + esc(g.unit) + ' · put away in ' + esc(ingLoc(g)) + '</span>';
+  else if (ingId === '__new') {
+    var r = name ? ingResolve(name, prov) : null;
+    if (r && r.g) h.innerHTML = '<span style="color:#b23a48">Already in the inventory as <b>' + esc(r.g.name) + '</b></span> <button class="btn o s" onclick="invUseExisting(' + i + ',\'' + r.g.id + '\')">Use ' + esc(r.g.name) + '</button>';
+    else h.innerHTML = name ? '<span style="color:#a3720d">＋ will be created (' + esc(ingGuessCat(name)) + ' · ' + esc(LOC_BY_CAT[ingGuessCat(name)] || 'Dry store') + ')</span>' : '<span class="muted">Type the new item\'s name</span>';
+  } else h.innerHTML = '';
+  var unitEl = document.querySelector('#dlg [data-l="' + i + '"][data-f="unit"]');
+  if (unitEl) unitEl.placeholder = g ? g.unit : 'kg';
+  var locEl = document.querySelector('#dlg [data-l="' + i + '"][data-f="loc"]');
+  if (locEl) locEl.placeholder = g ? ingLoc(g) : name ? (LOC_BY_CAT[ingGuessCat(name)] || 'Dry store') : 'auto';
+  var t = (Number(get('qty')) || 0) * (Number(get('cost')) || 0), te = document.getElementById('iv-t' + i);
+  if (te) te.textContent = t ? money(t) : '';
+  var sum = 0, n = 0;
+  document.querySelectorAll('#dlg tr[data-row]').forEach(function (tr) {
+    var q = tr.querySelector('[data-f="qty"]'), c = tr.querySelector('[data-f="cost"]'), it = tr.querySelector('[data-f="ing"]');
+    if (it && it.value && Number(q.value) > 0) { n++; sum += Number(q.value) * (Number(c.value) || 0); }
+  });
+  var se = document.getElementById('iv-sum'); if (se) se.textContent = money(sum);
+  var ne = document.getElementById('iv-n'); if (ne) ne.textContent = n + ' line' + (n === 1 ? '' : 's') + ' to receive';
+}
+function invUseExisting(i, id) {
+  var sel = document.querySelector('#dlg [data-l="' + i + '"][data-f="ing"]'); if (sel) sel.value = id;
+  invLineFill(i);
+}
+/* picking an item fills its usual cost when empty */
+function invLineFill(i) {
+  var sel = document.querySelector('#dlg [data-l="' + i + '"][data-f="ing"]'), costEl = document.querySelector('#dlg [data-l="' + i + '"][data-f="cost"]');
+  var g = sel && sel.value && sel.value !== '__new' ? byId(store('ingredients').all(), sel.value) : null;
+  if (g && costEl && !costEl.value && g.cost) costEl.value = g.cost;
+  if (sel && sel.value === '__new') { var ne = document.querySelector('#dlg [data-l="' + i + '"][data-f="name"]'); if (ne) { ne.style.display = ''; ne.focus(); } }
+  invLineHint(i);
 }
 function invReadLines() {
   document.querySelectorAll('#dlg [data-l]').forEach(function (el) {
@@ -4063,43 +4196,108 @@ function invReadLines() {
     invDraftLines[i][el.dataset.f] = el.value;
   });
 }
-function invKindChange() { invReadLines(); invDraftLines = [{}]; invoiceDlg(); }
-function invAddLine() { invReadLines(); invDraftLines.push({}); invoiceDlg(); }
+function invKeepHead(fn) { // re-draw the form without losing provider / number / due date
+  var keep = {}; ['iv-prov', 'iv-code', 'iv-due'].forEach(function (id) { var el = document.getElementById(id); if (el) keep[id] = el.value; });
+  fn();
+  Object.keys(keep).forEach(function (id) { var el = document.getElementById(id); if (el && keep[id]) el.value = keep[id]; });
+}
+function invKindChange() { invReadLines(); invDraftLines = [{}]; invKeepHead(invoiceDlg); }
+function invAddLine(n) { invReadLines(); for (var k = 0; k < (n || 1); k++) invDraftLines.push({}); invKeepHead(invoiceDlg); }
+function invDelLine(i) { invReadLines(); invDraftLines.splice(i, 1); if (!invDraftLines.length) invDraftLines.push({}); invKeepHead(invoiceDlg); }
+function invPaste() {
+  invReadLines();
+  var txt = (document.getElementById('iv-paste') || {}).value || '';
+  var rows = window.ttInvPasteRows ? window.ttInvPasteRows(txt, (document.getElementById('iv-prov') || {}).value)
+    : txt.split(/\r?\n/).filter(function (x) { return x.trim(); }).map(function (x) { var c = x.split('\t'); return { name: c[0], qty: c[1], unit: c[2], cost: c[3], lot: c[4], expiry: c[5], loc: c[6] }; });
+  if (!rows.length) { alert('Nothing to add — paste one item per line.'); return; }
+  var prov = (document.getElementById('iv-prov') || {}).value;
+  rows.forEach(function (r) { var m = ingResolve(r.name, prov); if (m && m.g) { r.ing = m.g.id; r._label = r._label || r.name; } else { r.ing = '__new'; } });
+  invDraftLines = invDraftLines.filter(function (l) { return l.ing || l.qty; }).concat(rows);
+  logAct('Payables', 'invoice lines pasted', rows.length + ' line(s)');
+  invKeepHead(invoiceDlg);
+}
 function saveInvoice() {
   invReadLines();
   var kind = document.getElementById('iv-kind').value;
   var provId = document.getElementById('iv-prov').value;
   var provs = store('providers').all(); var prov = byId(provs, provId);
-  var lines = invDraftLines.filter(function (l) { return kind === 'service' ? l.amount : (l.ing && l.qty); })
-    .map(function (l) {
-      return kind === 'service'
-        ? { desc: l.desc || 'Service', amount: Number(l.amount) }
-        : { ing: l.ing, qty: Number(l.qty), cost: Number(l.cost) || 0, lot: l.lot || ('LOT-' + uid().toUpperCase()), expiry: l.expiry || today(7) };
+  var code = document.getElementById('iv-code').value.trim();
+  var lines, created = [];
+  if (kind === 'service') {
+    lines = invDraftLines.filter(function (l) { return l.amount; }).map(function (l) { return { desc: l.desc || 'Service', amount: Number(l.amount) }; });
+  } else {
+    var filled = function (l) { return l.ing && (l.ing !== '__new' || (l.name || '').trim()); };
+    var use = invDraftLines.filter(function (l) { return filled(l) && Number(l.qty) > 0; });
+    var half = invDraftLines.filter(function (l) { return filled(l) ? !(Number(l.qty) > 0) : Number(l.qty) > 0; });
+    if (half.length && !confirm(half.length + ' line(s) have an item without a quantity (or a quantity without an item) and will be left out. Continue?')) return;
+    // resolve every name to an item; the ones not in the inventory are created (once, even if listed twice)
+    var fresh = {};
+    var clash = [];
+    use.forEach(function (l) {
+      if (l.ing !== '__new') return;
+      var r = ingResolve(l.name, provId);
+      if (r && r.g) { clash.push('"' + l.name.trim() + '" → ' + r.g.name); l.ing = r.g.id; } // never a second Carrots
+      else { l.ing = ''; fresh[ingNorm(l.name)] = fresh[ingNorm(l.name)] || l; }
     });
+    if (clash.length && !confirm('These new names are already in the inventory and will be received on the existing item (no duplicate):\n\n• ' + clash.join('\n• ') + '\n\nOK?')) { invKeepHead(invoiceDlg); return; }
+    // two spellings of the same new item in one invoice (Yoghurt / yogurt) become one item
+    var freshList = [];
+    Object.keys(fresh).forEach(function (k) {
+      var same = window.ttMatchIng ? window.ttMatchIng(fresh[k].name, freshList.map(function (x) { return { id: x, name: fresh[x].name, cat: '' }; })) : null;
+      if (same) { use.forEach(function (x) { if (!x.ing && ingNorm(x.name) === k) x.name = fresh[same.ing].name; }); delete fresh[k]; }
+      else freshList.push(k);
+    });
+    var newNames = Object.keys(fresh).map(function (k) { return fresh[k].name.trim(); });
+    if (newNames.length && !confirm('Not in the inventory yet — these item(s) will be created:\n\n• ' + newNames.join('\n• ') + '\n\nIf one of them is an existing item under another name, press Cancel and pick it from the list.')) return;
+    if (newNames.length) {
+      var ingsC = store('ingredients').all();
+      Object.keys(fresh).forEach(function (k) {
+        var l = fresh[k], nm = l.name.trim().replace(/\s+/g, ' '), cat = ingGuessCat(nm);
+        var unit = { g: 'kg', ml: 'L', dozen: 'pc' }[l.unit] || (INV_UNITS.indexOf(l.unit) >= 0 ? l.unit : '') || 'kg';
+        var g = normIng({ id: uid(), name: nm.charAt(0).toUpperCase() + nm.slice(1), cat: cat, unit: unit, cost: (Number(l.cost) || 0) / invUnitFactor(l.unit, unit),
+          min: 0, max: 0, reorder: 0, use_m: '', lead: 1, auto: false, loc: l.loc || LOC_BY_CAT[cat] || 'Dry store' });
+        ingsC.push(g); created.push(g.name);
+        use.forEach(function (x) { if (!x.ing && ingNorm(x.name) === k) x.ing = g.id; });
+      });
+      store('ingredients').save(ingsC);
+      logAct('Inventory', 'items created from invoice', created.join(', '));
+    }
+    var ingsN = store('ingredients').all();
+    lines = use.map(function (l) {
+      var g = byId(ingsN, l.ing), f = invUnitFactor(l.unit, g ? g.unit : '');
+      return { ing: l.ing, qty: r3(Number(l.qty) * f), cost: Math.round((Number(l.cost) || 0) / f * 10000) / 10000,
+        lot: (l.lot || '').trim() || ((g ? g.name.replace(/[^A-Za-z]/g, '').slice(0, 3).toUpperCase() : 'LOT') + '-' + today(0).replace(/-/g, '').slice(2) + '-' + uid().toUpperCase().slice(0, 3)),
+        expiry: l.expiry || ingShelfExpiry(g), loc: (l.loc || '').trim() || ingLoc(g) };
+    });
+    invDraftLines.forEach(function (d) { var m = use.indexOf(d); if (m >= 0) d.ing = use[m].ing; }); // resolved ids, for the scanner's memory
+  }
   if (!lines.length) { alert('Add at least one complete line'); return; }
   var invs = store('sup_invoices').all();
-  var inv = { id: uid(), code: document.getElementById('iv-code').value || ('INV-' + uid().toUpperCase().slice(0, 5)),
+  if (code && invs.some(function (v) { return v.code === code && v.provider === provId; }) &&
+      !confirm('Invoice ' + code + ' from this provider is already posted. Post it again (the goods would be received twice)?')) return;
+  var inv = { id: uid(), code: code || ('INV-' + uid().toUpperCase().slice(0, 5)),
     provider: provId, kind: kind, date: today(0), due: document.getElementById('iv-due').value || today(15),
     status: 'unpaid', paid_at: null, lines: lines };
   invs.unshift(inv);
-  logAct('Payables', 'invoice posted', inv.code + ' · ' + money(invTotal(inv)) + (kind === 'goods' ? ' · stock received' : ''));
+  logAct('Payables', 'invoice posted', inv.code + ' · ' + lines.length + ' line(s) · ' + money(invTotal(inv)) + (kind === 'goods' ? ' · stock received' : ''));
   store('sup_invoices').save(invs);
 
   if (kind === 'goods') {
-    // AUTO STOCK UPDATE: every line becomes a lot, cost refreshes, requisitions close
+    // AUTO STOCK UPDATE: every line becomes a lot in its place, cost refreshes, requisitions close
     var lots = store('lots').all(), ings = store('ingredients').all(), reqs = store('requisitions').all();
     var received = [];
     var invMoves = [];
     lines.forEach(function (l) {
-      lots.push({ id: uid(), ing: l.ing, lot: l.lot, qty: l.qty, expiry: l.expiry, received: today(0) });
+      lots.push({ id: uid(), ing: l.ing, lot: l.lot, qty: l.qty, loc: l.loc, expiry: l.expiry, received: today(0) });
       var g = byId(ings, l.ing);
-      invMoves.push({ type: 'purchase', ing: l.ing, lot: l.lot, qty: l.qty, unit: g ? g.unit : '', cost: l.cost || (g ? g.cost : 0), ref: inv.code, note: prov ? prov.name : '' });
-      if (g) { if (l.cost) g.cost = l.cost; received.push(l.qty + ' ' + g.unit + ' ' + g.name); }
+      invMoves.push({ type: 'purchase', ing: l.ing, lot: l.lot, qty: l.qty, unit: g ? g.unit : '', cost: l.cost || (g ? g.cost : 0), ref: inv.code, note: (prov ? prov.name : '') + (l.loc ? ' · ' + l.loc : '') });
+      if (g) { if (l.cost) g.cost = l.cost; if (!g.loc && l.loc) g.loc = l.loc; received.push(l.qty + ' ' + g.unit + ' ' + g.name + ' → ' + l.loc); }
       reqs.map(normReq).forEach(function (r) { if (r.ing === l.ing && (r.status === 'pending' || r.status === 'approved')) r.status = 'received'; });
     });
     store('lots').save(lots); store('ingredients').save(ings); store('requisitions').save(reqs);
     recordMoves(invMoves);
     pushDemo('Stock received 📦', (prov ? prov.name : 'Supplier') + ' · ' + inv.code + ': ' + received.join(', '), 'Role · kitchen');
+    if (typeof uToast === 'function') uToast(lines.length + ' line(s) received into stock' + (created.length ? ' · new item(s): ' + created.join(', ') : ''));
   }
   closeDlg(); render();
 }
@@ -4121,7 +4319,7 @@ RENDER.iso = function () {
           var lbl = s === 'done' ? '✅ done' : s === 'progress' ? '🟡 in progress' : '🔴 not done';
           return '<option value="' + s + '"' + (i.status === s ? ' selected' : '') + '>' + lbl + '</option>';
         }).join('') + '</select></td>' +
-        '<td><input value="' + esc(i.owner) + '" placeholder="owner" style="width:110px" onchange="isoSet(\'' + i.id + '\',\'owner\',this.value)"></td>' +
+        '<td><input value="' + esc(i.owner) + '" placeholder="owner" onchange="isoSet(\'' + i.id + '\',\'owner\',this.value)"></td>' +
         '<td><input value="' + esc(i.evidence) + '" placeholder="evidence / doc ref" style="width:150px" onchange="isoSet(\'' + i.id + '\',\'evidence\',this.value)"></td></tr>';
     }).join('');
     return '<div class="panel"><div class="iso-h"><h3>' + esc(c) + '</h3><span class="stp-bar"><i style="width:' + Math.round(d / mine.length * 100) + '%"></i></span><span class="muted">' + d + ' of ' + mine.length + ' done</span></div>' +
@@ -5116,6 +5314,7 @@ function syncActAs() {
 </script>
 <script src="js/dash-ui.js"></script>
 <script src="js/ask-ops.js"></script>
+<script src="js/inv-scan.js"></script>
 <script src="js/help.js"></script>
 </body>
 </html>
