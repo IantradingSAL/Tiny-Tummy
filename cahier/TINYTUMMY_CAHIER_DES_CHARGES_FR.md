@@ -266,6 +266,15 @@ Chaque commande, client, recette ou ingrédient de la réponse est un lien.
    signalé par le livreur ou détecté automatiquement envoie au client une
    nouvelle heure d'arrivée.
 7. **Livrée** : confirmation horodatée. Chaque étape est horodatée.
+   **Contrôle à la livraison** : *Livrée* ouvre un contrôle avec boutons OK /
+   Not OK — bon client et bonne adresse, emballages intacts et scellés,
+   étiquettes de lot sur chaque emballage, glacière encore froide, conseils
+   de conservation donnés — plus la température à la porte (limite ≤ 8 °C)
+   et le nom de la personne qui a reçu la commande. La signature reste
+   verrouillée tant que tout n'est pas rempli ; la commande est alors livrée.
+   Un Not OK ou une température au-dessus de la limite est enregistré comme
+   *Contrôle de livraison non conforme* avec les motifs, et le responsable
+   est alerté.
 
 ## 6. Recettes, stock et achats
 
@@ -451,6 +460,7 @@ Chaque commande, client, recette ou ingrédient de la réponse est un lien.
 - Formulaire CQ avant expédition (contrôles, poids ±5 %, température ≤ 5 °C, allergies de l'enfant, signature ; NON CONFORME garde la commande au CQ) ; lot créé au Conditionnement avec une étiquette imprimable par portion (18/11/2026).
 - Menu : titres de groupes sans compteur (18/11/2026).
 - Formulaire CQ : chaque point validé par un bouton OK / Not OK ; un bloc par produit avec son poids, sa température et les contrôles de sa recette ; Sign QC verrouillé tant que tout n'est pas rempli ; réglages CQ par recette (grammes de la portion, tolérance, température maximale, conservation, contrôles supplémentaires) (18/11/2026).
+- Contrôle à la livraison (points OK / Not OK, température ≤ 8 °C, reçu par, signature) avant qu'une commande soit livrée ; résultat affiché dans la liste Livraison et sur la commande (18/11/2026).
 - Commandes : contrôle du stock à la prise de commande et à la confirmation ; un manque ouvre une réquisition d'achat pour la commande et bloque l'envoi en cuisine jusqu'à réception (dérogation super administrateur tracée) ; libération automatique à la réception (18/11/2026).
 
 ### V1.1 — du 01/11/2026 au 18/11/2026 (mise en service le 18/11/2026)

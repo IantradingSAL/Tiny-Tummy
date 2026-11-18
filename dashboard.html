@@ -1643,6 +1643,7 @@ function orderStep(oid) {
   var o = byId(store('orders').all(), oid); if (!o) return;
   var n = NEXT_STEP[o.status]; if (!n) return;
   if (n[0] === 'qcpass' && !(o.qc && o.qc.pass)) { qcForm(oid); return; }
+  if (n[0] === 'delivered' && !o.dqc) { deliveryForm(oid); return; }
   if (n[0] === 'dispatch') {
     var ag = suggestAgent();
     if (!ag) { alert('No delivery agent on duty — switch one on in Dispatch · Agents.'); return; }
@@ -1705,6 +1706,8 @@ function openOrder(id) {
     stockBanner(o) +
     (actions ? '<div class="o-next"><span class="o-next-l">Next step</span><div class="pill-row">' + actions + '</div>' +
       (o.batch_lot || ['kitchen', 'portioning', 'qc', 'dispatch'].indexOf(o.status) >= 0 ? '<button class="btn o s o-lbl" onclick="printLabels(\'' + o.id + '\')" title="One label per portion">' + ic('receipt') + ' Print labels' + (o.batch_lot ? ' · ' + esc(o.batch_lot) : '') + '</button>' : '') + '</div>' : '') +
+    (o.dqc ? '<div class="qc-sum ' + (o.dqc.pass ? 'ok' : 'bad') + '">' + ic(o.dqc.pass ? 'truck' : 'alarm') + ' Delivery check ' + (o.dqc.pass ? 'OK' : 'FAILED') + ' · ' + esc(o.dqc.at) + ' · ' + esc(o.dqc.by) +
+      ' · ' + o.dqc.temp_c + ' °C at the door · received by ' + esc(o.dqc.received_by) + (o.dqc.pass ? '' : ' — ' + esc(o.dqc.reasons.join('; '))) + '</div>' : '') +
     (o.qc ? '<div class="qc-sum ' + (o.qc.pass ? 'ok' : 'bad') + '">' + ic(o.qc.pass ? 'check' : 'alarm') + ' QC ' + (o.qc.pass ? 'passed' : 'FAILED') + ' · ' + esc(o.qc.at) + ' · ' + esc(o.qc.by) + ' · ' +
       (o.qc.lines || []).map(function (l) { return esc(l.name) + ' ' + l.weight_g + ' g (' + (l.dev_pct >= 0 ? '+' : '') + l.dev_pct + ' %) ' + l.temp_c + ' °C'; }).join(' · ') +
       (o.qc.pass ? '' : ' — ' + esc(o.qc.reasons.join('; '))) + '</div>' : '') +
@@ -2271,6 +2274,69 @@ function saveQc(oid) {
   closeDlg(); openOrder(oid); render();
 }
 
+/* ── Delivery check at handover (same OK / Not OK buttons as QC) ── */
+var DQ_CHECKS = [
+  ['who', 'Right customer and address'],
+  ['intact', 'Every pack intact, seals unbroken'],
+  ['labels', 'Lot labels on every pack'],
+  ['cold', 'Cold box still cold, ice pack in place'],
+  ['advice', 'Customer told: keep refrigerated, use-by date on the label']
+];
+var DQ_TMAX = 8;
+var DQF = null;
+function dqBtns(key) {
+  var v = DQF && DQF.ans[key];
+  return '<span class="qc-b"><button type="button" class="qc-ok' + (v === 'ok' ? ' on' : '') + '" onclick="dqAns(\'' + key + '\',\'ok\')">' + ic('check') + ' OK</button>' +
+    '<button type="button" class="qc-no' + (v === 'no' ? ' on' : '') + '" onclick="dqAns(\'' + key + '\',\'no\')">' + ic('x') + ' Not OK</button></span>';
+}
+function dqAns(key, v) {
+  if (!DQF) return; DQF.ans[key] = DQF.ans[key] === v ? '' : v;
+  var row = document.querySelector('[data-dk="' + key + '"]');
+  if (row) { var t = document.createElement('template'); t.innerHTML = dqBtns(key); row.querySelector('.qc-b').replaceWith(t.content.firstChild); row.className = 'qc-row ' + (DQF.ans[key] || ''); }
+  dqProgress();
+}
+function dqProgress() {
+  if (!DQF) return;
+  var n = DQ_CHECKS.filter(function (c) { return DQF.ans[c[0]]; }).length;
+  var t = document.getElementById('dq-t'), who = document.getElementById('dq-who'), live = document.getElementById('dq-live');
+  if (live && t) live.innerHTML = t.value === '' ? '' : (Number(t.value) <= DQ_TMAX ? '<span class="ok">' + t.value + ' °C ✓</span>' : '<span class="bad">' + t.value + ' °C ✗ above ' + DQ_TMAX + ' °C</span>');
+  var all = n === DQ_CHECKS.length && t && t.value !== '' && who && who.value.trim() !== '';
+  var p = document.getElementById('dq-prog'); if (p) p.innerHTML = '<b>' + n + '/' + DQ_CHECKS.length + '</b> checks pressed · temperature ' + (t && t.value !== '' ? '✓' : '—') + ' · received by ' + (who && who.value.trim() ? '✓' : '—');
+  var b = document.getElementById('dq-sign'); if (b) b.disabled = !all;
+}
+function deliveryForm(oid) {
+  var o = byId(store('orders').all(), oid); if (!o) return;
+  if (o.status !== 'delivering') { alert('The delivery check is done at the door, once the order is on the road.'); return; }
+  DQF = { oid: oid, ans: {} };
+  var a = o.agent ? byId(store('agents').all(), o.agent) : null, products = store('products').all();
+  showDlg('<h3>' + ic('truck') + ' Delivery check — ' + esc(o.code) + '</h3>' +
+    '<p class="muted">' + esc(o.customer) + ' · ' + esc(o.address || '') + ' · ' + esc(o.phone || '') + (a ? ' · driver <b>' + esc(a.name) + '</b>' : '') + '</p>' +
+    '<div class="qc-lot"><span>' + o.items.map(function (it) { var p = byId(products, it.product); return it.qty + '× ' + esc(p ? p.name : '?'); }).join(', ') + (o.batch_lot ? ' · lot <b>' + esc(o.batch_lot) + '</b>' : '') + '</span></div>' +
+    '<h4 class="qc-sec">At the door — press OK on each point</h4>' +
+    DQ_CHECKS.map(function (c) { return '<div class="qc-row" data-dk="' + c[0] + '"><span>' + esc(c[1]) + '</span>' + dqBtns(c[0]) + '</div>'; }).join('') +
+    '<div class="qc-meas" style="margin-top:10px"><label>Temperature at the door (°C)<input id="dq-t" type="number" step="0.1" placeholder="≤ ' + DQ_TMAX + '" oninput="dqProgress()"></label>' +
+      '<label>Received by (name)<input id="dq-who" placeholder="e.g. the mother, the nanny" oninput="dqProgress()" style="width:220px"></label><span class="qc-live" id="dq-live"></span></div>' +
+    '<div class="frm"><label>Notes<input id="dq-n" placeholder="optional — e.g. left with the concierge"></label>' +
+      '<div class="qc-foot"><span id="dq-prog"></span><button class="btn g" id="dq-sign" disabled onclick="saveDelivery(\'' + oid + '\')">' + ic('check') + ' Sign — delivered</button></div>' +
+      '<span class="muted">Signed by <b>' + esc(currentUser().name) + '</b> · ' + esc(nowTs()) + '</span></div>');
+  dqProgress();
+}
+function saveDelivery(oid) {
+  var orders = store('orders').all(), o = byId(orders, oid); if (!o || !DQF) return;
+  if (DQ_CHECKS.some(function (c) { return !DQF.ans[c[0]]; })) { alert('Press OK or Not OK on every check.'); return; }
+  var t = Number(document.getElementById('dq-t').value), who = document.getElementById('dq-who').value.trim();
+  var reasons = DQ_CHECKS.filter(function (c) { return DQF.ans[c[0]] === 'no'; }).map(function (c) { return c[1]; });
+  if (t > DQ_TMAX) reasons.push('temperature at the door ' + t + ' °C (limit ≤ ' + DQ_TMAX + ' °C)');
+  var ans = {}; DQ_CHECKS.forEach(function (c) { ans[c[0]] = DQF.ans[c[0]]; });
+  o.dqc = { at: nowTs(), ts: Date.now(), by: currentUser().name, received_by: who, temp_c: t, checks: ans, notes: document.getElementById('dq-n').value || '', pass: !reasons.length, reasons: reasons };
+  o.history.push({ at: nowTs(), what: 'Delivery check ' + (reasons.length ? 'FAILED ✗ — ' + reasons.join('; ') : 'OK ✓') + ' · ' + t + ' °C at the door · received by ' + who + ' — ' + o.dqc.by });
+  logAct('Delivery', reasons.length ? 'delivery check failed' : 'delivery check OK', o.code + ' · ' + t + ' °C · received by ' + who + (reasons.length ? ' · ' + reasons.join('; ') : ''));
+  if (reasons.length) pushDemo('Delivery check failed 🚨', o.code + ': ' + reasons.join('; '), 'Role · manager');
+  store('orders').save(orders); DQF = null;
+  closeDlg(); orderAct(oid, 'delivered'); closeDlg(); render();
+  uToast(o.code + ' delivered' + (reasons.length ? ' — check failed, manager alerted' : ' ✓'));
+}
+
 function orderAct(oid, act) {
   var orders = store('orders').all(); var o = byId(orders, oid); if (!o) return;
   var prevStatus = o.status;
@@ -2311,6 +2377,7 @@ function orderAct(oid, act) {
     log('Dispatched with ' + (a ? a.name : 'agent') + ' · ' + km + ' km by road · ETA ' + fmtClock(o.track.promised));
     pushDemo('Your order has left the kitchen 🚚', o.code + ' is on the way with ' + (a ? a.name : 'our agent') + ' — arriving around ' + fmtClock(o.track.promised) + ' (' + km + ' km)', 'Customer · ' + o.customer);
   }
+  if (act === 'delivered' && !o.dqc) { deliveryForm(oid); return; }
   if (act === 'delivered') { o.status = 'delivered'; log('Delivered ✓'); pushDemo('Delivered 📦', 'Enjoy! Rate your ' + o.code + ' meals', 'Customer · ' + o.customer); }
   if (act === 'cancel') { if (!confirm('Cancel this order?')) return; o.status = 'cancelled'; log('Order cancelled'); }
   if (o.status !== prevStatus) { o.stage_times = o.stage_times || {}; o.stage_times[o.status] = Date.now(); }
@@ -3540,6 +3607,7 @@ function dlListView(orders, agents, onDuty, load, sugg) {
     } else timing = (x.done ? fmtClock(x.done) + ' · ' + String(new Date(x.done).toISOString().slice(0, 10)).split('-').reverse().join('/') : '<span class="muted">time not recorded</span>') +
       '<div class="il-sub">' + (x.mins != null ? x.mins + ' min on the road' : '') + '</div>';
     var result = x.onTime == null ? '<span class="muted">—</span>' : x.onTime ? '<span class="ostat" style="--sc:#2e8770">' + ic('check') + ' On time</span>' : '<span class="ostat" style="--sc:#b23a48">' + ic('alarm') + ' Late</span>';
+    if (o.dqc) result += '<div style="margin-top:4px">' + (o.dqc.pass ? '<span class="ostat" style="--sc:#2e8770">' + ic('shield') + ' check OK · ' + o.dqc.temp_c + ' °C</span>' : '<span class="ostat" style="--sc:#b23a48">' + ic('alarm') + ' check failed</span>') + '<div class="il-sub muted">received by ' + esc(o.dqc.received_by) + '</div></div>';
     var drv = a ? '<span class="stp-av" style="margin-right:6px">' + initials(a.name) + '</span>' + esc(a.name) : '<span class="muted">—</span>';
     var acts;
     if (o.status === 'dispatch') acts = onDuty.length
@@ -3555,7 +3623,7 @@ function dlListView(orders, agents, onDuty, load, sugg) {
       '<td>' + ic('pin') + ' ' + esc(o.address || '—') + '<div class="il-sub muted">' + x.km + ' km · ~' + etaMin(x.km) + ' min</div></td>' +
       '<td><span class="ostat" style="--sc:' + x.state[1] + '">' + x.state[0] + '</span></td>' +
       '<td style="white-space:nowrap">' + drv + '</td>' +
-      '<td>' + timing + (x.onTime == null ? '' : '<div style="margin-top:4px">' + result + '</div>') + '</td>' +
+      '<td>' + timing + (x.onTime == null && !o.dqc ? '' : '<div style="margin-top:4px">' + result + '</div>') + '</td>' +
       '<td><div class="il-acts">' + acts + '</div></td></tr>';
   }).join('');
   var foot = '<tfoot><tr><td><b>' + sum.n + ' deliver' + (sum.n === 1 ? 'y' : 'ies') + '</b></td><td></td><td><b>' + Math.round(sum.km * 10) / 10 + ' km</b></td><td colspan="2"></td>' +

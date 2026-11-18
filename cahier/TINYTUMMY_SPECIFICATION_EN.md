@@ -240,6 +240,13 @@ Each order, client, recipe or ingredient in the answer is a link to it.
 6. **On the road**: live map, *arriving soon* notice; a delay reported by the
    agent or detected automatically sends a new arrival time to the customer.
 7. **Delivered**: timestamped confirmation. Every stage is timestamped.
+   **Delivery check at the door**: *Delivered* opens a check with OK / Not OK
+   buttons — right customer and address, packs intact and sealed, lot labels
+   on every pack, cold box still cold, storage advice given — plus the
+   temperature at the door (limit ≤ 8 °C) and the name of the person who
+   received it. Sign stays locked until complete; the order is then
+   delivered. A Not OK or a temperature over the limit is recorded as
+   *Delivery check failed* with the reasons and the manager is alerted.
 
 ## 6. Recipes, stock and purchasing
 
@@ -408,6 +415,7 @@ Each order, client, recipe or ingredient in the answer is a link to it.
 - QC form before dispatch (checks, weight ±5 %, temperature ≤ 5 °C, child's allergies, signature; FAIL keeps the order at QC); batch lot created at Pack with one printable label per portion (18/11/2026).
 - Menu: group headers without counts (18/11/2026).
 - QC form: each point validated with an OK / Not OK button; one block per product with its own weight, temperature and recipe checks; Sign QC locked until complete; QC settings per recipe (portion grams, tolerance, max temperature, shelf life, extra checks) (18/11/2026).
+- Delivery check at the door (OK / Not OK points, temperature ≤ 8 °C, received by, signature) before an order is marked delivered; result shown in the Delivery list and the order (18/11/2026).
 - Orders: stock check when placed and confirmed; a shortfall opens a purchase requisition for the order and blocks Send to kitchen until received (super admin override recorded); released automatically on receipt (18/11/2026).
 
 ### V1.1 — from 01/11/2026 to 18/11/2026 (live on 18/11/2026)
