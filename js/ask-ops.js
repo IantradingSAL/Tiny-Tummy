@@ -152,7 +152,8 @@
     return '<b>' + esc(g.name) + '</b> · ' + total + ' ' + esc(g.unit) + ' in stock (min ' + g.min + ')' +
       list('Lots, next out first', lots.map(function (l, i) {
         return '<li>' + esc(l.lot) + ' · ' + l.qty + ' ' + esc(g.unit) + ' · expires ' + esc(l.expiry) + ' · ' + esc(l.loc) + (i === 0 ? ' <b>(next out)</b>' : '') + '</li>';
-      })) + '<br><a href="#" onclick="ttGoIngredient(\'' + esc(g.name).replace(/'/g, '\\\'') + '\');return false">Open in Inventory</a>';
+      })) + '<br><a href="#" onclick="ttGoIngredient(\'' + esc(g.name).replace(/'/g, '\\\'') + '\');return false">Open in Inventory</a>' +
+      ' · <a href="#" onclick="ttGoPage(\'inventory\');invLedgerFor(\'' + g.id + '\');return false">Its ledger (used, received, counted)</a>';
   }
 
   /* ── router ── */

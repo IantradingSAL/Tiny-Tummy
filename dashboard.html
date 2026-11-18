@@ -557,6 +557,30 @@ table.pm tfoot td { font-size:.74rem; font-weight:700; color:var(--soft); border
 .cah-tbl td.cah-l { white-space:nowrap; } .cah-tbl td.cah-l a { margin-right:6px; }
 @media (max-width:900px) { .cah-hero { grid-template-columns:1fr; } }
 @media (max-width:560px) { .cah-hero-r { grid-template-columns:1fr; } .cah-v { font-size:2.1rem; } }
+/* Inventory list, ledger, report */
+.t.il td, .t.lg td { vertical-align:middle; }
+.il-sub { font-size:.72rem; margin-top:2px; }
+.il-q { font-size:1.02rem; }
+.il-bar { position:relative; height:5px; background:#eee8da; border-radius:4px; margin-top:5px; min-width:80px; }
+.il-bar i { position:absolute; left:0; top:0; bottom:0; border-radius:4px; }
+.il-bar span { position:absolute; top:-3px; width:2px; height:11px; background:#17455e; opacity:.55; }
+.il-cnt { display:flex; gap:4px; align-items:center; }
+.il-cnt input { width:78px; padding:6px 8px; border:1px solid #d9e2e7; border-radius:8px; font:inherit; }
+.il-acts { display:flex; gap:6px; align-items:center; justify-content:flex-end; flex-wrap:nowrap; } .il-acts > * { margin:0 !important; flex:none; }
+.t.il tfoot td, .t.lg tfoot td { background:#f6f2e8; border-top:2px solid #e7e1d2; }
+.lg-f { display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin:0 0 12px; }
+.lg-f select, .lg-d input { padding:7px 10px; border:1px solid #d9e2e7; border-radius:10px; font:inherit; font-size:.85rem; background:#fff; color:#17455e; }
+.lg-d { display:inline-flex; align-items:center; gap:6px; font-size:.78rem; font-weight:700; color:#64808e; }
+.lg-q { display:inline-flex; background:#efe9dc; border-radius:999px; padding:3px; }
+.lg-q button { border:none; background:none; font:inherit; font-size:.78rem; font-weight:700; color:#64808e; padding:5px 10px; border-radius:999px; cursor:pointer; }
+.lg-q button.on { background:#fff; color:#17455e; box-shadow:0 1px 4px rgba(0,0,0,.08); }
+.lg-tiles { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:10px; margin-bottom:12px; }
+.lg-t { background:#fff; border:1px solid #e7e1d2; border-top:3px solid var(--sc); border-radius:12px; padding:10px 14px; }
+.lg-t small { display:block; font-size:.7rem; font-weight:800; letter-spacing:.06em; text-transform:uppercase; color:#64808e; }
+.lg-t b { font-size:1.15rem; color:#17455e; }
+.lg-dt { white-space:nowrap; font-size:.82rem; }
+.t.lg .ostat .i { width:.9em; height:.9em; }
+@media (max-width:640px) { .lg-f > * { flex:1 1 140px; } }
 </style>
 </head>
 <body>
@@ -1045,6 +1069,59 @@ function productCost(pid, bom, ings) {
 function stockOf(ingId, lots) {
   var s = 0; lots.forEach(function (l) { if (l.ing === ingId) s += l.qty; }); return s;
 }
+
+/* ── Stock ledger: every movement of every lot, signed (+ in, − out) ──
+   type: purchase (received) · usage (consumed by an order, FEFO) ·
+   adjust_in / adjust_out (physical count) · writeoff (expired, damaged…).
+   One row per lot touched, with date, order, reference, who and unit cost,
+   so stock can be re-derived and every kilo traced to an order or a person. */
+var MOVE_META = {
+  purchase:   { l: 'Received',      c: '#2e8770', i: 'inbox' },
+  usage:      { l: 'Used',          c: '#2f6fb0', i: 'chef' },
+  adjust_in:  { l: 'Count +',       c: '#7a4aa8', i: 'plus' },
+  adjust_out: { l: 'Count −',       c: '#c98a1b', i: 'scale' },
+  writeoff:   { l: 'Written off',   c: '#b23a48', i: 'trash' }
+};
+function r3(n) { return Math.round(n * 1000) / 1000; }
+function recordMoves(rows) {
+  if (!rows.length) return;
+  var mv = store('moves').all(), u = currentUser(), now = Date.now();
+  rows.forEach(function (x) {
+    mv.push({ id: uid(), at: x.at || now, date: x.date || today(0), type: x.type, ing: x.ing, lot: x.lot || '', qty: r3(x.qty),
+      unit: x.unit || '', cost: x.cost || 0, order: x.order || '', ref: x.ref || '', by: x.by || u.name, note: x.note || '' });
+  });
+  store('moves').save(mv);
+}
+/* Demo history: each seeded lot was received on its date, and a few past orders consumed from them (FEFO). */
+Object.defineProperty(SEED, 'moves', { enumerable: true, configurable: true, get: function () {
+  var ings = SEED.ingredients, bom = SEED.bom, lots = JSON.parse(JSON.stringify(SEED.lots)), used = {}, rows = [];
+  var past = [
+    { code: 'TT-2026-036', day: -3, by: 'Chef Nadim', items: [{ product: 'p1', qty: 2 }, { product: 'p3', qty: 2 }] },
+    { code: 'TT-2026-037', day: -2, by: 'Karim — Helper', items: [{ product: 'p2', qty: 4 }, { product: 'p5', qty: 2 }] },
+    { code: 'TT-2026-038', day: -1, by: 'Chef Nadim', items: [{ product: 'p4', qty: 3 }, { product: 'p2', qty: 3 }] },
+    { code: 'TT-2026-039', day: -1, by: 'Chef Nadim', items: [{ product: 'p8', qty: 1 }] },
+    { code: 'TT-2026-040', day: 0, by: 'Chef Nadim', items: [{ product: 'p7', qty: 3 }] }
+  ];
+  past.forEach(function (o, k) {
+    var need = {};
+    o.items.forEach(function (it) { bom.forEach(function (b) { if (b.product !== it.product) return; var g = byId(ings, b.ing); if (g) need[b.ing] = (need[b.ing] || 0) + bomLineStockQty(b, g) * it.qty; }); });
+    Object.keys(need).forEach(function (gid) {
+      var g = byId(ings, gid), rem = r3(need[gid]);
+      lots.filter(function (l) { return l.ing === gid; }).sort(function (a, b) { return a.expiry < b.expiry ? -1 : 1; }).forEach(function (l) {
+        if (rem <= 0) return; var take = rem; rem = 0;
+        used[l.id] = r3((used[l.id] || 0) + take);
+        var d = new Date(today(o.day) + 'T10:00:00').getTime() + k * 600000;
+        rows.push({ id: 'sm-u' + rows.length, at: d, date: today(o.day), type: 'usage', ing: gid, lot: l.lot, qty: -r3(take), unit: g.unit, cost: g.cost, order: o.code, ref: '', by: o.by, note: 'FEFO pick' });
+      });
+    });
+  });
+  lots.forEach(function (l) {
+    var g = byId(ings, l.ing); if (!g) return;
+    rows.push({ id: 'sm-p' + l.id, at: new Date(l.received + 'T08:30:00').getTime(), date: l.received, type: 'purchase', ing: l.ing, lot: l.lot,
+      qty: r3(l.qty + (used[l.id] || 0)), unit: g.unit, cost: g.cost, order: '', ref: 'Delivery note', by: 'Lina — Manager', note: l.loc || '' });
+  });
+  return rows.sort(function (a, b) { return a.at - b.at; });
+} });
 function orderTotals(o, products, bom, ings) {
   var rev = 0, cost = 0;
   (o.items || []).forEach(function (it) {
@@ -1094,7 +1171,7 @@ function consumeFEFO(order) {
       need[b.ing] = (need[b.ing] || 0) + bomLineStockQty(b, g || {}) * it.qty;
     });
   });
-  var picked = [];
+  var picked = [], moves = [];
   Object.keys(need).forEach(function (ingId) {
     var remaining = need[ingId];
     var mine = lots.filter(function (l) { return l.ing === ingId && l.qty > 0; })
@@ -1106,6 +1183,7 @@ function consumeFEFO(order) {
       remaining = Math.round((remaining - take) * 1000) / 1000;
       var g = byId(ings, ingId);
       picked.push(take + ' ' + (g ? g.unit : '') + ' ' + (g ? g.name : ingId) + ' ← lot ' + l.lot);
+      moves.push({ type: 'usage', ing: ingId, lot: l.lot, qty: -take, unit: g ? g.unit : '', cost: g ? g.cost : 0, order: order.code, note: 'FEFO pick' });
     });
     if (remaining > 0) {
       var g2 = byId(ings, ingId);
@@ -1113,6 +1191,7 @@ function consumeFEFO(order) {
     }
   });
   store('lots').save(lots);
+  recordMoves(moves);
   // auto-requisition anything now below minimum
   var reqs = store('requisitions').all();
   var opened = [];
@@ -2103,7 +2182,10 @@ RENDER.inventory = function () {
     : '<div class="panel ia-ok">' + ic('checkc') + ' All stock is above minimum and nothing expires in the next 7 days.</div>';
 
   var body;
-  if (invTab === 'items') {
+  if (invTab === 'list') body = invListView(ings, lots, openReq);
+  else if (invTab === 'ledger') body = invLedgerView(ings);
+  else if (invTab === 'report') body = invReportView(ings);
+  else if (invTab === 'items') {
     var list = ings.filter(function (g) { return invFilter !== 'low' || stockOf(g.id, lots) < g.min; });
     body = '<div class="igrid">' + list.map(function (g) {
       var st = Math.round(stockOf(g.id, lots) * 100) / 100;
@@ -2155,14 +2237,197 @@ RENDER.inventory = function () {
   return '<div class="pagehead"><div><h1>Inventory</h1><div class="sub">Every ingredient, every lot. Lots are used first-expired-first-out and low items are re-ordered automatically.</div></div>' +
     '<span class="pill-row"><button class="btn o" onclick="newIngredient()">' + ic('plus') + ' New item</button><button class="btn p" onclick="receivePick()">' + ic('inbox') + ' Receive stock</button></span></div>' +
     kpis + attention +
-    '<div class="u-bar"><div class="u-tabs" style="margin:0"><button class="' + (invTab === 'items' ? 'on' : '') + '" onclick="invTabGo(\'items\')">' + ic('grid') + ' Items</button>' +
-      '<button class="' + (invTab === 'lots' ? 'on' : '') + '" onclick="invTabGo(\'lots\')">' + ic('clipboard') + ' Lots (FEFO)</button></div>' +
+    '<div class="u-bar"><div class="u-tabs" style="margin:0">' +
+      [['items', 'grid', 'Cards'], ['list', 'clipboard', 'List'], ['lots', 'box', 'Lots (FEFO)'], ['ledger', 'history', 'Ledger'], ['report', 'chart', 'Report']].map(function (x) {
+        return '<button class="' + (invTab === x[0] ? 'on' : '') + '" onclick="invTabGo(\'' + x[0] + '\')">' + ic(x[1]) + ' ' + x[2] + '</button>';
+      }).join('') + '</div>' +
+      (invTab === 'ledger' || invTab === 'report' ? '' :
       '<div class="u-tabs ichips" style="margin:0">' + chip('all', 'All') + chip('low', 'Low') + (invTab === 'lots' ? chip('expiring', 'Expiring') : '') + '</div>' +
-      '<div class="u-search"><span>' + ic('search') + '</span><input placeholder="Search item, lot, location…" value="' + esc(invSearch) + '" oninput="invSearchGo(this.value)"></div></div>' +
+      '<div class="u-search"><span>' + ic('search') + '</span><input placeholder="Search item, lot, location…" value="' + esc(invSearch) + '" oninput="invSearchGo(this.value)"></div>') + '</div>' +
     body + '<div class="u-empty" id="inv-none" style="display:none"><div>' + ic('search') + '</div>Nothing matches your search.</div>';
 };
 function invGo(f) { invFilter = f; render(); }
-function invTabGo(t) { invTab = t; if (t === 'items' && invFilter === 'expiring') invFilter = 'all'; render(); }
+function invTabGo(t) { invTab = t; if ((t === 'items' || t === 'list') && invFilter === 'expiring') invFilter = 'all'; render(); }
+
+/* ── Inventory · List view: one row per item, count entry inline ── */
+function usedSince(ingId, days, mv) {
+  var from = today(-days), s = 0;
+  mv.forEach(function (m) { if (m.ing === ingId && m.type === 'usage' && m.date >= from) s -= m.qty; });
+  return r3(s);
+}
+function invListView(ings, lots, openReq) {
+  var mv = store('moves').all();
+  var list = ings.filter(function (g) { return invFilter !== 'low' || stockOf(g.id, lots) < g.min; })
+    .sort(function (a, b) { return a.name < b.name ? -1 : 1; });
+  var rows = list.map(function (g) {
+    var st = r3(stockOf(g.id, lots));
+    var myLots = lots.filter(function (l) { return l.ing === g.id && l.qty > 0; }).sort(function (a, b) { return a.expiry < b.expiry ? -1 : 1; });
+    var next = myLots[0], dn = next ? daysTo(next.expiry) : null;
+    var state = st < g.min ? ['Low', '#b23a48'] : st > g.max ? ['Over max', '#c98a1b'] : ['OK', '#2e8770'];
+    var top = Math.max(g.max, st, 1), r = openReq(g.id);
+    return '<tr data-inv="' + esc((g.name + ' ' + g.cat + ' ' + myLots.map(function (l) { return l.lot + ' ' + (l.loc || ''); }).join(' ')).toLowerCase()) + '">' +
+      '<td><span class="lt-i">' + ic(CAT_ICON[g.cat] || 'box') + '</span><b>' + esc(g.name) + '</b><div class="muted il-sub">' + esc(g.cat) + ' · ' + money(g.cost) + '/' + g.unit + '</div></td>' +
+      '<td class="num"><b class="il-q">' + st + '</b> ' + g.unit + '<div class="il-bar"><i style="width:' + Math.min(100, st / top * 100) + '%;background:' + state[1] + '"></i><span style="left:' + (g.min / top * 100) + '%"></span></div></td>' +
+      '<td class="num muted">' + g.min + ' / ' + g.max + '</td>' +
+      '<td class="num">' + usedSince(g.id, 7, mv) + ' <span class="muted">' + g.unit + '</span></td>' +
+      '<td>' + (next ? '<code class="lotc">' + esc(next.lot) + '</code><div class="muted il-sub">' + (dn < 0 ? 'expired ' + (-dn) + ' d ago' : dn === 0 ? 'expires today' : 'in ' + dn + ' d') + ' · ' + myLots.length + ' lot' + (myLots.length === 1 ? '' : 's') + '</div>' : '<span class="muted">—</span>') + '</td>' +
+      '<td class="num">' + money(st * g.cost) + '</td>' +
+      '<td><span class="ostat" style="--sc:' + state[1] + '">' + state[0] + '</span>' + (r ? '<div class="il-sub" style="color:#7a4aa8">' + ic('zap') + ' req. ' + r.qty + ' ' + g.unit + '</div>' : '') + '</td>' +
+      '<td><label class="sw" title="Auto-requisition when below minimum"><input type="checkbox"' + (g.auto ? ' checked' : '') + ' onchange="ingAutoToggle(\'' + g.id + '\')"><span></span></label></td>' +
+      '<td><div class="il-cnt"><input id="cnt-' + g.id + '" type="number" step="0.01" min="0" placeholder="Qty" title="Type the quantity counted on the shelf" onkeydown="if(event.key===\'Enter\')invCount(\'' + g.id + '\')">' +
+        '<button class="u-ib" title="Save count" onclick="invCount(\'' + g.id + '\')">' + ic('check') + '</button></div></td>' +
+      '<td><div class="il-acts"><button class="btn p s" title="Receive stock" onclick="receiveLot(\'' + g.id + '\')">' + ic('inbox') + '</button>' +
+        '<button class="u-ib" title="Ledger of this item" onclick="invLedgerFor(\'' + g.id + '\')">' + ic('history') + '</button>' +
+        '<button class="u-ib" title="Edit item" onclick="editIngredient(\'' + g.id + '\')">' + ic('pencil') + '</button></div></td></tr>';
+  }).join('');
+  var value = list.reduce(function (s, g) { return s + stockOf(g.id, lots) * g.cost; }, 0);
+  return '<div class="panel" style="padding:0;overflow:hidden"><div class="tbl-scroll"><table class="t reg il"><thead><tr>' +
+    '<th>Item</th><th class="num">In stock</th><th class="num">Min / Max</th><th class="num">Used 7 d</th><th>Next out (FEFO)</th><th class="num">Value</th><th>Status</th><th>Auto</th><th>Count</th><th></th></tr></thead><tbody>' +
+    rows + '</tbody><tfoot><tr><td><b>' + list.length + ' items</b></td><td colspan="4"></td><td class="num"><b>' + money(value) + '</b></td><td colspan="4"></td></tr></tfoot></table></div></div>' +
+    '<p class="muted" style="margin:8px 2px 0">' + ic('info') + ' <b>Count</b>: type what is on the shelf and press Enter — the difference is booked as a count adjustment in the ledger (taken from the lot that expires first, or added to the newest lot).</p>';
+}
+function invCount(ingId) {
+  var el = document.getElementById('cnt-' + ingId); if (!el || el.value === '') return;
+  var counted = Number(el.value); if (!(counted >= 0)) { alert('Enter a quantity of 0 or more'); return; }
+  var lots = store('lots').all(), g = byId(store('ingredients').all().map(normIng), ingId); if (!g) return;
+  var cur = r3(stockOf(ingId, lots)), diff = r3(counted - cur);
+  if (!diff) { uToast(g.name + ': count matches stock (' + cur + ' ' + g.unit + ')'); el.value = ''; return; }
+  var note = prompt(g.name + ': system ' + cur + ' ' + g.unit + ', counted ' + counted + ' ' + g.unit + ' (' + (diff > 0 ? '+' : '') + diff + ').\nReason for the difference:', 'Physical count');
+  if (note === null) return;
+  var moves = [], mine = lots.filter(function (l) { return l.ing === ingId; });
+  if (diff < 0) {
+    var rem = -diff;
+    mine.filter(function (l) { return l.qty > 0; }).sort(function (a, b) { return a.expiry < b.expiry ? -1 : 1; }).forEach(function (l) {
+      if (rem <= 0) return; var take = Math.min(l.qty, rem); l.qty = r3(l.qty - take); rem = r3(rem - take);
+      moves.push({ type: 'adjust_out', ing: ingId, lot: l.lot, qty: -take, unit: g.unit, cost: g.cost, note: note || 'Physical count' });
+    });
+  } else {
+    var newest = mine.sort(function (a, b) { return a.received < b.received ? 1 : -1; })[0];
+    if (!newest) { newest = { id: uid(), ing: ingId, lot: 'ADJ-' + uid().toUpperCase().slice(0, 5), qty: 0, loc: '', expiry: today(7), received: today(0) }; lots.push(newest); }
+    newest.qty = r3(newest.qty + diff);
+    moves.push({ type: 'adjust_in', ing: ingId, lot: newest.lot, qty: diff, unit: g.unit, cost: g.cost, note: note || 'Physical count' });
+  }
+  store('lots').save(lots); recordMoves(moves);
+  logAct('Inventory', 'stock count', g.name + ': ' + cur + ' → ' + counted + ' ' + g.unit + (note ? ' — ' + note : ''));
+  uToast(g.name + ': stock set to ' + counted + ' ' + g.unit); render();
+}
+
+/* ── Inventory · Ledger: every movement, filtered ── */
+var LG = { q: '', ing: 'all', type: 'all', order: 'all', by: 'all', from: '', to: '' };
+function lgSet(k, v) { LG[k] = v; render(); }
+function lgReset() { LG = { q: '', ing: 'all', type: 'all', order: 'all', by: 'all', from: '', to: '' }; render(); }
+function invLedgerFor(ingId) { lgReset(); LG.ing = ingId; invTab = 'ledger'; render(); }
+function lgRows(ings) {
+  var q = LG.q.trim().toLowerCase();
+  return store('moves').all().filter(function (m) {
+    if (LG.ing !== 'all' && m.ing !== LG.ing) return false;
+    if (LG.type !== 'all' && m.type !== LG.type) return false;
+    if (LG.order !== 'all' && (LG.order === '__none__' ? m.order : m.order !== LG.order)) return false;
+    if (LG.by !== 'all' && m.by !== LG.by) return false;
+    if (LG.from && m.date < LG.from) return false;
+    if (LG.to && m.date > LG.to) return false;
+    if (q) { var g = byId(ings, m.ing); if ((g ? g.name : '') .toLowerCase().indexOf(q) < 0 && [m.lot, m.order, m.ref, m.by, m.note].join(' ').toLowerCase().indexOf(q) < 0) return false; }
+    return true;
+  }).sort(function (a, b) { return b.at - a.at; });
+}
+function fmtAt(ms) { var d = new Date(ms); return d.toISOString().slice(0, 10).split('-').reverse().join('/') + ' ' + String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0'); }
+function moveBadge(type) { var m = MOVE_META[type] || { l: type, c: '#64808e', i: 'box' }; return '<span class="ostat" style="--sc:' + m.c + '">' + ic(m.i) + ' ' + m.l + '</span>'; }
+function invLedgerView(ings) {
+  var all = store('moves').all(), rows = lgRows(ings);
+  function opts(list, cur, allLbl) { return '<option value="all">' + allLbl + '</option>' + list.map(function (x) { return '<option value="' + esc(x[0]) + '"' + (cur === x[0] ? ' selected' : '') + '>' + esc(x[1]) + '</option>'; }).join(''); }
+  var uniq = function (f) { var s = {}; all.forEach(function (m) { var v = f(m); if (v) s[v] = 1; }); return Object.keys(s).sort(); };
+  var ingOpts = ings.slice().sort(function (a, b) { return a.name < b.name ? -1 : 1; }).map(function (g) { return [g.id, g.name]; });
+  var orders = uniq(function (m) { return m.order; }).reverse().map(function (o) { return [o, o]; }); orders.unshift(['__none__', 'No order (receipts, counts…)']);
+  var people = uniq(function (m) { return m.by; }).map(function (b) { return [b, b]; });
+  var filters = '<div class="lg-f">' +
+    '<div class="u-search" style="margin:0"><span>' + ic('search') + '</span><input placeholder="Search item, lot, order, note…" value="' + esc(LG.q) + '" onchange="lgSet(\'q\',this.value)"></div>' +
+    '<select onchange="lgSet(\'ing\',this.value)">' + opts(ingOpts, LG.ing, 'All items') + '</select>' +
+    '<select onchange="lgSet(\'type\',this.value)">' + opts(Object.keys(MOVE_META).map(function (k) { return [k, MOVE_META[k].l]; }), LG.type, 'All movements') + '</select>' +
+    '<select onchange="lgSet(\'order\',this.value)">' + opts(orders, LG.order, 'All orders') + '</select>' +
+    '<select onchange="lgSet(\'by\',this.value)">' + opts(people, LG.by, 'Everyone') + '</select>' +
+    '<label class="lg-d">From<input type="date" value="' + LG.from + '" onchange="lgSet(\'from\',this.value)"></label>' +
+    '<label class="lg-d">To<input type="date" value="' + LG.to + '" onchange="lgSet(\'to\',this.value)"></label>' +
+    '<span class="lg-q">' + [['Today', 0], ['7 d', 7], ['30 d', 30]].map(function (x) { var f = today(-x[1]); return '<button class="' + (LG.from === f && !LG.to ? 'on' : '') + '" onclick="LG.from=\'' + f + '\';LG.to=\'\';render()">' + x[0] + '</button>'; }).join('') + '</span>' +
+    '<button class="btn o s" onclick="lgReset()">' + ic('x') + ' Clear</button>' +
+    '<button class="btn o s" onclick="lgCsv()">' + ic('save') + ' CSV</button></div>';
+  var val = { purchase: 0, usage: 0, adjust: 0, writeoff: 0 };
+  rows.forEach(function (m) { var v = m.qty * (m.cost || 0); if (m.type === 'purchase') val.purchase += v; else if (m.type === 'usage') val.usage -= v; else if (m.type === 'writeoff') val.writeoff -= v; else val.adjust += v; });
+  var one = LG.ing !== 'all' ? byId(ings, LG.ing) : null, qs = { in: 0, out: 0 };
+  if (one) rows.forEach(function (m) { if (m.qty > 0) qs.in += m.qty; else qs.out -= m.qty; });
+  function tile(lbl, v, c) { return '<div class="lg-t" style="--sc:' + c + '"><small>' + lbl + '</small><b>' + v + '</b></div>'; }
+  var tiles = '<div class="lg-tiles">' + tile('Movements', rows.length, '#17455e') +
+    tile('Received', money(val.purchase), '#2e8770') + tile('Used by orders', money(val.usage), '#2f6fb0') +
+    tile('Count adjustments', (val.adjust >= 0 ? '+' : '−') + money(Math.abs(val.adjust)), '#7a4aa8') + tile('Written off', money(val.writeoff), '#b23a48') +
+    (one ? tile(esc(one.name) + ' in / out', '+' + r3(qs.in) + ' / −' + r3(qs.out) + ' ' + one.unit, '#c98a1b') : '') + '</div>';
+  var table = '<div class="panel" style="padding:0;overflow:hidden"><div class="tbl-scroll"><table class="t reg lg"><thead><tr><th>Date</th><th>Item</th><th>Lot</th><th>Movement</th><th class="num">Quantity</th><th class="num">Unit cost</th><th class="num">Value</th><th>Order / ref.</th><th>By</th><th>Note</th></tr></thead><tbody>' +
+    (rows.length ? rows.slice(0, 500).map(function (m) {
+      var g = byId(ings, m.ing), v = m.qty * (m.cost || 0);
+      var ord = m.order ? (function () { var o = store('orders').all().filter(function (x) { return x.code === m.order; })[0]; return o ? '<a href="#" onclick="openOrder(\'' + o.id + '\');return false"><b>' + esc(m.order) + '</b></a>' : '<b>' + esc(m.order) + '</b>'; })() : esc(m.ref || '—');
+      return '<tr><td class="lg-dt">' + fmtAt(m.at) + '</td><td><b>' + esc(g ? g.name : m.ing) + '</b></td><td><code class="lotc">' + esc(m.lot || '—') + '</code></td><td>' + moveBadge(m.type) + '</td>' +
+        '<td class="num"><b style="color:' + (m.qty >= 0 ? '#2e8770' : '#b23a48') + '">' + (m.qty >= 0 ? '+' : '−') + Math.abs(m.qty) + '</b> <span class="muted">' + esc(m.unit) + '</span></td>' +
+        '<td class="num muted">' + (m.cost ? money(m.cost) : '—') + '</td><td class="num">' + (m.cost ? (v < 0 ? '−' : '') + money(Math.abs(v)) : '—') + '</td>' +
+        '<td>' + ord + '</td><td>' + esc(m.by) + '</td><td class="muted">' + esc(m.note) + '</td></tr>';
+    }).join('') : '<tr><td colspan="10" class="muted" style="text-align:center;padding:26px">No movements match these filters.</td></tr>') +
+    '</tbody></table></div></div>' + (rows.length > 500 ? '<p class="muted">Showing the latest 500 of ' + rows.length + ' — narrow the filters or export CSV.</p>' : '');
+  return filters + tiles + table;
+}
+function lgCsv() {
+  var ings = store('ingredients').all();
+  var head = ['Date', 'Item', 'Lot', 'Movement', 'Quantity', 'Unit', 'Unit cost', 'Value', 'Order', 'Reference', 'By', 'Note'];
+  var lines = [head].concat(lgRows(ings).map(function (m) {
+    var g = byId(ings, m.ing);
+    return [fmtAt(m.at), g ? g.name : m.ing, m.lot, (MOVE_META[m.type] || {}).l || m.type, m.qty, m.unit, m.cost || '', r3(m.qty * (m.cost || 0)), m.order, m.ref, m.by, m.note];
+  })).map(function (r) { return r.map(function (c) { c = String(c == null ? '' : c); return /[",;\n]/.test(c) ? '"' + c.replace(/"/g, '""') + '"' : c; }).join(','); }).join('\n');
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob(['\ufeff' + lines], { type: 'text/csv;charset=utf-8' }));
+  a.download = 'tinytummy-stock-ledger-' + today(0) + '.csv'; a.click();
+  logAct('Inventory', 'ledger export', lgRows(ings).length + ' movements');
+}
+
+/* ── Inventory · Report: the ledger added up ── */
+var RPG = 'item';
+var RP_GROUPS = {
+  item:  { l: 'Item',   k: function (m, ings) { var g = byId(ings, m.ing); return g ? g.name : m.ing; }, f: 'ing', v: function (m) { return m.ing; } },
+  order: { l: 'Order',  k: function (m) { return m.order || 'No order'; }, f: 'order', v: function (m) { return m.order || '__none__'; } },
+  by:    { l: 'Person', k: function (m) { return m.by || '—'; }, f: 'by', v: function (m) { return m.by; } },
+  day:   { l: 'Day',    k: function (m) { return m.date.split('-').reverse().join('/'); }, f: 'day', v: function (m) { return m.date; } },
+  month: { l: 'Month',  k: function (m) { return m.date.slice(0, 7); }, f: 'month', v: function (m) { return m.date.slice(0, 7); } }
+};
+function rpDrill(f, v) {
+  var keep = { from: LG.from, to: LG.to }; lgReset(); LG.from = keep.from; LG.to = keep.to;
+  if (f === 'day') { LG.from = v; LG.to = v; }
+  else if (f === 'month') { LG.from = v + '-01'; LG.to = v + '-31'; }
+  else LG[f] = v;
+  invTab = 'ledger'; render();
+}
+function invReportView(ings) {
+  var rows = lgRows(ings), G = RP_GROUPS[RPG], groups = {};
+  rows.forEach(function (m) {
+    var k = G.k(m, ings), g = groups[k] || (groups[k] = { k: k, v: G.v(m), n: 0, inq: 0, use: 0, adj: 0, wo: 0, val: 0, unit: m.unit });
+    var v = m.qty * (m.cost || 0); g.n++;
+    if (m.type === 'purchase') g.inq += RPG === 'item' ? m.qty : v;
+    else if (m.type === 'usage') { g.use += RPG === 'item' ? -m.qty : -v; g.val -= v; }
+    else if (m.type === 'writeoff') g.wo += RPG === 'item' ? -m.qty : -v;
+    else g.adj += RPG === 'item' ? m.qty : v;
+  });
+  var list = Object.keys(groups).map(function (k) { return groups[k]; }).sort(function (a, b) { return RPG === 'day' || RPG === 'month' ? (a.v < b.v ? 1 : -1) : b.val - a.val || (a.k < b.k ? -1 : 1); });
+  var qty = RPG === 'item', fmt = function (n, u) { n = r3(n); return qty ? (n ? n + ' <span class="muted">' + esc(u) + '</span>' : '<span class="muted">—</span>') : (n ? money(n) : '<span class="muted">—</span>'); };
+  var tot = list.reduce(function (s, g) { s.n += g.n; s.val += g.val; return s; }, { n: 0, val: 0 });
+  var gb = '<div class="lg-f"><span class="muted" style="font-weight:700">Group by</span><div class="u-tabs" style="margin:0">' + Object.keys(RP_GROUPS).map(function (k) {
+      return '<button class="' + (RPG === k ? 'on' : '') + '" onclick="RPG=\'' + k + '\';render()">' + RP_GROUPS[k].l + '</button>'; }).join('') + '</div>' +
+    '<label class="lg-d">From<input type="date" value="' + LG.from + '" onchange="lgSet(\'from\',this.value)"></label>' +
+    '<label class="lg-d">To<input type="date" value="' + LG.to + '" onchange="lgSet(\'to\',this.value)"></label>' +
+    '<span class="lg-q">' + [['7 d', 7], ['30 d', 30], ['90 d', 90]].map(function (x) { var f = today(-x[1]); return '<button class="' + (LG.from === f && !LG.to ? 'on' : '') + '" onclick="LG.from=\'' + f + '\';LG.to=\'\';render()">' + x[0] + '</button>'; }).join('') + '</span>' +
+    ((LG.ing !== 'all' || LG.type !== 'all' || LG.order !== 'all' || LG.by !== 'all' || LG.q) ? '<button class="btn o s" onclick="lgReset()">' + ic('x') + ' Clear ledger filters</button>' : '') + '</div>';
+  return gb + '<div class="panel" style="padding:0;overflow:hidden"><div class="tbl-scroll"><table class="t reg lg"><thead><tr><th>' + G.l + '</th><th class="num">Movements</th><th class="num">Received</th><th class="num">Used</th><th class="num">Count ±</th><th class="num">Written off</th><th class="num">Cost of use</th></tr></thead><tbody>' +
+    (list.length ? list.map(function (g) {
+      var drill = 'rpDrill(\'' + G.f + '\',\'' + esc(String(g.v || '')).replace(/'/g, "\\'") + '\')';
+      return '<tr class="rowlink" onclick="' + drill + '" title="Open these movements in the ledger"><td><b>' + esc(g.k) + '</b></td><td class="num">' + g.n + '</td><td class="num">' + fmt(g.inq, g.unit) + '</td><td class="num">' + fmt(g.use, g.unit) + '</td>' +
+        '<td class="num">' + (r3(g.adj) ? (g.adj > 0 ? '+' : '−') + fmt(Math.abs(g.adj), g.unit) : '<span class="muted">—</span>') + '</td><td class="num">' + fmt(g.wo, g.unit) + '</td><td class="num"><b>' + money(g.val) + '</b></td></tr>';
+    }).join('') : '<tr><td colspan="7" class="muted" style="text-align:center;padding:26px">No movements in this period.</td></tr>') +
+    '</tbody><tfoot><tr><td><b>Total</b></td><td class="num"><b>' + tot.n + '</b></td><td colspan="4"></td><td class="num"><b>' + money(tot.val) + '</b></td></tr></tfoot></table></div></div>' +
+    '<p class="muted" style="margin:8px 2px 0">' + ic('info') + ' ' + (qty ? 'Quantities in each item\'s unit; ' : 'Values at each movement\'s unit cost; ') + 'click a line to open its movements in the Ledger.</p>';
+}
 function ingAutoToggle(id) {
   var ings = store('ingredients').all().map(normIng); var g = byId(ings, id);
   if (g) { g.auto = !g.auto; store('ingredients').save(ings); logAct('Inventory', 'auto reorder ' + (g.auto ? 'on' : 'off'), g.name); render(); uToast(g.name + ': auto reorder ' + (g.auto ? 'on' : 'off')); }
@@ -2199,6 +2464,7 @@ function lotWriteOff(lotId) {
   var g = byId(store('ingredients').all(), l.ing);
   var reason = prompt('Write off lot ' + l.lot + ' (' + l.qty + ' ' + (g ? g.unit : '') + ' ' + (g ? g.name : '') + ')?\nReason (expired / damaged / recall):', 'expired');
   if (!reason) return;
+  recordMoves([{ type: 'writeoff', ing: l.ing, lot: l.lot, qty: -l.qty, unit: g ? g.unit : '', cost: g ? g.cost : 0, note: reason }]);
   l.qty = 0;
   logAct('Inventory', 'lot write-off', l.lot + ' — ' + reason);
   store('lots').save(lots);
@@ -2234,10 +2500,14 @@ function receiveLot(ingId) {
 }
 function saveLot(ingId) {
   var lots = store('lots').all();
-  lots.push({ id: uid(), ing: ingId, lot: document.getElementById('rl-lot').value || ('LOT-' + uid()),
+  var nl = { id: uid(), ing: ingId, lot: document.getElementById('rl-lot').value || ('LOT-' + uid()),
     qty: Number(document.getElementById('rl-qty').value) || 0, loc: document.getElementById('rl-loc').value,
-    expiry: document.getElementById('rl-exp').value, received: today(0) });
+    expiry: document.getElementById('rl-exp').value, received: today(0) };
+  if (!(nl.qty > 0)) { alert('Enter the quantity received'); return; }
+  lots.push(nl);
   store('lots').save(lots);
+  var gR = byId(store('ingredients').all(), ingId);
+  recordMoves([{ type: 'purchase', ing: ingId, lot: nl.lot, qty: nl.qty, unit: gR ? gR.unit : '', cost: gR ? gR.cost : 0, ref: 'Received', note: nl.loc }]);
   logAct('Inventory', 'lot received', document.getElementById('rl-lot').value || 'lot');
   uToast('Received into stock');
   var reqs = store('requisitions').all();
@@ -2713,13 +2983,16 @@ function saveInvoice() {
     // AUTO STOCK UPDATE: every line becomes a lot, cost refreshes, requisitions close
     var lots = store('lots').all(), ings = store('ingredients').all(), reqs = store('requisitions').all();
     var received = [];
+    var invMoves = [];
     lines.forEach(function (l) {
       lots.push({ id: uid(), ing: l.ing, lot: l.lot, qty: l.qty, expiry: l.expiry, received: today(0) });
       var g = byId(ings, l.ing);
+      invMoves.push({ type: 'purchase', ing: l.ing, lot: l.lot, qty: l.qty, unit: g ? g.unit : '', cost: l.cost || (g ? g.cost : 0), ref: inv.code, note: prov ? prov.name : '' });
       if (g) { if (l.cost) g.cost = l.cost; received.push(l.qty + ' ' + g.unit + ' ' + g.name); }
       reqs.map(normReq).forEach(function (r) { if (r.ing === l.ing && (r.status === 'pending' || r.status === 'approved')) r.status = 'received'; });
     });
     store('lots').save(lots); store('ingredients').save(ings); store('requisitions').save(reqs);
+    recordMoves(invMoves);
     pushDemo('Stock received 📦', (prov ? prov.name : 'Supplier') + ' · ' + inv.code + ': ' + received.join(', '), 'Role · kitchen');
   }
   closeDlg(); render();

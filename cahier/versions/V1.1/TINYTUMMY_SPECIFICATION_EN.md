@@ -62,6 +62,10 @@ particular order, customer or invoice) are not.
   roster (13/11/2026, #2).
 - Inventory: needs-attention list and automatic reorder below minimum
   (13/11/2026, #3).
+- Inventory: **stock ledger** of every movement (received, used by an
+  order, count ±, written off) with date, lot, order, person and cost;
+  **List** view with stock counts typed in, and a consumption **Report**
+  by item, order, person, day or month (18/11/2026).
 - Allergy **STOP** alert when an order contains one of the child's allergies
   (13/11/2026, #5).
 - Team & Access redesign; same design on every dashboard page (13/11/2026,
@@ -195,6 +199,21 @@ Each order, client, recipe or ingredient in the answer is a link to it.
   purchase cost. Picking always takes the first-expired lot.
 - **Supplier invoice = receiving**: each invoice line (item, quantity, cost,
   lot, expiry) becomes a lot. Payables age visibly until marked paid.
+- **Stock ledger**: every movement is a line — *Received* (receipt or
+  supplier invoice), *Used* (consumed by an order, FEFO, with the order
+  number and the person who sent it to the kitchen), *Count +/−* (physical
+  count) and *Written off* (with its reason) — with date and time, lot,
+  quantity, unit cost, value, order or reference, who and note. Stock can be
+  re-derived from it. Filters: item, movement, order, person, dates (today,
+  7 / 30 days); totals per type; CSV export.
+- Inventory views: **Cards**, **List** (one row per item: stock against
+  min/max, used in the last 7 days, next lot out, value, status, auto
+  reorder, and a **Count** box: the quantity typed is compared with the
+  system and the difference booked in the ledger, taken from the lot that
+  expires first or added to the newest), **Lots (FEFO)**, **Ledger** and
+  **Report** (the ledger added up by item, order, person, day or month:
+  received, used, count ±, written off, cost of use; each line opens its
+  movements).
 - **Needs attention**: expiring or expired lots (write-off, reason required)
   and items below minimum. Items set to *auto reorder* get a requisition
   automatically, sized to refill to the maximum.
@@ -293,6 +312,7 @@ Each order, client, recipe or ingredient in the answer is a link to it.
 - The Help button is renamed **Ask me** on every page (18/11/2026).
 - Ask me for staff: my orders, delivered today, what to prepare, ready / on the road / late, a client, a product, an ingredient or an order number — with links that open the page, order, client or item (18/11/2026).
 - Cahier des charges moved from the public home page into the dashboard (System → Cahier des charges), with its own permission, cards and list views (18/11/2026).
+- Inventory: stock ledger of every movement, List view with stock counts, consumption Report by item / order / person / day / month, CSV export (18/11/2026).
 
 ### V1.0 — 28/08/2026 (platform launch)
 

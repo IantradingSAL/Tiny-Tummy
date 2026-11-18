@@ -68,6 +68,10 @@ reprises.
   un geste, liste des livreurs (13/11/2026, #2).
 - Stock : liste « à traiter » et réapprovisionnement automatique sous le
   minimum (13/11/2026, #3).
+- Stock : **journal des mouvements** (reçu, utilisé par une commande,
+  inventaire ±, mis au rebut) avec date, lot, commande, personne et coût ;
+  vue **Liste** avec saisie des comptages, et **Rapport** de consommation
+  par article, commande, personne, jour ou mois (18/11/2026).
 - Alerte **STOP** allergie quand une commande contient un allergène de
   l'enfant (13/11/2026, #5).
 - Refonte Équipe & Accès ; même design sur toutes les pages du tableau de
@@ -218,6 +222,22 @@ Chaque commande, client, recette ou ingrédient de la réponse est un lien.
 - **Facture fournisseur = réception** : chaque ligne de facture (article,
   quantité, coût, lot, péremption) devient un lot. Les dettes vieillissent
   de façon visible jusqu'à leur paiement.
+- **Journal des mouvements** : chaque mouvement est une ligne — *Reçu*
+  (réception ou facture fournisseur), *Utilisé* (sorti pour une commande en
+  FEFO, avec le numéro de commande et la personne qui l'a envoyée en
+  cuisine), *Inventaire +/−* (comptage physique) et *Mis au rebut* (avec son
+  motif) — avec date et heure, lot, quantité, coût unitaire, valeur,
+  commande ou référence, auteur et note. Le stock peut être reconstitué à
+  partir de lui. Filtres : article, mouvement, commande, personne, dates
+  (aujourd'hui, 7 / 30 jours) ; totaux par type ; export CSV.
+- Vues du stock : **Cartes**, **Liste** (une ligne par article : stock face
+  au min/max, utilisé sur 7 jours, prochain lot à sortir, valeur, statut,
+  réapprovisionnement automatique, et une case **Comptage** : la quantité
+  saisie est comparée au système et l'écart est inscrit au journal, pris sur
+  le lot qui périme en premier ou ajouté au plus récent), **Lots (FEFO)**,
+  **Journal** et **Rapport** (le journal additionné par article, commande,
+  personne, jour ou mois : reçu, utilisé, inventaire ±, mis au rebut, coût
+  d'utilisation ; chaque ligne ouvre ses mouvements).
 - **À traiter** : lots proches de la péremption ou périmés (mise au rebut,
   motif obligatoire) et articles sous le minimum. Les articles en
   *réapprovisionnement automatique* reçoivent une réquisition automatiquement,
@@ -323,6 +343,7 @@ Chaque commande, client, recette ou ingrédient de la réponse est un lien.
 - Le bouton Aide devient **Ask me** sur toutes les pages (18/11/2026).
 - Ask me pour le personnel : mes commandes, livrées aujourd'hui, à préparer, prêtes / en route / en retard, un client, un produit, un ingrédient ou un numéro de commande — avec des liens qui ouvrent la page, la commande, la fiche client ou l'article (18/11/2026).
 - Le cahier des charges quitte la page d'accueil publique pour le tableau de bord (Système → Cahier des charges), avec son propre droit d'accès, vues cartes et liste (18/11/2026).
+- Stock : journal de tous les mouvements, vue Liste avec comptages, Rapport de consommation par article / commande / personne / jour / mois, export CSV (18/11/2026).
 
 ### V1.0 — 28/08/2026 (lancement de la plateforme)
 
