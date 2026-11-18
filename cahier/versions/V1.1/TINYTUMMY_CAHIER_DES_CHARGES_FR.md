@@ -74,6 +74,10 @@ reprises.
   l'enfant (13/11/2026, #5).
 - Refonte Équipe & Accès ; même design sur toutes les pages du tableau de
   bord (13/11/2026, #1, #4).
+- **Ask me** pour le personnel : répond aux questions sur l'activité en cours
+  (mes commandes, livrées aujourd'hui, à préparer, un client, un article, un
+  numéro de commande) et ouvre la bonne page, commande, fiche client ou
+  article (18/11/2026).
 
 **Sécurité / données**
 
@@ -159,6 +163,23 @@ Le menu est regroupé par métier :
 | Qualité | ISO 22000 | Liste de contrôle clause par clause avec responsable et preuve |
 | Qualité | Réclamations | Registre des avis et réclamations |
 | Équipe | Messagerie, Notifications, Journal d'activité, Équipe · Accès, Paramètres | |
+
+**Ask me (personnel).** Sur chaque page du tableau de bord, le bouton
+**Ask me** répond aux questions sur l'activité en cours et mène l'employé
+directement à la réponse, dans les modules autorisés par son rôle :
+
+- *Mes commandes / mes tâches* : les étapes de cuisine, livraisons et
+  dossiers attribués à la personne connectée ;
+- *Livrées aujourd'hui*, *à préparer* (avec le total par article), *prêtes à
+  expédier*, *en route*, *en retard*, *nouvelles commandes*, *commandes du
+  jour* ;
+- le **nom d'un client** : ses commandes, ses dossiers et son téléphone ; un
+  **produit** : les commandes ouvertes qui le contiennent et sa recette ; un
+  **ingrédient** : stock et lots (prochain à sortir en premier) ;
+- un **numéro de commande ou de dossier** (TT-2026-041, 041, CF-2026-002)
+  l'ouvre.
+
+Chaque commande, client, recette ou ingrédient de la réponse est un lien.
 
 ## 5. De la commande à la porte
 
@@ -295,6 +316,7 @@ Le menu est regroupé par métier :
 - Un seul numéro de contact partout : +961 70 341 002 (13/11/2026, #10).
 - Cahier des charges en français et en anglais sur la page d'accueil, avec toutes les versions précédentes et retour arrière (18/11/2026).
 - Le bouton Aide devient **Ask me** sur toutes les pages (18/11/2026).
+- Ask me pour le personnel : mes commandes, livrées aujourd'hui, à préparer, prêtes / en route / en retard, un client, un produit, un ingrédient ou un numéro de commande — avec des liens qui ouvrent la page, la commande, la fiche client ou l'article (18/11/2026).
 
 ### V1.0 — 28/08/2026 (lancement de la plateforme)
 

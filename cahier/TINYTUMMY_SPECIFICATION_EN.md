@@ -68,6 +68,9 @@ particular order, customer or invoice) are not.
   (13/11/2026, #5).
 - Team & Access redesign; same design on every dashboard page (13/11/2026,
   #1, #4).
+- **Ask me** for staff: answers questions on the live operation (my orders,
+  delivered today, what to prepare, a client, an item, an order number) and
+  opens the right page, order, client or item (18/11/2026).
 
 **Security / data**
 
@@ -146,6 +149,21 @@ The menu is grouped by trade:
 | Quality | ISO 22000 | Clause-by-clause checklist with owner and evidence |
 | Quality | Complaints | Feedback & complaints register |
 | Team | Team Chat, Notifications, Activity Log, Team · Access, Settings | |
+
+**Ask me (staff).** On every dashboard page, the **Ask me** button answers
+questions about the live operation and takes the employee straight to the
+answer, within the modules their role allows:
+
+- *My orders / my tasks*: the kitchen steps, deliveries and cases assigned to
+  the person signed in;
+- *Delivered today*, *what is to prepare* (with the total per item), *ready
+  to dispatch*, *on the road*, *late*, *new orders*, *orders today*;
+- a **client's name**: their orders, cases and phone; a **product**: open
+  orders containing it and its recipe; an **ingredient**: stock and lots
+  (next out first);
+- an **order or case number** (TT-2026-041, 041, CF-2026-002) opens it.
+
+Each order, client, recipe or ingredient in the answer is a link to it.
 
 ## 5. From order to door
 
@@ -268,6 +286,7 @@ The menu is grouped by trade:
 - One contact number everywhere: +961 70 341 002 (13/11/2026, #10).
 - Cahier des charges in French and English on the home page, with every previous version and rollback (18/11/2026).
 - The Help button is renamed **Ask me** on every page (18/11/2026).
+- Ask me for staff: my orders, delivered today, what to prepare, ready / on the road / late, a client, a product, an ingredient or an order number — with links that open the page, order, client or item (18/11/2026).
 
 ### V1.0 — 28/08/2026 (platform launch)
 

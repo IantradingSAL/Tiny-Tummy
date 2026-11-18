@@ -22,3 +22,11 @@ records it in `cahier/versions.json` and publishes it at the fixed file names
 the home page links to. Previous versions stay listed on the home page.
 Rollback: `node tools/cahier.mjs rollback V1.0` or GitHub → Actions →
 *Cahier des charges — rollback*. Never delete an archived version.
+
+## Ask me
+
+`js/help.js` is the floating **Ask me** button on every page (page Q&A).
+On the dashboard it first calls `window.ttOpsAsk` (`js/ask-ops.js`), which
+answers live-operation questions (my orders, delivered today, to prepare,
+clients, products, ingredients, order/case numbers) from the dashboard's own
+data and links to them. New modules should add their intents there.

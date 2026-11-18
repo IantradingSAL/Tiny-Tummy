@@ -111,9 +111,21 @@
     return { 'index.html': 'site-home', '': 'site-home', 'products.html': 'site-menu', 'why-us.html': 'site-why',
       'how-it-works.html': 'site-how', 'contact.html': 'site-contact', 'project-report.html': 'site-report' }[f] || 'site-home';
   }
+  /* Staff questions about the live operation: answered by js/ask-ops.js (window.ttOpsAsk) */
+  var OPS_QA = [
+    ['My orders', 'my orders tasks steps deliveries cases', 'Open <b>Kitchen</b> for your steps and <b>Dispatch · Agents</b> for your deliveries.'],
+    ['Delivered today', 'delivered today', 'See <b>Dispatch · Agents</b> → delivered today.'],
+    ['What is to prepare?', 'prepare kitchen production', 'See the <b>Kitchen</b> module.'],
+    ['Ready to dispatch', 'ready dispatch', 'See <b>Dispatch · Agents</b>.'],
+    ['Late orders', 'late delayed overdue', 'Late orders are flagged red in <b>Orders</b> and <b>Kitchen</b>.']
+  ];
   function entry(id) {
     var e = KB[id] || KB['site-home'];
-    var common = id.indexOf('dash-') === 0 ? DASH_COMMON : id === 'portal' ? SITE_COMMON.slice(4, 5).concat(SITE_COMMON.slice(7, 8)) : SITE_COMMON;
+    var dash = id.indexOf('dash-') === 0;
+    var common = dash ? DASH_COMMON : id === 'portal' ? SITE_COMMON.slice(4, 5).concat(SITE_COMMON.slice(7, 8)) : SITE_COMMON;
+    if (dash && window.ttOpsAsk) return { title: e.title, ops: true,
+      intro: e.intro + '<br><br>Ask me about <b>your orders</b>, <b>deliveries today</b>, <b>what to prepare</b>, a <b>client</b> (e.g. <i>Rana</i>), an <b>item</b> (e.g. <i>carrots</i>) or an order number — I take you there.',
+      qa: OPS_QA.concat(e.qa, common) };
     return { title: e.title, intro: e.intro, qa: e.qa.concat(common) };
   }
 
@@ -184,7 +196,7 @@
     panel.innerHTML = '<div class="tth-h"><span class="bi">' + svg('bot') + '</span><div><b>Ask me · ' + esc(e.title) + '</b><small>Ask anything about this page</small></div>' +
       '<button type="button" aria-label="Close Ask me">' + svg('x') + '</button></div>' +
       '<div class="tth-body"><div class="tth-intro">' + e.intro + '</div><div class="tth-chips">' +
-      e.qa.slice(0, 6).map(function (q, i) { return '<button type="button" data-i="' + i + '">' + esc(q[0]) + '</button>'; }).join('') + '</div></div>' +
+      e.qa.slice(0, e.ops ? 8 : 6).map(function (q, i) { return '<button type="button" data-i="' + i + '">' + esc(q[0]) + '</button>'; }).join('') + '</div></div>' +
       '<form class="tth-f"><input placeholder="Type your question…" aria-label="Your question" autocomplete="off"><button type="submit" aria-label="Send">' + svg('send') + '</button></form>';
     panel.classList.add('on');
     body = panel.querySelector('.tth-body');
@@ -198,9 +210,12 @@
   function add(html, who) { var m = document.createElement('div'); m.className = 'tth-msg ' + who; m.innerHTML = html; body.appendChild(m); body.scrollTop = body.scrollHeight; }
   function ask(q, e) {
     add(esc(q), 'me');
-    var hit = answer(q, e) || answer(q, entry('site-home'));
+    var ops = null;
+    if (e.ops) { try { ops = window.ttOpsAsk(q); } catch (err) { ops = null; } }
+    var hit = ops ? null : (answer(q, e) || answer(q, entry('site-home')));
     setTimeout(function () {
-      if (hit) add(hit[2], 'bot');
+      if (ops) add(ops, 'bot');
+      else if (hit) add(hit[2], 'bot');
       else if (pageId().indexOf('dash-') === 0) add('I don\'t have an answer for that yet. Try one of the suggestions above, or ask your manager in <b>Team chat</b>.', 'bot');
       else add('I\'m not sure about that one. Our team will gladly help on <a href="' + WA + '" target="_blank" rel="noopener">WhatsApp +961 70 341 002</a>.', 'bot');
     }, 250);
