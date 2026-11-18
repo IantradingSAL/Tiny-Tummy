@@ -314,6 +314,15 @@ Chaque commande, client, recette ou ingrédient de la réponse est un lien.
   reportée ; un report la coupe 5 minutes, puis elle sonne de nouveau si
   l'étape est toujours ouverte. Alarmes et reports vont à l'historique de la
   commande et au Journal d'activité.
+- **Le travail de qui.** En haut de la Cuisine (Tableau et Liste), chaque
+  cuisinier choisit **My steps** (mes étapes), ou une personne, ou les étapes
+  sans personne : seules les commandes où cette personne a des étapes
+  ouvertes s'affichent, ses étapes encadrées.
+- **Commande en retard.** Quand une commande en cuisine dépasse son heure
+  prévue (début + minutes prévues), sa carte passe au rouge avec *OVERDUE
+  +x min* et l'alarme sonne toutes les 30 secondes, la commande apparaissant
+  dans le bandeau *Over time*, jusqu'à ce qu'elle quitte la cuisine ou que
+  l'alarme soit reportée de 5 minutes.
 - Le module **ISO 22000** contient la liste de contrôle clause par clause (du
   contexte à l'amélioration, PRP, chaîne HACCP) avec statut, responsable et
   preuve, et une barre de préparation revue chaque mois. Un exercice de
@@ -404,6 +413,8 @@ Chaque commande, client, recette ou ingrédient de la réponse est un lien.
 - Menu : groupes repliables, favoris, Trouver une page (Ctrl K), pages limitées aux accès de la personne (18/11/2026).
 - Commandes : l'étape suivante (Confirmer, Envoyer en cuisine, Cuisine terminée → CQ, CQ conforme, Expédier, Livrée) est un bouton sur chaque commande — dans la barre en haut de la fenêtre, sur chaque carte du tableau et sur chaque ligne de la liste ; la Cuisine affiche les commandes confirmées qui attendent d'être envoyées, avec leur bouton Envoyer en cuisine (18/11/2026).
 - Cuisine : les étapes démarrent seules l'une après l'autre, comptes à rebours en direct, l'alarme revient toutes les 30 s tant qu'une étape dépasse son temps avec un bandeau et Snooze 5 min, la commande passe seule au CQ quand toutes les étapes sont faites ; bouton d'étape suivante sur chaque carte en cuisine (18/11/2026).
+- Cuisine : sélecteur « Le travail de qui » (mes étapes / une personne / sans personne) sur Tableau et Liste ; une commande en retard passe au rouge et fait sonner l'alarme toutes les 30 s, avec report de 5 min (18/11/2026).
+- Cuisine terminée → CQ avec des étapes encore ouvertes demande confirmation et les clôture au nom de la personne ; une commande sortie de la cuisine ne garde jamais d'étape ouverte ; une cuisson ou un refroidissement clos sans température est signalé « CCP non enregistré » dans l'historique de la commande (18/11/2026).
 
 ### V1.1 — du 01/11/2026 au 18/11/2026 (mise en service le 18/11/2026)
 

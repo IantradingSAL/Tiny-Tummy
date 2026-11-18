@@ -581,6 +581,13 @@ table.pm tfoot td { font-size:.74rem; font-weight:700; color:var(--soft); border
 #k-alarm .ka-r { display:flex; align-items:center; gap:6px; padding:6px 0; border-top:1px solid #f3e1e3; }
 #k-alarm .ka-r > div { flex:1; font-size:.85rem; color:#17455e; } #k-alarm .ka-r small { display:block; color:#64808e; }
 @keyframes kpulse { 0%,100% { box-shadow:0 16px 44px rgba(178,58,72,.28); } 50% { box-shadow:0 16px 44px rgba(178,58,72,.55); } }
+.kv-who { display:inline-flex; align-items:center; gap:8px; flex-wrap:wrap; margin-left:auto; }
+.kv-who > b { font-size:.72rem; letter-spacing:.08em; text-transform:uppercase; color:#64808e; }
+.kv-who select { padding:6px 10px; border:1px solid #d9e2e7; border-radius:10px; font:inherit; font-size:.84rem; background:#fff; color:#17455e; }
+.kv-who select.on { border-color:#17455e; background:#eef4f7; font-weight:700; }
+.panel.k-late { border:2px solid #b23a48; box-shadow:0 0 0 4px rgba(178,58,72,.12); }
+.panel.k-late > .toolbar h3 { color:#b23a48; }
+.stp.mine { box-shadow:0 0 0 2px #f0b64b; background:#fffaf0; }
 .o-next { display:flex; align-items:center; gap:12px; flex-wrap:wrap; background:#fff7e6; border:1px solid #f3dcae; border-radius:12px; padding:10px 12px; margin:12px 0 4px; }
 .o-next-l { font-size:.7rem; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:#a3720d; }
 .o-next .pill-row { margin:0; }
@@ -1763,7 +1770,7 @@ function stepControls(o) {
       return u.role === 'super_admin' || u.role === 'manager' || (u.stations || []).indexOf(station) >= 0;
     });
     var who = done ? (st.by || st.assigned) : (st && st.assigned);
-    var whoSel = done ? '<span class="stp-meta">' + (who ? 'Completed by <b style="color:var(--ink)">' + esc(who) + '</b>' : 'Completed') + '</span>' : '<select class="stp-sel" title="Change who does this step" onchange="stepAssign(\'' + o.id + '\',' + i + ',this.value)"' + (done ? ' disabled' : '') + '>' +
+    var whoSel = done ? '<span class="stp-meta">' + (who ? 'Completed by <b style="color:var(--ink)">' + esc(who) + '</b>' : 'Completed') + (st.closed ? ' · <i>' + esc(st.closed) + '</i>' : '') + '</span>' : '<select class="stp-sel" title="Change who does this step" onchange="stepAssign(\'' + o.id + '\',' + i + ',this.value)"' + (done ? ' disabled' : '') + '>' +
       '<option value="">Unassigned</option>' +
       eligible.map(function (u) {
         return '<option' + (who === u.name ? ' selected' : '') + ' value="' + esc(u.name) + '">' + esc(u.name) + '</option>';
@@ -1775,7 +1782,7 @@ function stepControls(o) {
       else if (Date.now() > stepDue(st, def)) acts += '<button class="btn o s" title="Silence the alarm for ' + SNOOZE_MIN + ' minutes" onclick="stepSnooze(\'' + o.id + '\',' + i + ')">' + ic('timer') + ' Snooze ' + SNOOZE_MIN + ' min</button>';
       acts += '<button class="btn g s" onclick="stepToggle(\'' + o.id + '\',' + i + ',true)">' + ic('check') + ' Done</button>';
     }
-    return '<div class="stp ' + (done ? 'done' : running ? 'running' : '') + '">' +
+    return '<div class="stp ' + (done ? 'done' : running ? 'running' : '') + (current === 'kitchen' && kvMine(st) ? ' mine' : '') + '">' +
       '<div class="stp-ico">' + ic(STATION_SVG[station] || 'chef') + '</div>' +
       '<div class="stp-main"><div class="stp-top"><b>' + (i + 1) + '. ' + esc(def.name) + '</b>' +
         '<span class="stp-meta">' + esc(stLabel(station)) + ' · ' + def.min + ' min</span></div>' +
@@ -1920,7 +1927,12 @@ function orderAct(oid, act) {
     o.alarm_sent = false;
     log('Sent to kitchen · planned ' + plan + ' min (due ' + fmtClock(o.kitchen_due) + ') · stock consumed FEFO: ' + picked.join(' · '));
   }
-  if (act === 'qc') { o.status = 'qc'; log('Kitchen complete — waiting QC'); }
+  if (act === 'qc') {
+    var openN = openSteps(o).length;
+    if (openN && !confirm(openN + ' kitchen step' + (openN > 1 ? 's are' : ' is') + ' not marked done.\nMark ' + (openN > 1 ? 'them' : 'it') + ' done now and send the order to QC?')) return;
+    closeOpenSteps(o, 'closed with Kitchen done → QC');
+    o.status = 'qc'; log('Kitchen complete — waiting QC');
+  }
   if (act === 'qcpass') { o.status = 'dispatch'; log('QC passed ✓ ready for dispatch'); }
   if (act === 'dispatch') {
     var sel = document.getElementById('dl-agent');
@@ -2042,8 +2054,30 @@ function checkKitchenAlarms() {
    steps are all done moves to QC, countdowns update live. ── */
 var BUZZ_EVERY = 30000, SNOOZE_MIN = 5;
 function stepDue(st, def) { return st.started_at + (Number(def.min) || 0) * 60000; }
+/* Steps still open on an order: closing them records who and why; a CCP
+   (cook / blast chill) closed without its temperature is flagged. */
+function openSteps(o) {
+  return stepDefs(o).filter(function (d) { var s = (o.steps || []).find(function (x) { return x.s === d.name; }); return !(s && s.done); });
+}
+function closeOpenSteps(o, why, by) {
+  var n = 0; o.steps = o.steps || [];
+  openSteps(o).forEach(function (d) {
+    var s = o.steps.find(function (x) { return x.s === d.name; }); if (!s) { s = { s: d.name }; o.steps.push(s); }
+    s.done = true; s.by = by || currentUser().name; s.at = nowTs(); s.closed = why; n++;
+    var k = stepKind(d.name);
+    if ((k === 'cook' || k === 'chill') && !(o.ccp || []).some(function (c) { return c.step === d.name; }))
+      o.history.push({ at: nowTs(), what: '⚠ CCP not recorded — ' + d.name + ' closed without a temperature (' + why + ')' });
+  });
+  if (n) o.history.push({ at: nowTs(), what: n + ' open step' + (n > 1 ? 's' : '') + ' marked done — ' + why + ' — ' + (by || currentUser().name) });
+  return n;
+}
 function kitchenAuto() {
   var orders = store('orders').all(), now = Date.now(), changed = false;
+  orders.forEach(function (o) {
+    if (['qc', 'dispatch', 'delivering', 'delivered'].indexOf(o.status) >= 0 && openSteps(o).length) {
+      closeOpenSteps(o, 'order had left the kitchen', 'system'); changed = true;
+    }
+  });
   orders.forEach(function (o) {
     if (['kitchen', 'portioning'].indexOf(o.status) < 0) return;
     var defs = stepDefs(o); if (!defs.length) return;
@@ -2077,8 +2111,28 @@ function overdueSteps() {
   });
   return list;
 }
+function orderLate(o) { return ['kitchen', 'portioning'].indexOf(o.status) >= 0 && o.kitchen_due && Date.now() > o.kitchen_due; }
+function overdueOrders() {
+  var now = Date.now();
+  return store('orders').all().filter(orderLate).map(function (o) {
+    return { o: o, order: true, over: Math.round((now - o.kitchen_due) / 60000), snoozed: o.snooze_until && now < o.snooze_until };
+  });
+}
+function orderSnooze(oid) {
+  var orders = store('orders').all(), o = byId(orders, oid); if (!o) return;
+  o.snooze_until = Date.now() + SNOOZE_MIN * 60000; o.last_buzz = 0;
+  o.history.push({ at: nowTs(), what: 'Due-time alarm snoozed ' + SNOOZE_MIN + ' min — ' + currentUser().name });
+  logAct('Kitchen', 'due alarm snoozed ' + SNOOZE_MIN + ' min', o.code);
+  store('orders').save(orders); kitchenAlarmBar(); render();
+  uToast('Alarm snoozed ' + SNOOZE_MIN + ' min — ' + o.code);
+}
 function kitchenBuzz() {
   var orders = store('orders').all(), now = Date.now(), ring = false, changed = false;
+  orders.forEach(function (o) {
+    if (!orderLate(o) || (o.snooze_until && now < o.snooze_until) || (o.last_buzz && now - o.last_buzz < BUZZ_EVERY)) return;
+    if (!o.due_buzzed) { o.history.push({ at: nowTs(), what: '⏰ Past its due time (' + fmtClock(o.kitchen_due) + ') — alarm' }); logAct('Kitchen', 'due-time alarm', o.code + ' · due ' + fmtClock(o.kitchen_due)); }
+    o.due_buzzed = true; o.last_buzz = now; ring = true; changed = true;
+  });
   orders.forEach(function (o) {
     if (['kitchen', 'portioning', 'qc'].indexOf(o.status) < 0) return;
     stepDefs(o).forEach(function (d) {
@@ -2111,11 +2165,14 @@ function stepSnooze(oid, idx) {
   uToast('Alarm snoozed ' + SNOOZE_MIN + ' min — ' + d.name);
 }
 function kitchenAlarmBar() {
-  var ring = overdueSteps().filter(function (x) { return !x.snoozed; });
+  var ring = overdueOrders().concat(overdueSteps()).filter(function (x) { return !x.snoozed; });
   var bar = document.getElementById('k-alarm');
   if (!ring.length) { if (bar) bar.remove(); return; }
   if (!bar) { bar = document.createElement('div'); bar.id = 'k-alarm'; document.body.appendChild(bar); }
-  bar.innerHTML = '<div class="ka-h">' + ic('alarm') + ' <b>Over time</b><span>' + ring.length + '</span></div>' + ring.slice(0, 4).map(function (x) {
+  bar.innerHTML = '<div class="ka-h">' + ic('alarm') + ' <b>Over time</b><span>' + ring.length + '</span></div>' + ring.slice(0, 5).map(function (x) {
+    if (x.order) return '<div class="ka-r"><div><b>' + esc(x.o.code) + '</b> · order past its due time<small>due ' + fmtClock(x.o.kitchen_due) + ' · +' + x.over + ' min · ' + esc(currentStep(x.o, store('products').all().map(normProd)) || '') + '</small></div>' +
+      '<button class="btn o s" onclick="orderSnooze(\'' + x.o.id + '\')">' + ic('timer') + ' Snooze ' + SNOOZE_MIN + ' min</button>' +
+      '<button class="u-ib" title="Open the order" onclick="openOrder(\'' + x.o.id + '\')">' + ic('eye') + '</button></div>';
     return '<div class="ka-r"><div><b>' + esc(x.o.code) + '</b> · ' + esc(x.d.name) + '<small>+' + x.over + ' min · ' + esc(x.s.assigned || 'unassigned') + '</small></div>' +
       '<button class="btn o s" onclick="stepSnooze(\'' + x.o.id + '\',' + x.i + ')">' + ic('timer') + ' Snooze ' + SNOOZE_MIN + ' min</button>' +
       '<button class="btn g s" onclick="stepToggle(\'' + x.o.id + '\',' + x.i + ',true)">' + ic('check') + ' Done</button>' +
@@ -2154,9 +2211,19 @@ document.addEventListener('pointerdown', function () {
 var KV = { view: (function () { try { return localStorage.getItem('ttops_kitchen_view') || 'board'; } catch (e) { return 'board'; } })(),
   show: 'todo', who: 'all', station: 'all', q: '' };
 function kvSet(k, v) { KV[k] = v; if (k === 'view') { try { localStorage.setItem('ttops_kitchen_view', v); } catch (e) {} } render(); }
+function kvWho() { return KV.who === 'me' ? currentUser().name : KV.who; }
+function kvMine(st) { // is this (not done) step the selected person's work?
+  if (KV.who === 'all' || !st || st.done) return false;
+  return KV.who === '__none__' ? !st.assigned : st.assigned === kvWho();
+}
 function kvBar() {
+  var staff = store('staff').all().map(normStaff), me = currentUser().name;
   return '<div class="u-bar"><div class="u-tabs" style="margin:0"><button class="' + (KV.view === 'board' ? 'on' : '') + '" onclick="kvSet(\'view\',\'board\')">' + ic('grid') + ' Board</button>' +
-    '<button class="' + (KV.view === 'list' ? 'on' : '') + '" onclick="kvSet(\'view\',\'list\')">' + ic('clipboard') + ' List</button></div></div>';
+    '<button class="' + (KV.view === 'list' ? 'on' : '') + '" onclick="kvSet(\'view\',\'list\')">' + ic('clipboard') + ' List</button></div>' +
+    '<span class="kv-who"><b>Whose work</b><span class="lg-q"><button class="' + (KV.who === 'all' ? 'on' : '') + '" onclick="kvSet(\'who\',\'all\')">Everyone</button>' +
+      '<button class="' + (KV.who === 'me' ? 'on' : '') + '" onclick="kvSet(\'who\',\'me\')">' + ic('user') + ' My steps</button></span>' +
+      '<select aria-label="Person" class="' + (KV.who !== 'all' && KV.who !== 'me' ? 'on' : '') + '" onchange="kvSet(\'who\',this.value)"><option value="all">Pick a person…</option><option value="__none__"' + (KV.who === '__none__' ? ' selected' : '') + '>Unassigned steps</option>' +
+      staff.map(function (u) { return '<option value="' + esc(u.name) + '"' + (KV.who === u.name ? ' selected' : '') + '>' + esc(u.name) + (u.name === me ? ' (me)' : '') + '</option>'; }).join('') + '</select></span></div>';
 }
 function klTasks(active, products) {
   var tasks = [];
@@ -2194,8 +2261,7 @@ function klListView(active, products) {
     '<div class="u-search" style="margin:0"><span>' + ic('search') + '</span><input placeholder="Search order, customer, step…" value="' + esc(KV.q) + '" onchange="kvSet(\'q\',this.value)"></div>' +
     '<span class="lg-q">' + [['todo', 'To do'], ['running', 'Running'], ['late', 'Overdue'], ['done', 'Done'], ['all', 'All']].map(function (x) {
       return '<button class="' + (KV.show === x[0] ? 'on' : '') + '" onclick="kvSet(\'show\',\'' + x[0] + '\')">' + x[1] + '</button>'; }).join('') + '</span>' +
-    '<select onchange="kvSet(\'who\',this.value)">' + opt('all', 'Everyone', KV.who) + opt('me', 'My steps (' + me + ')', KV.who) + opt('__none__', 'Unassigned', KV.who) +
-      staff.map(function (u) { return opt(u.name, u.name, KV.who); }).join('') + '</select>' +
+
     '<select onchange="kvSet(\'station\',this.value)">' + opt('all', 'All stations', KV.station) +
       Object.keys(stations).map(function (s) { return opt(s, stLabel(s), KV.station); }).join('') + '</select></div>';
   var sum = { n: 0, min: 0, late: 0, running: 0 };
@@ -2261,13 +2327,15 @@ RENDER.kitchen = function () {
   var stationRows = Object.keys(stationMin).map(function (k) { return { label: k, value: stationMin[k] }; })
     .filter(function (r) { return r.value > 0; });
 
-  var cards = active.map(function (o) {
+  var cards = active.filter(function (o) { return KV.who === 'all' || (o.steps || []).some(kvMine); }).map(function (o) {
     var items = o.items.map(function (it) { var p = byId(products, it.product); return it.qty + '× ' + (p ? p.name : '?'); }).join(', ');
     var defs = normProd(orderProduct(o, products)).steps;
     var doneN = defs.filter(function (d) { var x = o.steps.find(function (y) { return y.s === d.name; }); return x && x.done; }).length;
     var pct = defs.length ? Math.round(doneN / defs.length * 100) : 0;
     var cur = currentStep(o, products);
-    return '<div class="panel"><div class="toolbar"><h3>' + esc(o.code) + ' <span class="chip ' + o.status + '">' + o.status + '</span>' +
+    var late = orderLate(o), lateMin = late ? Math.round((Date.now() - o.kitchen_due) / 60000) : 0;
+    return '<div class="panel' + (late ? ' k-late' : '') + '"><div class="toolbar"><h3>' + esc(o.code) + ' <span class="chip ' + o.status + '">' + o.status + '</span>' +
+      (late ? ' <span class="chip alarm">' + ic('alarm') + ' OVERDUE +' + lateMin + ' min · due ' + fmtClock(o.kitchen_due) + '</span>' : '') +
       (o.batch_lot ? ' <span class="chip fefo">lot ' + esc(o.batch_lot) + '</span>' : '') + '</h3>' +
       '<span class="pill-row"><button class="btn o s" title="Steps are assigned automatically. Re-balance re-assigns every step not yet started, spreading work evenly." onclick="autoAssignSteps(\'' + o.id + '\')">↺ Re-balance</button>' + (cur ? '<span class="chip progress">▶ now: ' + esc(cur) + '</span>' : '<span class="chip done">all steps complete</span>') + '</span></div>' +
       '<p class="muted">' + esc(items) + ' · ' + esc(o.customer) + '</p>' + childBlock(o) +
@@ -2288,7 +2356,7 @@ RENDER.kitchen = function () {
     '<div class="kpi ' + (overdueN ? 'bad b-red' : 'good b-green') + '"><div class="v">' + overdueN + '</div><div class="l">⏰ Overdue</div></div></div>' + kitchenWaiting(products) + kvBar() +
     (KV.view === 'list' ? klListView(active, products) :
     (stationRows.length ? '<div class="panel" style="padding:14px 18px"><div class="toolbar" style="margin-bottom:8px"><h3 style="font-size:1rem">🏭 Station load</h3><span class="muted">minutes of work remaining per step</span></div>' + hBarChart(stationRows, CHART.blue, function (v) { return v + ' min'; }) + '</div>' : '') +
-    (cards || '<div class="panel"><p class="muted">Nothing in production. Confirm an order and send it to the kitchen — the production clock starts at that moment.</p></div>'));
+    (cards || (KV.who !== 'all' && active.length ? '<div class="panel"><p class="muted">No open step for <b>' + esc(KV.who === '__none__' ? 'unassigned work' : kvWho()) + '</b> right now. <a href="#" onclick="kvSet(\'who\',\'all\');return false">Show everyone</a></p></div>' : '') || '<div class="panel"><p class="muted">Nothing in production. Confirm an order and send it to the kitchen — the production clock starts at that moment.</p></div>'));
 };
 
 /* CCP readings, portioning record and sign-offs shown on the card */

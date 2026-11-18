@@ -281,6 +281,13 @@ Each order, client, recipe or ingredient in the answer is a link to it.
   until the step is done or snoozed; a snooze silences it for 5 minutes, then
   it rings again if the step is still open. Alarms and snoozes go to the order
   history and the Activity Log.
+- **Whose work.** At the top of Kitchen (Board and List) each cook picks
+  **My steps** (or any person, or unassigned steps): only the orders where
+  that person has open steps are shown, their own steps outlined.
+- **Order past its due time.** When an order in the kitchen passes its due
+  time (start + planned minutes), its card turns red with *OVERDUE +x min*,
+  and the buzzer rings every 30 seconds with the order in the *Over time*
+  banner until it leaves the kitchen or is snoozed 5 minutes.
 - The **ISO 22000** module holds the clause-by-clause checklist (context to
   improvement, PRPs, HACCP chain) with status, owner and evidence, and a
   readiness bar reviewed monthly. A traceability drill (delivered order →
@@ -365,6 +372,8 @@ Each order, client, recipe or ingredient in the answer is a link to it.
 - Menu: groups that fold, favourites, Find a page (Ctrl K), pages limited to the person's access (18/11/2026).
 - Orders: the next step (Confirm, Send to kitchen, Kitchen done → QC, QC pass, Dispatch, Delivered) is a button on every order — in the order window's top bar, on each board card and on each list row; Kitchen shows the confirmed orders waiting to be sent, with their Send to kitchen button (18/11/2026).
 - Kitchen: steps start automatically one after the other, live countdowns, the buzzer repeats every 30 s while a step is over time with an Over time banner and Snooze 5 min, the order moves to QC by itself when all steps are done; next-step button on each kitchen card (18/11/2026).
+- Kitchen: "Whose work" selector (My steps / a person / unassigned) on Board and List; an order past its due time turns red and rings the buzzer every 30 s, with Snooze 5 min (18/11/2026).
+- Kitchen done → QC with steps still open asks first and closes them in the person's name; an order that has left the kitchen never keeps open steps; a cook or chill step closed without its temperature is flagged "CCP not recorded" in the order history (18/11/2026).
 
 ### V1.1 — from 01/11/2026 to 18/11/2026 (live on 18/11/2026)
 
