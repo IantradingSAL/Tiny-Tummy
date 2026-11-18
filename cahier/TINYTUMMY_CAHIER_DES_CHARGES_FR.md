@@ -21,7 +21,7 @@ chaque page), qui explique chaque page au fil de l'utilisation.
 |---|---|---|
 | V1.0 | version de référence (lancement de la plateforme) | 28/08/2026 |
 | V1.1 | 01/11/2026 – 18/11/2026 | 18/11/2026 |
-| V1.2 | 18/11/2026 — outils de travail du tableau de bord et traçabilité complète | 18/11/2026 |
+| V1.2 | 18/11/2026 — outils de travail du tableau de bord, traçabilité complète, scan des factures, fiche fournisseur, rôles et accès aux pages, RGPD pour les noms des enfants | 18/11/2026 |
 
 Aucune modification n'a été enregistrée en septembre et octobre 2026.
 **Numérotation retenue.** Une version par mois comportant des modifications
@@ -102,10 +102,33 @@ reprises.
   numéro de commande) et ouvre la bonne page, commande, fiche client ou
   article (18/11/2026).
 
+**Nouveau en V1.2 — réception, fournisseurs, accès (18/11/2026, #11)**
+
+- **Scanner la facture du fournisseur** à l'arrivée des marchandises (photo
+  ou PDF) : le formulaire de facture se remplit seul — fournisseur, numéro,
+  dates, chaque ligne avec quantité, coût, lot et péremption — et la
+  validation met tout en stock.
+- **Plusieurs lignes d'un coup** : un seul numéro de facture pour tous ses
+  articles, saisis dans un tableau ou collés depuis Excel ou une liste ;
+  articles choisis dans une liste déroulante des articles existants, pour ne
+  jamais créer deux fois le même article (*Carot* est reçu comme *Carrots*) ;
+  un article vraiment nouveau est créé après confirmation.
+- **Emplacement de rangement rempli automatiquement** pour chaque lot reçu.
+- **Une fiche par fournisseur** : relevé de compte avec solde progressif,
+  paiements (aussi partiels), factures, articles fournis avec évolution des
+  prix, coordonnées, ancienneté du solde ; relevé imprimable.
+- **Équipe & accès** : création de rôles ; accès à chaque page par rôle et
+  par personne (les nouvelles pages apparaissent automatiquement) ;
+  permissions par personne.
+
 **Sécurité / données**
 
 - Données des familles séparées par famille en base ; les données réservées
   au personnel ne sont plus lisibles par un parent connecté (13/11/2026, #6).
+- **Noms des enfants (RGPD)** : visibles seulement par les personnes ayant
+  l'accès *et* ayant signé l'engagement de confidentialité ; les autres
+  voient un code ; les allergies restent visibles pour la sécurité des
+  aliments (18/11/2026, #11).
 
 ---
 
@@ -179,7 +202,7 @@ Le menu est regroupé par métier :
 | Production | Stock · Lots | Stock par lots, FEFO, péremption, réapprovisionnement |
 | Production | Réquisitions | Demandes d'achat |
 | Livraison | Expédition · Livreurs | Vue Tableau (cartes prêtes / en route, carte en direct, livreurs) et vue Liste (chaque livraison : statut, livreur, adresse et distance, heures prête / départ / arrivée prévue / livrée, minutes de route, à l'heure ou en retard ; filtres statut, période, livreur ; expédier, position, retard et livrée depuis la ligne ; totaux : km, temps moyen, % à l'heure ; CSV) |
-| Finances | Fournisseurs · Dettes | Facture fournisseur = entrée en stock, dettes |
+| Finances | Fournisseurs · Dettes | Facture fournisseur = entrée en stock (scannée ou saisie), dettes ; une fiche par fournisseur (relevé, paiements, factures, articles, coordonnées) |
 | Qualité | ISO 22000 | Liste de contrôle clause par clause avec responsable et preuve |
 | Qualité | Réclamations | Registre des avis et réclamations |
 | Équipe | Messagerie, Notifications, Journal d'activité, Équipe · Accès | |
@@ -303,8 +326,50 @@ Chaque commande, client, recette ou ingrédient de la réponse est un lien.
   péremption, son emplacement et son coût d'achat. Le prélèvement prend
   toujours le lot qui périme le premier.
 - **Facture fournisseur = réception** : chaque ligne de facture (article,
-  quantité, coût, lot, péremption) devient un lot. Les dettes vieillissent
-  de façon visible jusqu'à leur paiement.
+  quantité, coût, lot, péremption, emplacement de rangement) devient un lot.
+  Les dettes vieillissent de façon visible jusqu'à leur paiement.
+- **Scanner la facture** (Stock, Fournisseurs, Recevoir du stock — *Scan
+  supplier invoice*) : une photo ou le PDF du fournisseur est lu sur
+  l'appareil (texte du PDF, sinon reconnaissance de texte, anglais et
+  français). Le formulaire de facture s'ouvre rempli : fournisseur (par nom
+  ou téléphone), numéro, date de facture, échéance (ou date + délai du
+  fournisseur), et une ligne par article avec quantité, coût unitaire, lot
+  et péremption ; les unités sont converties dans celle de l'article (g →
+  kg, douzaine → pièces) et une virgule perdue est corrigée à partir du
+  total de la ligne. La personne vérifie — le texte lu est affiché sous
+  chaque ligne, le total des lignes est comparé au total de la facture, un
+  numéro de facture déjà saisi est signalé — puis valide. Le scan reste sur
+  la facture ; l'article choisi pour un libellé imprimé est retenu pour ce
+  fournisseur.
+- **Saisir beaucoup de lignes** : le formulaire de facture est un tableau —
+  un numéro de facture, autant de lignes que nécessaire (*+ 10 lines*), ou
+  *Paste many lines* depuis Excel (article, qté, unité, coût unitaire, lot,
+  péremption, emplacement) ou une liste tapée.
+- **Pas d'articles en double** : l'article d'une ligne se choisit dans une
+  liste déroulante des articles en stock, ou *Nouvel article*. Un nom proche
+  d'un article existant (orthographe, pluriel, nom français : *Carot*,
+  *Courgettes*) est reçu sur l'article existant ; un article vraiment
+  nouveau n'est créé qu'après confirmation, une seule fois même s'il est
+  écrit de deux façons dans la même facture. *New item* dans le Stock
+  prévient de la même façon.
+- **Emplacement de rangement** : rempli automatiquement pour chaque lot — là
+  où l'article a été rangé la dernière fois, sinon selon sa catégorie
+  (légumes et fruits Fridge A, produits laitiers Fridge B, épicerie sèche
+  Dry store) — et modifiable sur la ligne. Péremption vide : la durée de
+  conservation habituelle de l'article.
+- **Fiche fournisseur** (clic sur un fournisseur) : solde dû, en retard,
+  facturé sur 12 mois, payé, délai moyen de paiement, dernière livraison,
+  ancienneté du solde (non échu, 1–30, 31–60, 61–90, plus de 90 jours).
+  Onglets : *Relevé* (solde d'ouverture, factures, paiements, solde
+  progressif, période avec solde reporté, CSV, relevé imprimable / PDF),
+  *Factures* (payé, reste à payer, partiellement payée, en retard, scan),
+  *Paiements* (date, montant, mode — virement, espèces, chèque, OMT /
+  Whish… — référence, factures réglées ; annulables), *Articles fournis*
+  (quantité, dépense, dernier prix et évolution), *Coordonnées* (contact,
+  adresse, n° TVA / MOF, banque, délai, solde d'ouverture, agrément ISO et
+  date du certificat, notes). Un paiement règle d'abord les factures les
+  plus anciennes ou celle choisie ; *Mark paid* et *Unpay* dans la liste
+  des factures gardent le relevé équilibré.
 - **Journal des mouvements** : chaque mouvement est une ligne — *Reçu*
   (réception ou facture fournisseur), *Utilisé* (sorti pour une commande en
   FEFO, avec le numéro de commande et la personne qui l'a envoyée en
@@ -409,6 +474,32 @@ Chaque commande, client, recette ou ingrédient de la réponse est un lien.
   étapes des postes qu'elle détient.
 - Un super administrateur peut travailler *en tant que* autre utilisateur ;
   les deux identités sont tracées.
+- **Rôles** : les rôles d'origine plus les rôles créés dans Équipe & accès
+  (onglet *Roles* : nom, description, couleur, permissions copiées d'un
+  rôle existant) ; un rôle qui a des personnes ne peut pas être supprimé.
+- **Accès aux pages** : l'onglet *Page access* liste chaque page du tableau
+  de bord, automatiquement (une nouvelle page apparaît le jour où elle est
+  ajoutée) ; par rôle, chaque page est *Par défaut* (suit la permission de
+  la page), *Autorisée* ou *Bloquée*. **Access** sur une personne règle son
+  rôle et, pour elle seule, chaque permission et chaque page (Par défaut /
+  Autorisée / Bloquée). Règle : personne, puis rôle, puis défaut ; super
+  administrateur toujours. Le menu ne montre à chacun que les pages qu'il
+  peut ouvrir.
+- **Noms et données de santé des enfants (RGPD)** : visibles seulement par
+  une personne qui a la permission *Noms et données de santé des enfants*
+  (par rôle, ou accordée à la personne) **et** qui a signé l'engagement de
+  confidentialité (version GDPR-CONF-1.0 : besoin d'en connaître, ni copie
+  ni partage, sécurité, signalement de toute violation sous 24 h, devoir
+  après le départ, contrôle, sanctions ; RGPD art. 5, 9, 28(3)(b), 29,
+  32(4) et loi libanaise 81/2018). Signature : lire, cocher deux
+  déclarations, taper le nom complet, signer à la main. Les engagements
+  signés sont conservés, imprimables et révocables (avec motif). Les autres
+  voient un code (*Child #K7Q2*) sur les commandes, la cuisine, le CQ, les
+  étiquettes, le conseiller, l'historique des notifications et le journal
+  d'activité ; **les allergies restent visibles par tous**, c'est un
+  contrôle de sécurité des aliments. Registre de qui peut voir les noms en
+  bas d'Équipe & accès. En base, le personnel lit les enfants par une vue
+  qui renvoie le code sauf pour les personnes autorisées.
 
 ## 10. Traçabilité de chaque action
 
@@ -480,6 +571,12 @@ Chaque commande, client, recette ou ingrédient de la réponse est un lien.
 - Preuve de livraison : photo et signature du client à l'écran sous une déclaration de réception (client absent : photo seule), conservées avec la commande (18/11/2026).
 - Export des preuves de livraison : un fichier HTML (toutes les livraisons ou une commande) avec contrôles, photo, déclaration et signature (18/11/2026).
 - Commandes : contrôle du stock à la prise de commande et à la confirmation ; un manque ouvre une réquisition d'achat pour la commande et bloque l'envoi en cuisine jusqu'à réception (dérogation super administrateur tracée) ; libération automatique à la réception (18/11/2026).
+- Stock : Scan supplier invoice (photo ou PDF lu sur l'appareil) remplit le formulaire de facture — fournisseur, numéro, dates, lignes avec quantité, coût, lot, péremption ; vérifier et valider pour recevoir en stock ; scan conservé sur la facture (18/11/2026, #11).
+- Formulaire de facture en tableau : plusieurs lignes sous un numéro de facture, collage depuis Excel ou une liste, liste déroulante des articles existants + Nouvel article ; noms proches reçus sur l'article existant, nouveaux articles créés après confirmation (18/11/2026, #11).
+- Emplacement de rangement rempli automatiquement pour chaque lot reçu ; péremption par défaut selon la conservation habituelle de l'article (18/11/2026, #11).
+- Fiche fournisseur : relevé de compte avec solde progressif et relevé imprimable, paiements avec mode et référence (paiements partiels), factures, articles fournis avec évolution des prix, coordonnées, ancienneté (18/11/2026, #11).
+- Noms des enfants visibles seulement avec la permission et l'engagement de confidentialité RGPD signé ; code pour les autres ; allergies toujours visibles (18/11/2026, #11).
+- Équipe & accès : création de rôles ; accès aux pages par rôle et par personne, chaque page listée automatiquement ; permissions par personne (18/11/2026, #11).
 
 ### V1.1 — du 01/11/2026 au 18/11/2026 (mise en service le 18/11/2026)
 

@@ -308,11 +308,12 @@
       cols: [
         { k: 'code', l: 'Invoice', html: function (v) { return '<b>' + esc(v.code) + '</b><div class="il-sub muted">' + esc(v.date) + ' · due ' + esc(v.due) + '</div>'; }, text: function (v) { return v.code; } },
         { k: 'date', l: 'Date', html: function (v) { return esc(v.date); } },
-        { k: 'prov', l: 'Provider', html: function (v) { var p = byId(provs, v.provider); return esc(p ? p.name : '?') + '<div class="il-sub muted">' + (p && p.type === 'employee' ? 'employee' : 'supplier') + '</div>'; }, text: function (v) { var p = byId(provs, v.provider); return p ? p.name : '?'; } },
+        { k: 'prov', l: 'Provider', html: function (v) { var p = byId(provs, v.provider); return (p ? '<a href="#" onclick="supOpen(\'' + p.id + '\');return false">' + esc(p.name) + '</a>' : '?') + '<div class="il-sub muted">' + (p && p.type === 'employee' ? 'employee' : 'supplier') + '</div>'; }, text: function (v) { var p = byId(provs, v.provider); return p ? p.name : '?'; } },
         { k: 'lines', l: 'Lines', wrap: true, html: function (v) { return invSummary(v, ings) + (v.kind === 'goods' ? ' ' + chipS(ic('box') + ' stock received', '#2e8770') : ''); }, text: function (v) { return textOf(invSummary(v, ings)); } },
         { k: 'total', l: 'Total', num: true, html: function (v) { return '<b>' + money(invTotal(v)) + '</b>'; }, text: function (v) { return invTotal(v).toFixed(2); }, sort: function (v) { return invTotal(v); } },
         { k: 'st', l: 'Status', html: function (v) { return v.status === 'paid' ? chipS('Paid ' + esc(v.paid_at || ''), '#2e8770') : invOverdue(v) ? chipS('Overdue', '#b23a48') : chipS('Unpaid', '#c98a1b'); }, text: function (v) { return v.status === 'paid' ? 'paid' : invOverdue(v) ? 'overdue' : 'unpaid'; } },
-        { k: 'act', l: '', csv: false, sortable: false, html: function (v) { return '<button class="btn ' + (v.status === 'paid' ? 'o' : 'g') + ' s" onclick="invPay(\'' + v.id + '\')">' + (v.status === 'paid' ? ic('undo') + ' Unpay' : ic('check') + ' Mark paid') + '</button>'; } }],
+        { k: 'act', l: '', csv: false, sortable: false, html: function (v) { return '<div class="il-acts">' + (window.invHasScan && invHasScan(v.id) ? '<button class="u-ib" title="See the scanned invoice" onclick="invScanView(\'' + v.id + '\')">' + ic('camera') + '</button>' : '') +
+          '<button class="btn ' + (v.status === 'paid' ? 'o' : 'g') + ' s" onclick="invPay(\'' + v.id + '\')">' + (v.status === 'paid' ? ic('undo') + ' Unpay' : ic('check') + ' Mark paid') + '</button></div>'; } }],
       foot: function (rows) { var t = 0, u = 0; rows.forEach(function (v) { var x = invTotal(v); t += x; if (v.status !== 'paid') u += x; });
         return '<tr><td><b>' + rows.length + ' invoices</b></td><td colspan="3"></td><td class="num"><b>' + money(t) + '</b><div class="il-sub muted">' + money(u) + ' outstanding</div></td><td colspan="2"></td></tr>'; } });
     var prov = ttList({ id: 'sup-providers', page: 'suppliers', noViews: true, rows: provs, ph: 'Search provider, category, phone…',
@@ -320,14 +321,14 @@
       filters: [{ k: 'type', l: 'Type', all: 'Suppliers + employees', opts: [['supplier', 'Suppliers'], ['employee', 'Employees']], test: function (p, x) { return x === 'employee' ? p.type === 'employee' : p.type !== 'employee'; } },
                 { k: 'due', l: 'Balance', all: 'Any balance', opts: [['owed', 'Money owed'], ['clear', 'Nothing owed']], test: function (p, x) { var u = invs.filter(function (v) { return v.provider === p.id && v.status !== 'paid'; }).length; return x === 'owed' ? u > 0 : !u; } }],
       cols: [
-        { k: 'name', l: 'Provider', html: function (p) { return '<b>' + esc(p.name) + '</b><div class="il-sub muted">' + (p.type === 'employee' ? 'employee' : 'supplier') + '</div>'; }, text: function (p) { return p.name; } },
+        { k: 'name', l: 'Provider', html: function (p) { return '<b><a href="#" onclick="supOpen(\'' + p.id + '\');return false">' + esc(p.name) + '</a></b><div class="il-sub muted">' + (p.type === 'employee' ? 'employee' : 'supplier') + '</div>'; }, text: function (p) { return p.name; } },
         { k: 'cat', l: 'Category', wrap: true, html: function (p) { return esc(p.category || ''); } },
         { k: 'phone', l: 'Phone', html: function (p) { return esc(p.phone || ''); } },
         { k: 'terms', l: 'Terms', num: true, html: function (p) { return p.terms ? p.terms + ' days' : 'on receipt'; }, sort: function (p) { return p.terms || 0; } },
         { k: 'tot', l: 'Invoiced', num: true, html: function (p) { var t = 0; invs.forEach(function (v) { if (v.provider === p.id) t += invTotal(v); }); return money(t); }, sort: function (p) { var t = 0; invs.forEach(function (v) { if (v.provider === p.id) t += invTotal(v); }); return t; } },
         { k: 'out', l: 'Outstanding', num: true, html: function (p) { var u = 0; invs.forEach(function (v) { if (v.provider === p.id && v.status !== 'paid') u += invTotal(v); }); return u ? '<b style="color:#b23a48">' + money(u) + '</b>' : '<span class="muted">—</span>'; },
           sort: function (p) { var u = 0; invs.forEach(function (v) { if (v.provider === p.id && v.status !== 'paid') u += invTotal(v); }); return u; } },
-        { k: 'act', l: '', csv: false, sortable: false, html: function (p) { return '<button class="u-ib" title="Show this provider\'s invoices" onclick="TLS[\'sup-invoices\'].f.prov=\'' + p.id + '\';render()">' + ic('receipt') + '</button>'; } }] });
+        { k: 'act', l: '', csv: false, sortable: false, html: function (p) { return '<div class="il-acts"><button class="btn o s" title="Open the supplier file: statement, invoices, payments, items" onclick="supOpen(\'' + p.id + '\')">' + ic('idcard') + ' File</button><button class="u-ib" title="Show this provider\'s invoices" onclick="TLS[\'sup-invoices\'].f.prov=\'' + p.id + '\';render()">' + ic('receipt') + '</button></div>'; } }] });
     var html = replacePanel(origSup(), 'Invoices', inv, true);
     return replacePanel(html, 'Provider registry', prov, true);
   };
@@ -483,7 +484,7 @@
   window.navGroup = function (g) { openG = openG || {}; openG[g] = !isOpen(g); lsSet('ttops_nav_open', openG); buildNav(); };
   function groupOf(m) { for (var i = 0; i < NAV.length; i++) if (NAV[i].items.indexOf(m) >= 0) return NAV[i].g; return ''; }
   function isOpen(g) { if (!g || navQ) return true; if (g === groupOf(current)) return true; return openG ? !!openG[g] : false; }
-  function allowed(m) { var k = MODULE_PERMS[m]; return !k || can(k); }
+  function allowed(m) { return window.pageAllowed(m); }
   function navLink(m, inFav) {
     var L = PAGE_LABEL[m] || { e: '', l: m }, f = favs().indexOf(m) >= 0;
     return '<a data-m="' + m + '"' + (m === current ? ' class="active"' : '') + '><span>' + L.e + '</span><em>' + esc(L.l) + '</em>' +

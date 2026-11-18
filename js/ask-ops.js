@@ -22,7 +22,7 @@
 
   function lc(s) { return String(s || '').toLowerCase(); }
   function first(s) { return lc(String(s || '').split(/[\s—–-]+/)[0]); }
-  function allowed(m) { var k = MODULE_PERMS[m]; return !k || can(k); }
+  function allowed(m) { return window.pageAllowed(m); }
   function noAccess(m) { return 'Your role doesn\'t give access to <b>' + esc(m) + '</b>. A super admin can grant it in <b>Team · Access</b>.'; }
   function deliveredAt(o) { return o.stage_times && o.stage_times.delivered; }
   function isDeliveredToday(o) {
