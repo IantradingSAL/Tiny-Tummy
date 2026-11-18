@@ -325,11 +325,22 @@ Chaque commande, client, recette ou ingrédient de la réponse est un lien.
 - **Formulaire CQ et étiquettes.** *Done* sur l'étape CQ, ou *QC check* sur la
   commande, ouvre le formulaire CQ (seulement quand toutes les autres étapes
   sont faites). Il montre le lot, si les étiquettes ont été imprimées et les
-  allergies de l'enfant (un STOP si la commande en contient une). Chaque point
-  reçoit OK / Non OK, la pesée et la température sont saisies et le
-  contrôleur signe : CONFORME clôt l'étape CQ et rend la commande prête à
+  allergies de l'enfant (un STOP si la commande en contient une). Chaque point est
+  validé en appuyant sur son bouton **OK** (ou **Not OK**). Les contrôles de la
+  commande viennent d'abord ; puis **chaque produit** de la commande a son
+  bloc : pesée comparée aux grammes et à la tolérance de sa recette,
+  température comparée à la limite de sa recette (affichées en vert ou rouge
+  à la saisie) et les contrôles propres à la recette. **Sign QC** reste
+  verrouillé tant qu'un point n'est pas validé ou qu'une mesure manque ; le
+  contrôleur signe alors : CONFORME clôt l'étape CQ et rend la commande prête à
   expédier ; NON CONFORME la garde au CQ avec les motifs. Chaque contrôle est
   conservé avec ses réponses, valeurs, personne et heure.
+- **CQ par recette.** Chaque fiche recette (Recettes · BOM) a *QC for this
+  recipe* : poids de la portion (g), tolérance de poids ± % (5 par défaut),
+  température maximale avant expédition (5 °C par défaut), durée de
+  conservation en jours (date limite sur l'étiquette) et contrôles
+  supplémentaires, un par ligne (par défaut selon la catégorie, ex.
+  *Décoration intacte* pour les gâteaux).
 - **Lot et étiquettes.** Le numéro de lot (B-AAAA-NNN-MMJJ) est créé à l'étape
   Conditionnement, ou au CQ s'il manque ; *Print labels* (étape
   Conditionnement, fenêtre de la commande, formulaire CQ) imprime une
@@ -439,6 +450,7 @@ Chaque commande, client, recette ou ingrédient de la réponse est un lien.
 - Cuisine terminée → CQ avec des étapes encore ouvertes demande confirmation et les clôture au nom de la personne ; une commande sortie de la cuisine ne garde jamais d'étape ouverte ; une cuisson ou un refroidissement clos sans température est signalé « CCP non enregistré » dans l'historique de la commande (18/11/2026).
 - Formulaire CQ avant expédition (contrôles, poids ±5 %, température ≤ 5 °C, allergies de l'enfant, signature ; NON CONFORME garde la commande au CQ) ; lot créé au Conditionnement avec une étiquette imprimable par portion (18/11/2026).
 - Menu : titres de groupes sans compteur (18/11/2026).
+- Formulaire CQ : chaque point validé par un bouton OK / Not OK ; un bloc par produit avec son poids, sa température et les contrôles de sa recette ; Sign QC verrouillé tant que tout n'est pas rempli ; réglages CQ par recette (grammes de la portion, tolérance, température maximale, conservation, contrôles supplémentaires) (18/11/2026).
 - Commandes : contrôle du stock à la prise de commande et à la confirmation ; un manque ouvre une réquisition d'achat pour la commande et bloque l'envoi en cuisine jusqu'à réception (dérogation super administrateur tracée) ; libération automatique à la réception (18/11/2026).
 
 ### V1.1 — du 01/11/2026 au 18/11/2026 (mise en service le 18/11/2026)

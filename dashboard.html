@@ -598,6 +598,25 @@ table.pm tfoot td { font-size:.74rem; font-weight:700; color:var(--soft); border
 .stk-b { display:flex; gap:10px; align-items:flex-start; background:#fdeaea; color:#7d2330; border:1px solid #f3c4ca; border-radius:12px; padding:10px 12px; margin:12px 0 4px; font-size:.88rem; }
 .stk-b > .i { color:#b23a48; margin-top:3px; } .stk-b ul { margin:4px 0 4px 18px; } .stk-b small { color:#8a4a52; }
 .btn[disabled] { opacity:.65; cursor:not-allowed; }
+.qc-sec { margin:14px 0 6px; font-size:.95rem; color:#17455e; }
+.qc-row { display:flex; align-items:center; gap:10px; padding:7px 10px; border:1px solid #e7e1d2; border-radius:10px; margin-bottom:6px; background:#fff; }
+.qc-row > span:first-child { flex:1; font-size:.9rem; }
+.qc-row.ok { border-color:#9fd3bf; background:#f1faf6; } .qc-row.no { border-color:#f0b3bb; background:#fdf1f2; }
+.qc-b { display:inline-flex; gap:6px; flex:none; }
+.qc-b button { display:inline-flex; align-items:center; gap:5px; border:2px solid #d9e2e7; background:#fff; color:#64808e; border-radius:999px; padding:7px 14px; font:inherit; font-weight:800; font-size:.85rem; cursor:pointer; min-width:84px; justify-content:center; }
+.qc-b .qc-ok.on { background:#2e8770; border-color:#2e8770; color:#fff; } .qc-b .qc-no.on { background:#b23a48; border-color:#b23a48; color:#fff; }
+.qc-b .qc-ok:hover { border-color:#2e8770; color:#2e8770; } .qc-b .qc-no:hover { border-color:#b23a48; color:#b23a48; }
+.qc-b .qc-ok.on:hover, .qc-b .qc-no.on:hover { color:#fff; }
+.qc-line { border:1px solid #d9e2e7; border-radius:12px; padding:10px 12px; margin-bottom:10px; background:#fbfdfe; }
+.qc-lh { display:flex; align-items:baseline; gap:10px; flex-wrap:wrap; margin-bottom:8px; } .qc-lh .muted { margin-left:auto; font-size:.82rem; }
+.qc-meas { display:flex; gap:10px; flex-wrap:wrap; align-items:flex-end; margin-bottom:8px; }
+.qc-meas label { display:flex; flex-direction:column; font-size:.78rem; font-weight:700; color:#64808e; gap:4px; }
+.qc-meas input { width:150px; padding:8px 10px; border:1px solid #d9e2e7; border-radius:8px; font:inherit; font-size:1rem; }
+.qc-live { font-size:.85rem; font-weight:800; padding-bottom:8px; } .qc-live .ok { color:#2e8770; } .qc-live .bad { color:#b23a48; }
+.qc-foot { display:flex; align-items:center; gap:12px; justify-content:space-between; flex-wrap:wrap; margin:6px 0; } #qc-prog { font-size:.85rem; color:#64808e; }
+.qc-set { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:10px; margin:6px 0 10px; }
+.qc-set label { display:flex; flex-direction:column; gap:4px; font-size:.78rem; font-weight:700; color:#64808e; } .qc-set label.wide { grid-column:1 / -1; }
+.qc-set input, .qc-set textarea { padding:7px 10px; border:1px solid #d9e2e7; border-radius:8px; font:inherit; font-size:.88rem; color:#17455e; }
 .o-next { display:flex; align-items:center; gap:12px; flex-wrap:wrap; background:#fff7e6; border:1px solid #f3dcae; border-radius:12px; padding:10px 12px; margin:12px 0 4px; }
 .o-next-l { font-size:.7rem; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:#a3720d; }
 .o-next .pill-row { margin:0; }
@@ -1686,8 +1705,9 @@ function openOrder(id) {
     stockBanner(o) +
     (actions ? '<div class="o-next"><span class="o-next-l">Next step</span><div class="pill-row">' + actions + '</div>' +
       (o.batch_lot || ['kitchen', 'portioning', 'qc', 'dispatch'].indexOf(o.status) >= 0 ? '<button class="btn o s o-lbl" onclick="printLabels(\'' + o.id + '\')" title="One label per portion">' + ic('receipt') + ' Print labels' + (o.batch_lot ? ' · ' + esc(o.batch_lot) : '') + '</button>' : '') + '</div>' : '') +
-    (o.qc ? '<div class="qc-sum ' + (o.qc.pass ? 'ok' : 'bad') + '">' + ic(o.qc.pass ? 'check' : 'alarm') + ' QC ' + (o.qc.pass ? 'passed' : 'FAILED') + ' · ' + esc(o.qc.at) + ' · ' + esc(o.qc.by) +
-      ' · ' + o.qc.weight_g + ' g (' + (o.qc.dev_pct >= 0 ? '+' : '') + o.qc.dev_pct + ' %) · ' + o.qc.temp_c + ' °C' + (o.qc.pass ? '' : ' — ' + esc(o.qc.reasons.join('; '))) + '</div>' : '') +
+    (o.qc ? '<div class="qc-sum ' + (o.qc.pass ? 'ok' : 'bad') + '">' + ic(o.qc.pass ? 'check' : 'alarm') + ' QC ' + (o.qc.pass ? 'passed' : 'FAILED') + ' · ' + esc(o.qc.at) + ' · ' + esc(o.qc.by) + ' · ' +
+      (o.qc.lines || []).map(function (l) { return esc(l.name) + ' ' + l.weight_g + ' g (' + (l.dev_pct >= 0 ? '+' : '') + l.dev_pct + ' %) ' + l.temp_c + ' °C'; }).join(' · ') +
+      (o.qc.pass ? '' : ' — ' + esc(o.qc.reasons.join('; '))) + '</div>' : '') +
     '<div class="tbl-scroll" style="margin:12px 0"><table class="t"><thead><tr><th>Item</th><th class="num">Qty</th><th class="num">Price</th><th class="num">Cost (BOM)</th><th class="num">Margin</th></tr></thead>' +
     '<tbody>' + items + '</tbody>' +
     '<tfoot><tr><th colspan="2">Totals</th><th class="num">' + money(t.rev) + '</th><th class="num">' + money(t.cost) + '</th><th class="num">' + money(t.margin) + ' (' + t.pct + '%)</th></tr></tfoot></table></div>' +
@@ -2104,6 +2124,71 @@ function printLabels(oid) {
   var dlg = document.getElementById('dlg'); if (dlg && dlg.open && dlg.dataset.order === oid) openOrder(oid);
 }
 function qcStepName(o) { var d = stepDefs(o).filter(function (x) { return stepKind(x.name) === 'qc'; })[0]; return d ? d.name : null; }
+/* QC set per recipe (Recipes · BOM): portion grams, tolerance, max temperature,
+   shelf life and the recipe's own extra checks. */
+var QC_DEFAULT_EXTRA = {
+  purees: ['Smooth texture, no lumps (right for the age)'],
+  meals: ['Pieces soft and bite-size for the age'],
+  cakes: ['Decoration intact', 'Baked through — no raw centre']
+};
+function qcTol(p) { return p.qc_tol > 0 ? Number(p.qc_tol) : QC_WEIGHT_TOL; }
+function qcTmax(p) { return p.qc_tmax != null && p.qc_tmax !== '' ? Number(p.qc_tmax) : QC_TEMP_MAX; }
+function qcExtra(p) { return p.qc_extra ? p.qc_extra : (QC_DEFAULT_EXTRA[p.category] || []); }
+function prodQcSet(id, field, value) {
+  var products = store('products').all(), p = byId(products, id); if (!p) return;
+  if (field === 'qc_extra') p.qc_extra = String(value).split('\n').map(function (s) { return s.trim(); }).filter(Boolean);
+  else if (value === '' || value == null) delete p[field];
+  else p[field] = Number(value);
+  store('products').save(products); logAct('Recipes · BOM', 'QC setting', p.name + ' · ' + field + ' = ' + (field === 'qc_extra' ? p.qc_extra.join(' / ') : value));
+  uToast(p.name + ': QC setting saved');
+}
+function qcRecipeBlock(p) {
+  return '<h4 style="margin-top:12px">' + ic('shield') + ' QC for this recipe</h4><div class="qc-set">' +
+    '<label>Portion weight (g)<input type="number" step="1" value="' + (p.portion_g || '') + '" onchange="prodSet(\'' + p.id + '\',\'portion_g\',this.value)"></label>' +
+    '<label>Weight tolerance ± %<input type="number" step="0.5" min="0" placeholder="' + QC_WEIGHT_TOL + '" value="' + (p.qc_tol > 0 ? p.qc_tol : '') + '" onchange="prodQcSet(\'' + p.id + '\',\'qc_tol\',this.value)"></label>' +
+    '<label>Max temperature before dispatch (°C)<input type="number" step="0.5" placeholder="' + QC_TEMP_MAX + '" value="' + (p.qc_tmax != null ? p.qc_tmax : '') + '" onchange="prodQcSet(\'' + p.id + '\',\'qc_tmax\',this.value)"></label>' +
+    '<label>Shelf life (days, use-by on the label)<input type="number" step="1" min="1" placeholder="' + (SHELF_DAYS[p.category] || 3) + '" value="' + (p.shelf_days || '') + '" onchange="prodQcSet(\'' + p.id + '\',\'shelf_days\',this.value)"></label>' +
+    '<label class="wide">Extra checks for this recipe — one per line<textarea rows="3" onchange="prodQcSet(\'' + p.id + '\',\'qc_extra\',this.value)">' + esc(qcExtra(p).join('\n')) + '</textarea></label></div>';
+}
+
+/* The QC form: every point is validated by pressing OK (or Not OK);
+   each product line has its own weight, temperature and recipe checks. */
+var QCF = null; // { oid, ans: { key: 'ok' | 'no' } }
+function qcBtns(key) {
+  var v = QCF && QCF.ans[key];
+  return '<span class="qc-b"><button type="button" class="qc-ok' + (v === 'ok' ? ' on' : '') + '" onclick="qcAns(\'' + key + '\',\'ok\')">' + ic('check') + ' OK</button>' +
+    '<button type="button" class="qc-no' + (v === 'no' ? ' on' : '') + '" onclick="qcAns(\'' + key + '\',\'no\')">' + ic('x') + ' Not OK</button></span>';
+}
+function qcAns(key, v) {
+  if (!QCF) return; QCF.ans[key] = QCF.ans[key] === v ? '' : v;
+  var row = document.querySelector('[data-qk="' + key + '"]');
+  if (row) { var t = document.createElement('template'); t.innerHTML = qcBtns(key); row.querySelector('.qc-b').replaceWith(t.content.firstChild); row.className = 'qc-row ' + (QCF.ans[key] || ''); }
+  qcProgress();
+}
+function qcKeys() {
+  var o = byId(store('orders').all(), QCF.oid), products = store('products').all(), keys = [];
+  var child = typeof orderChild === 'function' ? orderChild(o) : null;
+  QC_CHECKS.forEach(function (c) { if (!(c[0] === 'allergen' && !child)) keys.push('o:' + c[0]); });
+  o.items.forEach(function (it, i) { var p = byId(products, it.product); if (p) qcExtra(p).forEach(function (x, k) { keys.push('p' + i + ':' + k); }); });
+  return keys;
+}
+function qcLiveLine(i, target, tol, tmax) {
+  var w = document.getElementById('qc-w-' + i), t = document.getElementById('qc-t-' + i), out = document.getElementById('qc-s-' + i);
+  if (!out) return;
+  var msg = [];
+  if (w && w.value !== '') { var dev = target ? Math.round((Number(w.value) - target) / target * 1000) / 10 : 0; msg.push('<span class="' + (Math.abs(dev) <= tol ? 'ok' : 'bad') + '">' + (dev >= 0 ? '+' : '') + dev + ' % ' + (Math.abs(dev) <= tol ? '✓' : '✗ out of ±' + tol + ' %') + '</span>'); }
+  if (t && t.value !== '') { var tv = Number(t.value); msg.push('<span class="' + (tv <= tmax ? 'ok' : 'bad') + '">' + tv + ' °C ' + (tv <= tmax ? '✓' : '✗ above ' + tmax + ' °C') + '</span>'); }
+  out.innerHTML = msg.join(' · ');
+  qcProgress();
+}
+function qcProgress() {
+  if (!QCF) return;
+  var keys = qcKeys(), answered = keys.filter(function (k) { return QCF.ans[k]; }).length, nums = 0, numsDone = 0;
+  document.querySelectorAll('#dlg [data-qnum]').forEach(function (el) { nums++; if (el.value !== '') numsDone++; });
+  var all = answered === keys.length && numsDone === nums, el = document.getElementById('qc-prog'), btn = document.getElementById('qc-sign');
+  if (el) el.innerHTML = '<b>' + answered + '/' + keys.length + '</b> checks pressed · <b>' + numsDone + '/' + nums + '</b> measures entered';
+  if (btn) { btn.disabled = !all; btn.title = all ? 'Sign the quality check' : 'Press OK / Not OK on every check and enter every weight and temperature'; }
+}
 function qcForm(oid) {
   var orders = store('orders').all(), o = byId(orders, oid); if (!o) return;
   var qcName = qcStepName(o);
@@ -2111,58 +2196,68 @@ function qcForm(oid) {
   if (['kitchen', 'portioning', 'qc'].indexOf(o.status) < 0) { alert('QC is done when the kitchen has finished the order.'); return; }
   if (before.length) { alert('Finish the kitchen steps first: ' + before.map(function (d) { return d.name; }).join(', ') + '.'); return; }
   if (ensureLot(o)) store('orders').save(orders);
+  QCF = { oid: oid, ans: {} };
   var products = store('products').all(), child = typeof orderChild === 'function' ? orderChild(o) : null;
   var allergies = child && child.allergies && child.allergies.length ? child.allergies : [];
   var hits = child && typeof orderAllergens === 'function' ? orderAllergens(o, child) : [];
-  var planned = 0, wsum = 0;
-  o.items.forEach(function (it) { var p = byId(products, it.product); if (p) { planned += it.qty; wsum += (p.portion_g || 0) * it.qty; } });
-  var target = planned ? Math.round(wsum / planned) : 0;
   var last = (o.qc_checks || []).slice(-1)[0];
+  var orderRows = QC_CHECKS.filter(function (c) { return !(c[0] === 'allergen' && !child); }).map(function (c) {
+    return '<div class="qc-row" data-qk="o:' + c[0] + '"><span>' + esc(c[1]) + '</span>' + qcBtns('o:' + c[0]) + '</div>';
+  }).join('');
+  var lines = o.items.map(function (it, i) {
+    var p = byId(products, it.product); if (!p) return '';
+    var tol = qcTol(p), tmax = qcTmax(p), target = p.portion_g || 0, args = i + ',' + target + ',' + tol + ',' + tmax;
+    return '<div class="qc-line"><div class="qc-lh"><b>' + esc(p.name) + '</b> × ' + it.qty + '<span class="muted">target <b>' + target + ' g</b> ± ' + tol + ' % · ≤ ' + tmax + ' °C</span></div>' +
+      '<div class="qc-meas"><label>Weight sample — average g<input id="qc-w-' + i + '" data-qnum type="number" step="1" placeholder="' + target + '" oninput="qcLiveLine(' + args + ')"></label>' +
+      '<label>Temperature °C<input id="qc-t-' + i + '" data-qnum type="number" step="0.1" placeholder="≤ ' + tmax + '" oninput="qcLiveLine(' + args + ')"></label>' +
+      '<span class="qc-live" id="qc-s-' + i + '"></span></div>' +
+      qcExtra(p).map(function (x, k) { var key = 'p' + i + ':' + k; return '<div class="qc-row" data-qk="' + key + '"><span>' + esc(x) + '</span>' + qcBtns(key) + '</div>'; }).join('') + '</div>';
+  }).join('');
   showDlg('<h3>' + ic('shield') + ' Quality check — ' + esc(o.code) + '</h3>' +
-    '<p class="muted">' + o.items.map(function (it) { var p = byId(products, it.product); return it.qty + '× ' + esc(p ? p.name : '?'); }).join(', ') +
-      ' · ' + esc(o.customer) + (child ? ' · for <b>' + esc(child.name) + '</b>' : '') + '</p>' +
+    '<p class="muted">' + esc(o.customer) + (child ? ' · for <b>' + esc(child.name) + '</b>' : '') + ' · press <b>OK</b> on each point once checked</p>' +
     (last && !last.pass ? '<div class="qc-warn">' + ic('alarm') + ' Previous check FAILED (' + esc(last.at) + ', ' + esc(last.by) + '): ' + esc(last.reasons.join('; ')) + '</div>' : '') +
     '<div class="qc-lot"><span>Batch lot <b>' + esc(o.batch_lot) + '</b>' + (o.labels ? ' · ' + o.labels.n + ' labels printed ' + esc(o.labels.at) : ' · <b style="color:#b23a48">labels not printed yet</b>') + '</span>' +
       '<button class="btn o s" onclick="printLabels(\'' + oid + '\');setTimeout(function(){qcForm(\'' + oid + '\')},400)">' + ic('receipt') + ' Print labels</button></div>' +
     (child ? '<div class="qc-al' + (hits.length ? ' bad' : '') + '">' + ic(hits.length ? 'alarm' : 'shield') + ' ' + esc(child.name) + '\'s allergies: <b>' + esc(allergies.length ? allergies.join(', ') : 'none recorded') + '</b>' +
       (hits.length ? ' — <b>STOP: this order contains ' + esc(hits.join(', ')) + '</b>' : '') + '</div>' : '') +
-    '<table class="t qc-t"><thead><tr><th>Check</th><th>OK</th><th>Not OK</th></tr></thead><tbody>' +
-    QC_CHECKS.map(function (c) {
-      var na = c[0] === 'allergen' && !child;
-      return '<tr><td>' + esc(c[1]) + (na ? ' <span class="muted">(no child profile linked)</span>' : '') + '</td>' +
-        '<td><input type="radio" name="qc-' + c[0] + '" value="ok"' + (na ? ' checked' : '') + '></td><td><input type="radio" name="qc-' + c[0] + '" value="no"></td></tr>';
-    }).join('') + '</tbody></table>' +
-    '<div class="frm"><div class="row">' +
-      '<label>Weight sample — average per portion (g)<input id="qc-w" type="number" step="1" placeholder="target ' + target + ' g"><small class="muted">target ' + target + ' g · tolerance ±' + QC_WEIGHT_TOL + ' %</small></label>' +
-      '<label>Product temperature before dispatch (°C)<input id="qc-t" type="number" step="0.1" placeholder="≤ ' + QC_TEMP_MAX + '"><small class="muted">critical limit ≤ ' + QC_TEMP_MAX + ' °C</small></label></div>' +
-      '<label>Notes / corrective action<input id="qc-n" placeholder="optional"></label>' +
-      '<div class="pill-row"><button class="btn g" onclick="saveQc(\'' + oid + '\',' + target + ')">' + ic('check') + ' Sign QC</button>' +
-      '<span class="muted">Signed by <b>' + esc(currentUser().name) + '</b> · ' + esc(nowTs()) + '</span></div></div>');
+    '<h4 class="qc-sec">Order checks</h4>' + orderRows +
+    '<h4 class="qc-sec">Each product</h4>' + lines +
+    '<div class="frm" style="margin-top:10px"><label>Notes / corrective action<input id="qc-n" placeholder="optional"></label>' +
+      '<div class="qc-foot"><span id="qc-prog"></span><button class="btn g" id="qc-sign" disabled onclick="saveQc(\'' + oid + '\')">' + ic('check') + ' Sign QC</button></div>' +
+      '<span class="muted">Signed by <b>' + esc(currentUser().name) + '</b> · ' + esc(nowTs()) + '</span></div>');
+  qcProgress();
 }
-function saveQc(oid, target) {
-  var orders = store('orders').all(), o = byId(orders, oid); if (!o) return;
-  var ans = {}, missing = [];
-  QC_CHECKS.forEach(function (c) { var el = document.querySelector('input[name="qc-' + c[0] + '"]:checked'); ans[c[0]] = el ? el.value : ''; if (!el) missing.push(c[1]); });
-  var w = document.getElementById('qc-w').value, tv = document.getElementById('qc-t').value;
-  if (missing.length || w === '' || tv === '') { alert('Answer every check and enter the weight and the temperature.'); return; }
-  w = Number(w); tv = Number(tv);
-  var dev = target ? Math.round((w - target) / target * 100) : 0;
-  var reasons = [];
-  QC_CHECKS.forEach(function (c) { if (ans[c[0]] !== 'ok') reasons.push(c[1]); });
-  if (Math.abs(dev) > QC_WEIGHT_TOL) reasons.push('weight ' + w + ' g (' + (dev > 0 ? '+' : '') + dev + ' % vs ' + target + ' g)');
-  if (tv > QC_TEMP_MAX) reasons.push('temperature ' + tv + ' °C (limit ≤ ' + QC_TEMP_MAX + ' °C)');
+function saveQc(oid) {
+  var orders = store('orders').all(), o = byId(orders, oid); if (!o || !QCF) return;
+  var products = store('products').all(), keys = qcKeys(), reasons = [];
+  if (keys.some(function (k) { return !QCF.ans[k]; })) { alert('Press OK or Not OK on every check.'); return; }
+  QC_CHECKS.forEach(function (c) { if (QCF.ans['o:' + c[0]] === 'no') reasons.push(c[1]); });
+  var lines = [];
+  for (var i = 0; i < o.items.length; i++) {
+    var it = o.items[i], p = byId(products, it.product); if (!p) continue;
+    var w = document.getElementById('qc-w-' + i).value, t = document.getElementById('qc-t-' + i).value;
+    if (w === '' || t === '') { alert('Enter the weight and the temperature of every product.'); return; }
+    w = Number(w); t = Number(t);
+    var tol = qcTol(p), tmax = qcTmax(p), target = p.portion_g || 0, dev = target ? Math.round((w - target) / target * 1000) / 10 : 0;
+    var checks = {}; qcExtra(p).forEach(function (x, k) { checks[x] = QCF.ans['p' + i + ':' + k]; if (QCF.ans['p' + i + ':' + k] === 'no') reasons.push(p.name + ': ' + x); });
+    if (Math.abs(dev) > tol) reasons.push(p.name + ': weight ' + w + ' g (' + (dev > 0 ? '+' : '') + dev + ' % vs ' + target + ' g, ±' + tol + ' %)');
+    if (t > tmax) reasons.push(p.name + ': ' + t + ' °C (limit ≤ ' + tmax + ' °C)');
+    lines.push({ product: p.id, name: p.name, qty: it.qty, target_g: target, weight_g: w, dev_pct: dev, tol_pct: tol, temp_c: t, tmax_c: tmax, checks: checks });
+  }
   var child = typeof orderChild === 'function' ? orderChild(o) : null, hits = child && typeof orderAllergens === 'function' ? orderAllergens(o, child) : [];
   if (hits.length) reasons.push('contains the child\'s allergen: ' + hits.join(', '));
-  var rec = { at: nowTs(), ts: Date.now(), by: currentUser().name, pass: !reasons.length, checks: ans, weight_g: w, target_g: target, dev_pct: dev, temp_c: tv,
+  var orderChecks = {}; QC_CHECKS.forEach(function (c) { if (QCF.ans['o:' + c[0]]) orderChecks[c[0]] = QCF.ans['o:' + c[0]]; });
+  var rec = { at: nowTs(), ts: Date.now(), by: currentUser().name, pass: !reasons.length, checks: orderChecks, lines: lines,
     notes: document.getElementById('qc-n').value || '', lot: o.batch_lot, reasons: reasons };
-  o.qc_checks = (o.qc_checks || []).concat(rec); o.qc = rec;
+  var summary = lines.map(function (l) { return l.name + ' ' + l.weight_g + ' g (' + (l.dev_pct >= 0 ? '+' : '') + l.dev_pct + ' %) ' + l.temp_c + ' °C'; }).join(' · ');
+  o.qc_checks = (o.qc_checks || []).concat(rec); o.qc = rec; QCF = null;
   o.stage_times = o.stage_times || {};
   if (rec.pass) {
     var qn = qcStepName(o);
     if (qn) { var s = o.steps.find(function (x) { return x.s === qn; }); if (!s) { s = { s: qn }; o.steps.push(s); } s.done = true; s.by = rec.by; s.at = rec.at; }
     o.status = 'dispatch'; o.stage_times.dispatch = Date.now();
-    o.history.push({ at: nowTs(), what: 'QC PASSED ✓ — weight ' + w + ' g (' + (dev >= 0 ? '+' : '') + dev + ' %), ' + tv + ' °C, lot ' + o.batch_lot + ' — ' + rec.by + ' · ready to dispatch' });
-    logAct('Kitchen', 'QC passed', o.code + ' · lot ' + o.batch_lot + ' · ' + w + ' g · ' + tv + ' °C');
+    o.history.push({ at: nowTs(), what: 'QC PASSED ✓ — ' + summary + ' · lot ' + o.batch_lot + ' — ' + rec.by + ' · ready to dispatch' });
+    logAct('Kitchen', 'QC passed', o.code + ' · lot ' + o.batch_lot + ' · ' + summary);
     pushDemo('Ready to dispatch 📦', o.code + ' passed QC (lot ' + o.batch_lot + ')', 'Role · delivery');
     uToast(o.code + ' passed QC — ready to dispatch');
   } else {
@@ -2713,6 +2808,7 @@ RENDER.bom = function () {
       }).join('') + '</tbody></table></div>' +
       '<p style="margin-top:8px"><button class="btn o s" onclick="stepDefAdd(\'' + p.id + '\')">＋ Add process step</button> ' +
       '<span class="muted">names containing cook/chill become CCPs with temperature checks; “portion” opens the portioning sheet; “pack” prints the lot label</span></p>' +
+      qcRecipeBlock(p) +
       '<div class="stat-line">' +
       '<span>Materials / portion <b>' + money(cost) + '</b></span>' +
       '<span>💼 Labor ' + tBatch + ' min / batch (' + (Math.round(tBatch / 60 * 100) / 100) + ' hr) · <b>' + money(tCost) + '</b>/portion</span>' +

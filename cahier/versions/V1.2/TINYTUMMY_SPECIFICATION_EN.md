@@ -292,11 +292,21 @@ Each order, client, recipe or ingredient in the answer is a link to it.
 - **QC form and labels.** *Done* on the QC step, or *QC check* on the order,
   opens the QC form (only once every other kitchen step is done). It shows the
   batch lot, whether the labels were printed, and the child's allergies (a
-  STOP if the order contains one). Each point is answered OK / Not OK, the
-  weight sample and the temperature are entered, and the inspector signs:
+  STOP if the order contains one). Each point is validated by pressing its
+  **OK** button (or **Not OK**). The order checks come first; then **each
+  product** of the order has its own block: weight sample against that
+  recipe's portion grams and tolerance, temperature against that recipe's
+  limit (both shown green or red as they are typed) and the recipe's own
+  extra checks. **Sign QC** stays locked until every point is pressed and
+  every measure entered; the inspector then signs:
   PASS closes the QC step and makes the order ready to dispatch; FAIL keeps
   it at QC with the reasons. Every check is kept with its answers, values,
   person and time.
+- **QC set per recipe.** Each recipe card (Recipes · BOM) has *QC for this
+  recipe*: portion weight (g), weight tolerance ± % (default 5), maximum
+  temperature before dispatch (default 5 °C), shelf life in days (use-by on
+  the label) and extra checks, one per line (defaults by category, e.g.
+  *Decoration intact* for cakes).
 - **Batch lot and labels.** The batch lot (B-YYYY-NNN-MMDD) is created at the
   Pack step, or at QC if missing; *Print labels* (Pack step, order window, QC
   form) prints one label per portion (62 × 40 mm): product, age, net weight,
@@ -397,6 +407,7 @@ Each order, client, recipe or ingredient in the answer is a link to it.
 - Kitchen done → QC with steps still open asks first and closes them in the person's name; an order that has left the kitchen never keeps open steps; a cook or chill step closed without its temperature is flagged "CCP not recorded" in the order history (18/11/2026).
 - QC form before dispatch (checks, weight ±5 %, temperature ≤ 5 °C, child's allergies, signature; FAIL keeps the order at QC); batch lot created at Pack with one printable label per portion (18/11/2026).
 - Menu: group headers without counts (18/11/2026).
+- QC form: each point validated with an OK / Not OK button; one block per product with its own weight, temperature and recipe checks; Sign QC locked until complete; QC settings per recipe (portion grams, tolerance, max temperature, shelf life, extra checks) (18/11/2026).
 - Orders: stock check when placed and confirmed; a shortfall opens a purchase requisition for the order and blocks Send to kitchen until received (super admin override recorded); released automatically on receipt (18/11/2026).
 
 ### V1.1 — from 01/11/2026 to 18/11/2026 (live on 18/11/2026)
