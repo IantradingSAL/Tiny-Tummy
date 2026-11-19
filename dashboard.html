@@ -284,6 +284,9 @@ dialog:has(.iv-grid) { max-width:1180px; width:96vw; }
 .kb-next li .stp-av { width:18px; height:18px; font-size:.52rem; }
 .kb-next-h { font-size:.62rem; font-weight:800; letter-spacing:.06em; text-transform:uppercase; color:#a3b1b8; margin-top:2px; }
 .ocol-h small { font-weight:600; color:var(--soft); font-size:.7rem; }
+.kb-rail { display:grid; grid-auto-flow:column; grid-auto-columns:minmax(250px,270px); gap:12px; overflow-x:auto; padding:10px 10px 14px; align-items:start; background:#efe9dc; border-radius:14px; border-top:6px solid #c9bfa8; }
+.kb-slot { min-width:0; } .kb-slot .ocol-h { padding:2px 4px 8px; }
+@media (max-width:640px){ .kb-rail { grid-auto-flow:row; grid-auto-columns:auto; overflow:visible; } }
 @media (max-width:640px){ .oboard { grid-auto-flow:row; grid-auto-columns:auto; overflow:visible; } .otile { flex:0 0 92px; padding:8px 4px; } .otile b { font-size:1.15rem; } .otile small { font-size:.58rem; } }
 /* ── Kitchen step cards ── */
 .stp-head { display:flex; align-items:center; gap:12px; flex-wrap:wrap; font-size:.84rem; margin-bottom:10px; }
@@ -2798,9 +2801,12 @@ document.addEventListener('pointerdown', function () {
   try { _audio = _audio || new (window.AudioContext || window.webkitAudioContext)(); if (_audio.resume) _audio.resume(); } catch (e) {}
 }, { once: true });
 /* Kitchen · Board / List — the list is one row per production step */
-var KV = { view: (function () { try { return localStorage.getItem('ttops_kitchen_view') || 'board'; } catch (e) { return 'board'; } })(),
-  show: 'todo', who: 'all', station: 'all', q: '' };
-function kvSet(k, v) { KV[k] = v; if (k === 'view') { try { localStorage.setItem('ttops_kitchen_view', v); } catch (e) {} } render(); }
+/* the layout (Board / Tickets / List / Detail) is remembered per person */
+function kvViewKey() { return 'ttops_kitchen_view_' + (localStorage.getItem('ttops_whoami') || 'u1'); }
+function kvSavedView() { try { return localStorage.getItem(kvViewKey()) || localStorage.getItem('ttops_kitchen_view') || 'board'; } catch (e) { return 'board'; } }
+var KV = { view: kvSavedView(), show: 'todo', who: 'all', station: 'all', q: '' };
+var KV_FOR = null; // whose layout KV.view holds — switching user (act as) loads theirs
+function kvSet(k, v) { KV[k] = v; if (k === 'view') { try { localStorage.setItem(kvViewKey(), v); } catch (e) {} } render(); }
 function kvWho() { return KV.who === 'me' ? currentUser().name : KV.who; }
 function kvMine(st) { // is this (not done) step the selected person's work?
   if (KV.who === 'all' || !st || st.done) return false;
@@ -2809,6 +2815,7 @@ function kvMine(st) { // is this (not done) step the selected person's work?
 function kvBar() {
   var staff = store('staff').all().map(normStaff), me = currentUser().name;
   return '<div class="u-bar"><div class="u-tabs" style="margin:0"><button class="' + (KV.view === 'board' ? 'on' : '') + '" onclick="kvSet(\'view\',\'board\')">' + ic('grid') + ' Board</button>' +
+    '<button class="' + (KV.view === 'tickets' ? 'on' : '') + '" title="One ticket per order, side by side in arrival order" onclick="kvSet(\'view\',\'tickets\')">' + ic('receipt') + ' Tickets</button>' +
     '<button class="' + (KV.view === 'list' ? 'on' : '') + '" onclick="kvSet(\'view\',\'list\')">' + ic('clipboard') + ' List</button>' +
     '<button class="' + (KV.view === 'detail' ? 'on' : '') + '" title="One full panel per order: timeline, clocks, CCP readings" onclick="kvSet(\'view\',\'detail\')">' + ic('eye') + ' Detail</button></div>' +
     '<span class="kv-who"><b>Whose work</b><span class="lg-q"><button class="' + (KV.who === 'all' ? 'on' : '') + '" onclick="kvSet(\'who\',\'all\')">Everyone</button>' +
@@ -2897,17 +2904,41 @@ function klListView(active, products) {
    current task (person, timer, Start / Done) and the coming steps under it. */
 var KB_COLORS = { prep: '#7a4aa8', cook: '#d0622f', assembly: '#2f6fb0', portion: '#c98a1b', chill: '#2b8fb3', pack: '#5d7a3a', qc: '#2e8770' };
 function kbBoard(active, products) {
-  var arrival = active.slice().sort(function (a, b) { return (a.kitchen_start || 0) - (b.kitchen_start || 0); });
   var cols = {}; STATIONS.forEach(function (x) { cols[x[0]] = []; });
-  arrival.forEach(function (o, n) {
-    if (KV.who !== 'all' && !(o.steps || []).some(kvMine)) return;
-    var defs = stepDefs(o), cur = currentStep(o, products), ci = -1;
-    defs.forEach(function (d, i) { if (d.name === cur && ci < 0) ci = i; });
-    var station = ci >= 0 ? stepStation(defs[ci].name) : 'qc';
-    cols[station].push({ o: o, n: n + 1, defs: defs, ci: ci });
+  kbQueue(active, products).forEach(function (t) {
+    if (KV.who !== 'all' && !(t.o.steps || []).some(kvMine)) return;
+    cols[t.ci >= 0 ? stepStation(t.defs[t.ci].name) : 'qc'].push(t);
   });
   var staff = store('staff').all().map(normStaff);
-  function ticket(t, first) {
+  return '<div class="oboard">' + STATIONS.map(function (x) {
+    var k = x[0], list = cols[k];
+    var mins = list.reduce(function (m, t) { return m + (t.ci >= 0 ? Number(t.defs[t.ci].min) || 0 : 0); }, 0);
+    return '<div class="ocol" style="--sc:' + (KB_COLORS[k] || '#17455e') + '"><div class="ocol-h">' + ic(STATION_SVG[k] || 'chef') + ' ' + esc(stLabel(k)) +
+      (mins ? ' <small>' + mins + ' min</small>' : '') + '<span>' + list.length + '</span></div>' +
+      (list.map(function (t) { return kbTicket(t, products, staff); }).join('') || '<div class="ocol-empty">No orders</div>') + '</div>';
+  }).join('') + '</div>';
+}
+/* Orders in production in arrival order, each with its position (#n), step
+   definitions and the index of its current step (-1 = all steps done). */
+function kbQueue(active, products) {
+  return active.slice().sort(function (a, b) { return (a.kitchen_start || 0) - (b.kitchen_start || 0); }).map(function (o, n) {
+    var defs = stepDefs(o), cur = currentStep(o, products), ci = -1;
+    defs.forEach(function (d, i) { if (d.name === cur && ci < 0) ci = i; });
+    return { o: o, n: n + 1, defs: defs, ci: ci };
+  });
+}
+/* Kitchen · Tickets — the restaurant rail: one ticket per order, side by
+   side from left to right in arrival order (#1 first). */
+function kbTickets(active, products) {
+  var staff = store('staff').all().map(normStaff);
+  var list = kbQueue(active, products).filter(function (t) { return KV.who === 'all' || (t.o.steps || []).some(kvMine); });
+  if (!list.length) return '<div class="panel"><p class="muted">No open step for <b>' + esc(KV.who === '__none__' ? 'unassigned work' : kvWho()) + '</b> right now. <a href="#" onclick="kvSet(\'who\',\'all\');return false">Show everyone</a></p></div>';
+  return '<div class="kb-rail">' + list.map(function (t) {
+    var stn = t.ci >= 0 ? stepStation(t.defs[t.ci].name) : 'qc';
+    return '<div class="kb-slot" style="--sc:' + (KB_COLORS[stn] || '#17455e') + '"><div class="ocol-h">' + ic(STATION_SVG[stn] || 'chef') + ' ' + esc(stLabel(stn)) + '</div>' + kbTicket(t, products, staff) + '</div>';
+  }).join('') + '</div>';
+}
+function kbTicket(t, products, staff) {
     var o = t.o, defs = t.defs, ci = t.ci;
     var items = o.items.map(function (it) { var p = byId(products, it.product); return it.qty + '× ' + esc(p ? p.name : '?'); }).join(', ');
     var child = typeof orderChild === 'function' ? orderChild(o) : null, stop = child && typeof orderAllergens === 'function' ? orderAllergens(o, child) : [];
@@ -2935,7 +2966,7 @@ function kbBoard(active, products) {
       return '<li>' + ic(STATION_SVG[stepStation(d.name)] || 'chef') + '<b>' + esc(d.name) + '</b>' +
         (st.assigned ? '<span class="stp-av" title="' + esc(st.assigned) + '">' + initials(st.assigned) + '</span>' : '') + '<small>' + (Number(d.min) || 0) + ' min</small></li>';
     }).join('') : '';
-    return '<div class="ocard kb-tk' + (late ? ' late' : '') + (first ? ' first' : '') + '" onclick="openOrder(\'' + o.id + '\')">' +
+    return '<div class="ocard kb-tk' + (late ? ' late' : '') + '" onclick="openOrder(\'' + o.id + '\')">' +
       '<div class="oc-top"><span><span class="kb-n">#' + t.n + '</span><b>' + esc(o.code) + '</b></span>' + (late ? '<span class="chip alarm">' + ic('alarm') + ' late</span>' : due) + '</div>' +
       '<div class="oc-cust">' + ic('user') + ' ' + esc(o.customer) + '</div>' +
       '<div class="oc-items">' + items + '</div>' +
@@ -2944,16 +2975,11 @@ function kbBoard(active, products) {
       (coming ? '<div class="kb-next-h">Coming next</div><ul class="kb-next">' + coming + '</ul>' : '') +
       '<div class="oc-steps"><span class="stp-bar"><i style="width:' + (defs.length ? Math.round(doneN / defs.length * 100) : 0) + '%"></i></span><small>' + doneN + '/' + defs.length + ' steps</small></div>' +
       (NEXT_STEP[o.status] ? '<div class="oc-next">' + nextStepBtn(o) + '</div>' : '') + '</div>';
-  }
-  return '<div class="oboard">' + STATIONS.map(function (x) {
-    var k = x[0], list = cols[k];
-    var mins = list.reduce(function (m, t) { return m + (t.ci >= 0 ? Number(t.defs[t.ci].min) || 0 : 0); }, 0);
-    return '<div class="ocol" style="--sc:' + (KB_COLORS[k] || '#17455e') + '"><div class="ocol-h">' + ic(STATION_SVG[k] || 'chef') + ' ' + esc(stLabel(k)) +
-      (mins ? ' <small>' + mins + ' min</small>' : '') + '<span>' + list.length + '</span></div>' +
-      (list.map(function (t, i) { return ticket(t, i === 0); }).join('') || '<div class="ocol-empty">No orders</div>') + '</div>';
-  }).join('') + '</div>';
 }
 RENDER.kitchen = function () {
+  var who = localStorage.getItem('ttops_whoami') || 'u1';
+  if (KV_FOR !== null && KV_FOR !== who) KV.view = kvSavedView();
+  KV_FOR = who;
   autoAssignAll();
   kitchenAuto();
   checkKitchenAlarms();
@@ -3007,7 +3033,7 @@ RENDER.kitchen = function () {
     '<div class="kpi b-blue"><div class="v">' + portions + '</div><div class="l">Portions in production</div></div>' +
     '<div class="kpi b-gold"><div class="v">' + minsQueued + ' min</div><div class="l">Work queued</div></div>' +
     '<div class="kpi ' + (overdueN ? 'bad b-red' : 'good b-green') + '"><div class="v">' + overdueN + '</div><div class="l">⏰ Overdue</div></div></div>' + kitchenWaiting(products) + kvBar() +
-    (KV.view === 'list' ? klListView(active, products) : KV.view === 'board' ? (active.length ? kbBoard(active, products) : '<div class="panel"><p class="muted">Nothing in production. Confirm an order and send it to the kitchen — the production clock starts at that moment.</p></div>') :
+    (KV.view === 'list' ? klListView(active, products) : KV.view === 'tickets' && active.length ? kbTickets(active, products) : KV.view === 'board' || KV.view === 'tickets' ? (active.length ? kbBoard(active, products) : '<div class="panel"><p class="muted">Nothing in production. Confirm an order and send it to the kitchen — the production clock starts at that moment.</p></div>') :
     (stationRows.length ? '<div class="panel" style="padding:14px 18px"><div class="toolbar" style="margin-bottom:8px"><h3 style="font-size:1rem">🏭 Station load</h3><span class="muted">minutes of work remaining per step</span></div>' + hBarChart(stationRows, CHART.blue, function (v) { return v + ' min'; }) + '</div>' : '') +
     (cards || (KV.who !== 'all' && active.length ? '<div class="panel"><p class="muted">No open step for <b>' + esc(KV.who === '__none__' ? 'unassigned work' : kvWho()) + '</b> right now. <a href="#" onclick="kvSet(\'who\',\'all\');return false">Show everyone</a></p></div>' : '') || '<div class="panel"><p class="muted">Nothing in production. Confirm an order and send it to the kitchen — the production clock starts at that moment.</p></div>'));
 };
