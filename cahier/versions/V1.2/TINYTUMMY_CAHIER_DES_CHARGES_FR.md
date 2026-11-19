@@ -475,7 +475,22 @@ Chaque commande, client, recette ou ingrédient de la réponse est un lien.
   pas seulement à l'écran.
 - **Postes de cuisine** : préparation, cuisson, assemblage, portionnement,
   refroidissement, conditionnement, CQ. Une personne ne peut lancer que les
-  étapes des postes qu'elle détient.
+  étapes des postes qu'elle détient. Les postes se règlent **par rôle**
+  (Équipe & accès → *Rôles* : chaque carte de rôle a ses boutons de postes,
+  un nouveau rôle les choisit à sa création — par ex. un rôle Chef avec tous
+  les postes, un Commis préparation avec la seule préparation, un autre avec
+  préparation et conditionnement) ; une personne reçoit les postes de son
+  rôle plus ceux ajoutés sur sa propre carte. Le super administrateur a
+  toujours tous les postes ; le gérant les a tous sauf changement. Les
+  étapes ne sont proposées et attribuées qu'aux personnes qui détiennent le
+  poste. En base : table `tt_role_stations`, `tt_staff.stations` et
+  `tt_has_station()` (`supabase/schema5_kitchen_stations.sql`).
+- **Pages par poste** : sous *Cuisine* dans le menu, chaque personne voit
+  une entrée par poste qu'elle détient (Préparation, Cuisson…). Elle ouvre
+  la Cuisine sur ce poste : les commandes dont l'étape en cours y est, puis
+  celles qui y arrivent, dans l'ordre de passage — en Tableau (deux
+  colonnes : maintenant / à venir), Bons, Liste et Détail. *Cuisine* seule
+  montre tous les postes.
 - Un super administrateur peut travailler *en tant que* autre utilisateur ;
   les deux identités sont tracées.
 - **Rôles** : les rôles d'origine plus les rôles créés dans Équipe & accès
@@ -587,6 +602,7 @@ Chaque commande, client, recette ou ingrédient de la réponse est un lien.
 - Cuisine : le Tableau devient un rail de bons par poste, dans le style du tableau des Commandes — chaque commande est un bon numéroté dans la colonne de son étape en cours, tâche en cours en haut (personne, minuteur, Démarrer / Terminé), étapes à venir dessous ; les panneaux complets passent dans une vue Détail (19/11/2026, #13).
 
 - Cuisine : vue Bons — un bon par commande, côte à côte par ordre d'arrivée, comme le rail d'un restaurant ; la disposition (Tableau, Bons, Liste, Détail) est mémorisée par personne et peut être gardée dans une vue enregistrée par défaut ; l'ordre de passage se change en glissant un bon ou avec les flèches (19/11/2026, #14).
+- Postes de cuisine par rôle (onglet Rôles, aussi à la création d'un rôle) en plus de ceux de la personne ; une entrée de menu par poste sous Cuisine pour les postes détenus, qui ouvre la Cuisine sur ce poste (maintenant / à venir) (19/11/2026, #14).
 
 ### V1.1 — du 01/11/2026 au 18/11/2026 (mise en service le 18/11/2026)
 

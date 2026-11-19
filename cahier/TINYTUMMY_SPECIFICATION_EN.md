@@ -422,6 +422,20 @@ Each order, client, recipe or ingredient in the answer is a link to it.
   screen.
 - **Kitchen stations**: prep, cooking, assembly, portioning, chilling,
   packaging, QC. A person can only start steps of the stations they hold.
+  Stations are set **per role** (Team & Access → *Roles*: each role card
+  has its station toggles, a new role picks them when created — e.g. a Chef
+  role with every station, a Prep cook with Prep only, another with Prep
+  and Packaging); a person gets the stations of their role plus any extra
+  ones tapped on their own card. Super admin always has every station;
+  manager has every station unless changed. Steps are offered and assigned
+  only to people who hold the station. In the database: table
+  `tt_role_stations`, `tt_staff.stations` and `tt_has_station()`
+  (`supabase/schema5_kitchen_stations.sql`).
+- **Station pages**: under *Kitchen* in the menu, each person sees one entry
+  per station they hold (Prep, Cooking…). It opens Kitchen on that station:
+  the orders whose current step is there, then those coming to it, in
+  queue order — on Board (two columns: now / coming), Tickets, List and
+  Detail. *Kitchen* itself shows every station.
 - A super admin can work *as* another user; both identities are logged.
 - **Roles**: the built-in roles plus roles created in Team & Access
   (*Roles* tab: name, description, colour, permissions copied from an
@@ -527,6 +541,7 @@ Each order, client, recipe or ingredient in the answer is a link to it.
 - Kitchen: Board rebuilt as a station ticket rail in the style of the Orders board — each order a numbered ticket in the column of its current step, current task on top (person, timer, Start / Done), coming steps under it; the previous full panels move to a Detail view (19/11/2026, #13).
 
 - Kitchen: Tickets view — one ticket per order side by side in arrival order, like a restaurant rail; the layout (Board, Tickets, List, Detail) is remembered per person and can be kept in a saved view set as default; the queue order can be changed by dragging a ticket or with the arrows (19/11/2026, #14).
+- Kitchen stations per role (Roles tab, also when creating a role) on top of a person's own; one menu entry per station under Kitchen for the stations a person holds, opening Kitchen on that station (now / coming) (19/11/2026, #14).
 
 ### V1.1 — from 01/11/2026 to 18/11/2026 (live on 18/11/2026)
 
