@@ -1322,6 +1322,7 @@ function goSup(f) { supFilter = f; nav('suppliers'); }
 var VIEWS = ['overview','orders','programs','kitchen','bom','inventory','requisitions','delivery','suppliers','iso','complaints','chat','notify','audit','users','cahier','settings'];
 var current = 'overview';
 function nav(m) {
+  REQ_FOCUS = null; // the Requisitions "focus on one order" view only lasts until the next page change
   current = m; location.hash = m;
   document.querySelectorAll('#sidenav a').forEach(function (a) { a.classList.toggle('active', a.dataset.m === m); });
   render();
@@ -2474,7 +2475,15 @@ function orderAct(oid, act) {
     var sh = stockShortages(o);
     if (sh.length) {
       var miss = sh.map(function (s) { return s.name + ' short ' + s.short + ' ' + s.unit; }).join(', ');
-      if (currentUser().role !== 'super_admin') { alert('Not enough stock — ' + o.code + ' cannot go to the kitchen yet.\n\n' + miss + '\n\nA purchase requisition is open; the order is released when the stock is received. Only a super admin can send it anyway.'); return; }
+      if (currentUser().role !== 'super_admin') {
+        // make sure the shortfall is on a requisition, then open the Requisitions page on this order
+        if (requisitionShortages(o, sh).length) store('orders').save(orders);
+        logAct('Orders', 'stock short → requisitions', o.code + ' · ' + miss);
+        if (!window.pageAllowed('requisitions')) { alert('Not enough stock — ' + o.code + ' cannot go to the kitchen yet.\n\n' + miss + '\n\nA purchase requisition is open; the order is released when the stock is received. Only a super admin can send it anyway.'); return; }
+        closeDlg(); nav('requisitions');
+        REQ_FOCUS = { code: o.code, miss: miss }; render();
+        return;
+      }
       if (!confirm('Not enough stock: ' + miss + '.\n\nSend ' + o.code + ' to the kitchen anyway? (super admin override — recorded)')) return;
       log('⚠ Sent to the kitchen WITHOUT enough stock — super admin override by ' + currentUser().name + ': ' + miss);
       logAct('Orders', 'stock override', o.code + ' · ' + miss);
@@ -3531,16 +3540,25 @@ function saveLot(ingId) {
 
 /* ── Requisitions (Bloom workflow: pending → approve → receive) ── */
 function normReq(r) { if (r.status === 'open') r.status = 'pending'; return r; }
+/* Set when "Send to kitchen" is refused for missing stock: the Requisitions
+   page opens on that order — banner on top, its requisitions first and highlighted. */
+var REQ_FOCUS = null;
+function focusOrderId(code) { var o = store('orders').all().find(function (x) { return x.code === code; }); return o ? o.id : ''; }
+function reqFocusClear() { REQ_FOCUS = null; render(); }
 RENDER.requisitions = function () {
   var reqs = store('requisitions').all().map(normReq), ings = store('ingredients').all().map(normIng);
+  var focus = REQ_FOCUS;
+  function forFocus(r) { return !!focus && (r.orders || []).indexOf(focus.code) >= 0 && (r.status === 'pending' || r.status === 'approved'); }
+  if (focus) reqs = reqs.filter(forFocus).concat(reqs.filter(function (r) { return !forFocus(r); }));
   var rows = reqs.map(function (r) {
     var g = byId(ings, r.ing);
+    var hl = forFocus(r) ? ' style="background:rgba(214,69,65,.10);box-shadow:inset 3px 0 0 #d64541"' : '';
     var buyBy = g ? today(0) : '';
     var stChip = r.status === 'pending' ? 'open' : r.status === 'approved' ? 'progress' : r.status === 'received' ? 'done' : 'cancelled';
     var acts = '';
     if (r.status === 'pending') acts = '<button class="btn p s" onclick="reqAct(\'' + r.id + '\',\'approve\')">✓ Approve</button> <button class="btn o s" onclick="reqAct(\'' + r.id + '\',\'cancel\')">✕</button>';
     else if (r.status === 'approved' && g) acts = '<button class="btn g s" onclick="receiveLot(\'' + g.id + '\')">📦 Receive</button>';
-    return '<tr><td>' + (r.reason === 'auto' ? '<span class="chip auto">AUTO</span>' : '<span class="chip fefo">manual</span>') + '</td>' +
+    return '<tr' + hl + '><td>' + (r.reason === 'auto' ? '<span class="chip auto">AUTO</span>' : r.reason === 'order' ? '<span class="chip alarm">ORDER</span>' : '<span class="chip fefo">manual</span>') + '</td>' +
       '<td><b>' + esc(g ? g.name : '?') + '</b></td><td class="num">' + r.qty + ' ' + (g ? g.unit : '') + '</td>' +
       '<td class="num">' + (g ? g.lead + ' d' : '—') + '</td>' +
       '<td class="wrap">' + esc(r.note || '') + '</td><td>' + esc(r.created) + '</td>' +
@@ -3549,6 +3567,10 @@ RENDER.requisitions = function () {
   }).join('');
   return '<div class="pagehead"><div><h1>🧾 Requisitions</h1><div class="sub">Bloom workflow: auto-opened below minimum (sized to refill to Max) → approved by a manager → received as a lot via the supplier invoice or directly. Lead time says how urgent the approval is.</div></div>' +
     '<button class="btn p" onclick="manualReq()">＋ Manual requisition</button></div>' +
+    (focus ? '<div class="stk-b">' + ic('alarm') + '<div><b>' + esc(focus.code) + ' cannot go to the kitchen yet — not enough stock</b>' +
+      '<ul><li>' + esc(focus.miss) + '</li></ul>' +
+      '<small>Its purchase requisitions are highlighted below: approve them, then receive the stock (supplier invoice or 📦 Receive). The order is released to the kitchen automatically once the stock is in. Only a super admin can send it anyway.</small>' +
+      '<div class="pill-row" style="margin-top:8px"><button class="btn o s" onclick="openOrder(\'' + esc(focusOrderId(focus.code)) + '\')">Open ' + esc(focus.code) + '</button> <button class="btn o s" onclick="reqFocusClear()">Show all requisitions</button></div></div></div>' : '') +
     '<div class="panel"><div class="tbl-scroll"><table class="t reg"><thead><tr>' +
     '<th></th><th>Ingredient</th><th class="num">Qty</th><th class="num">Lead</th><th>Why</th><th>Date</th><th>Status</th><th>Actions</th>' +
     '</tr></thead><tbody>' + (rows || '<tr><td colspan="8" class="muted">No requisitions.</td></tr>') + '</tbody></table></div></div>';
