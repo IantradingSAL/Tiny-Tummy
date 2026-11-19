@@ -436,8 +436,8 @@
         { k: 'name', l: 'Name', html: function (u) { var m = roleMeta(u.role); return '<span class="stp-av" style="margin-right:8px;background:' + m.bg + ';color:' + m.c + '">' + initials(u.name) + '</span><b>' + esc(u.name) + '</b>'; }, text: function (u) { return u.name; } },
         { k: 'email', l: 'Email', html: function (u) { return '<span class="muted">' + esc(u.email || '') + '</span>'; }, text: function (u) { return u.email || ''; } },
         { k: 'role', l: 'Role', html: function (u) { return admin && u.id !== 'u1' ? '<select onchange="setRole(\'' + u.id + '\',this.value)">' + ROLES.map(function (r) { return '<option value="' + r + '"' + (u.role === r ? ' selected' : '') + '>' + roleMeta(r).l + '</option>'; }).join('') + '</select>' : esc(roleMeta(u.role).l); }, text: function (u) { return roleMeta(u.role).l; } },
-        { k: 'st', l: 'Kitchen stations', wrap: true, html: function (u) { return u.role === 'super_admin' || u.role === 'manager' ? '<span class="muted">All stations</span>' : (u.stations || []).map(function (s) { return '<span class="chip fefo">' + esc(stLabel(s)) + '</span>'; }).join(' ') || '<span class="muted">—</span>'; },
-          text: function (u) { return u.role === 'super_admin' || u.role === 'manager' ? 'All' : (u.stations || []).map(stLabel).join(' / '); } },
+        { k: 'st', l: 'Kitchen stations', wrap: true, html: function (u) { var us = userStations(u); return us.length === STATIONS.length ? '<span class="muted">All stations</span>' : us.map(function (s) { return '<span class="chip fefo">' + esc(stLabel(s)) + '</span>'; }).join(' ') || '<span class="muted">—</span>'; },
+          text: function (u) { var us = userStations(u); return us.length === STATIONS.length ? 'All' : us.map(stLabel).join(' / '); } },
         { k: 'act', l: '', csv: false, sortable: false, html: function (u) { return '<div class="il-acts">' + (u.id !== me() ? '<button class="u-ib" title="View as ' + esc(u.name) + '" onclick="actAs(\'' + u.id + '\')">' + ic('eye') + '</button>' : '') +
             (admin ? '<button class="u-ib" title="Edit" onclick="editEmployee(\'' + u.id + '\')">' + ic('pencil') + '</button>' + (u.id !== 'u1' ? '<button class="u-ib del" title="Remove" onclick="removeEmployee(\'' + u.id + '\')">' + ic('trash') + '</button>' : '') : '') + '</div>'; } }] });
     if (bar) bar.remove();
@@ -493,8 +493,19 @@
   function allowed(m) { return window.pageAllowed(m); }
   function navLink(m, inFav) {
     var L = PAGE_LABEL[m] || { e: '', l: m }, f = favs().indexOf(m) >= 0;
-    return '<a data-m="' + m + '"' + (m === current ? ' class="active"' : '') + '><span>' + L.e + '</span><em>' + esc(L.l) + '</em>' +
+    var on = m === current && !(m === 'kitchen' && window.KV && KV.station && KV.station !== 'all');
+    return '<a data-m="' + m + '"' + (on ? ' class="active"' : '') + '><span>' + L.e + '</span><em>' + esc(L.l) + '</em>' +
       '<i class="nv-star' + (f ? ' on' : '') + '" title="' + (f ? 'Remove from favourites' : 'Add to favourites') + '" onclick="navFav(\'' + m + '\',event)">' + star(f) + '</i></a>';
+  }
+  /* Kitchen → one entry per station the person works (their role's stations
+     plus their own extra ones, Team & Access); each opens Kitchen on that station. */
+  function kitchenSubs() {
+    if (typeof userStations !== 'function') return '';
+    var us = userStations(currentUser()); if (!us.length) return '';
+    return '<div class="nv-subs">' + us.map(function (k) {
+      var on = current === 'kitchen' && window.KV && KV.station === k;
+      return '<a data-ks="' + k + '"' + (on ? ' class="active"' : '') + ' title="Kitchen — ' + esc(stLabel(k)) + ' station"><span>' + ic(STATION_SVG[k] || 'chef') + '</span><em>' + esc(stLabel(k)) + '</em></a>';
+    }).join('') + '</div>';
   }
   function buildNav() {
     var nav = document.getElementById('sidenav'); if (!nav) return;
@@ -511,11 +522,12 @@
       if (!G.g) { html += items.filter(function (m) { return q || fav.indexOf(m) < 0; }).map(function (m) { return navLink(m); }).join(''); return; }
       var open = isOpen(G.g), hasCur = items.indexOf(current) >= 0;
       html += '<button type="button" class="nv-g' + (open ? ' open' : '') + (hasCur ? ' cur' : '') + '" onclick="navGroup(\'' + G.g + '\')">' + esc(G.g) + '<span class="nv-ch">' + (open ? '▾' : '▸') + '</span></button>' +
-        (open ? '<div class="nv-items">' + items.map(function (m) { return navLink(m); }).join('') + '</div>' : '');
+        (open ? '<div class="nv-items">' + items.map(function (m) { return navLink(m) + (m === 'kitchen' && !q ? kitchenSubs() : ''); }).join('') + '</div>' : '');
     });
     if (q && !NAV.some(function (G) { return G.items.some(function (m) { return allowed(m) && match(m); }); })) html += '<p class="nv-none">No page matches.</p>';
     nav.innerHTML = html;
-    nav.querySelectorAll('a[data-m]').forEach(function (a) { a.addEventListener('click', function () { navQ = ''; nav_(a.dataset.m); }); });
+    nav.querySelectorAll('a[data-m]').forEach(function (a) { a.addEventListener('click', function () { navQ = ''; if (a.dataset.m === 'kitchen' && window.KV) KV.station = 'all'; nav_(a.dataset.m); }); });
+    nav.querySelectorAll('a[data-ks]').forEach(function (a) { a.addEventListener('click', function () { navQ = ''; logAct('Kitchen', 'open station', stLabel(a.dataset.ks), 'page'); kStation(a.dataset.ks); }); });
     var inp = nav.querySelector('#nv-q');
     inp.addEventListener('input', function () { navQ = inp.value; var pos = inp.selectionStart; buildNav(); var i2 = document.getElementById('nv-q'); i2.focus(); try { i2.setSelectionRange(pos, pos); } catch (e) {} });
     inp.addEventListener('keydown', function (e) {
@@ -557,6 +569,8 @@
 
   var css = document.createElement('style');
   css.textContent = [
+    '.nv-subs{margin:-2px 0 4px 26px;padding-left:8px;border-left:1px solid rgba(255,255,255,.16)}',
+    '#sidenav .nv-subs a{padding-top:5px;padding-bottom:5px;font-size:.86em;opacity:.88}#sidenav .nv-subs a.active{opacity:1}',
     '.nv-find{display:flex;align-items:center;gap:6px;background:rgba(255,255,255,.08);border-radius:9px;padding:6px 10px;margin:0 2px 8px}',
     '.nv-find input{background:none;border:none;color:#fff;font:inherit;font-size:.8rem;width:100%;outline:none}.nv-find input::placeholder{color:#8fa8b4}.nv-find .i{color:#8fa8b4}',
     '.nv-sec{font-size:.64rem;letter-spacing:.12em;color:#f0b64b;padding:8px 12px 4px;text-transform:uppercase;font-weight:800}',

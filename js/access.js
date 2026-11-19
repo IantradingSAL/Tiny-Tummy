@@ -130,6 +130,16 @@
     render();
   };
 
+  /* the kitchen stations a role works: everyone with the role gets them
+     (and sees them under Kitchen in the menu); extra ones per person on their card */
+  function roleStationChips(r) {
+    var rs = roleStations(r), sa = r === 'super_admin', ed = can('users_manage') && !sa;
+    return '<div class="u-lbl" style="margin-top:10px"><span>Kitchen stations</span><span>' + (sa ? 'all, always' : rs.length === STATIONS.length ? 'all' : rs.length ? rs.length + ' of ' + STATIONS.length : 'none') + '</span></div>' +
+      '<div class="u-st" style="margin-top:6px">' + STATIONS.map(function (x) {
+        var on = rs.indexOf(x[0]) >= 0;
+        return '<button class="' + (on ? 'on' : '') + '"' + (ed ? '' : ' disabled') + ' onclick="roleStationToggle(\'' + r + '\',\'' + x[0] + '\')" title="' + (on ? 'Tap to remove ' : 'Tap to give ') + esc(stLabel(x[0])) + '">' + ic(STATION_SVG[x[0]]) + esc(stLabel(x[0])) + '</button>';
+      }).join('') + '</div>';
+  }
   function rolesTab() {
     var staff = store('staff').all();
     var cards = ROLES.map(function (r) {
@@ -137,9 +147,10 @@
       return '<div class="panel" style="border-top:4px solid ' + m.c + ';margin:0"><div style="display:flex;justify-content:space-between;gap:8px;align-items:flex-start"><div><b style="color:' + m.c + '">' + ic(m.e) + ' ' + esc(m.l) + '</b>' + (m.custom ? ' <span class="muted" style="font-size:.75rem">custom</span>' : '') +
         '<div class="muted" style="font-size:.84rem">' + esc(m.d) + '</div></div>' +
         (m.custom && can('users_manage') ? '<div class="il-acts"><button class="u-ib" title="Edit" onclick="accRoleDlg(\'' + r + '\')">' + ic('pencil') + '</button><button class="u-ib del" title="Delete" onclick="accRoleDel(\'' + r + '\')">' + ic('trash') + '</button></div>' : '') + '</div>' +
-        '<div class="pill-row" style="margin-top:8px;font-size:.82rem"><span><b>' + n + '</b> people</span><span><b>' + rolePermCount(r) + '</b> / ' + PERM_KEYS.length + ' permissions</span></div></div>';
+        '<div class="pill-row" style="margin-top:8px;font-size:.82rem"><span><b>' + n + '</b> people</span><span><b>' + rolePermCount(r) + '</b> / ' + PERM_KEYS.length + ' permissions</span></div>' +
+        roleStationChips(r) + '</div>';
     }).join('');
-    return '<div class="pagehead" style="margin-top:6px"><div><div class="sub">Built-in roles and the roles you create. A new role starts with the permissions of the role you copy, then you adjust it in <b>Role permissions</b> and <b>Page access</b>.</div></div>' +
+    return '<div class="pagehead" style="margin-top:6px"><div><div class="sub">Built-in roles and the roles you create. A new role starts with the permissions of the role you copy, then you adjust it in <b>Role permissions</b> and <b>Page access</b>. <b>Kitchen stations</b> on each role decide which stations its people work and see under Kitchen in the menu (e.g. a Chef role with every station, a Prep cook with Prep only); a person can get extra stations on their own card.</div></div>' +
       (can('users_manage') ? '<span class="pill-row"><button class="btn p" onclick="accRoleDlg()">' + ic('plus') + ' New role</button></span>' : '') + '</div>' +
       '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px">' + cards + '</div>';
   }
@@ -151,6 +162,8 @@
       '<label>Colour<select id="ar-c">' + COLORS.map(function (c) { return '<option value="' + c + '"' + (r && r.color === c ? ' selected' : '') + ' style="color:' + c + '">■ ' + c + '</option>'; }).join('') + '</select></label></div>' +
       '<label>What this role does<input id="ar-d" value="' + esc(r ? r.desc : '') + '" placeholder="e.g. Runs ISO 22000 checks and QC"></label>' +
       (r ? '' : '<label>Start with the permissions and page access of<select id="ar-b"><option value="">Nothing (all off)</option>' + ROLES.filter(function (x) { return x !== 'super_admin'; }).map(function (x) { return '<option value="' + x + '">' + esc(roleMeta(x).l) + '</option>'; }).join('') + '</select></label>') +
+      (r ? '' : '<label>Kitchen stations for this role <span class="muted" style="font-weight:600">(optional — also editable on the role card)</span></label><div class="u-st">' +
+        STATIONS.map(function (x) { return '<label style="display:inline-flex;align-items:center;gap:5px;margin:0 10px 6px 0;font-weight:600"><input type="checkbox" class="ar-st" value="' + x[0] + '"> ' + esc(stLabel(x[0])) + '</label>'; }).join('') + '</div>') +
       '<button class="btn p" onclick="accRoleSave(\'' + (id || '') + '\')">' + ic('save') + ' ' + (r ? 'Save' : 'Create role') + '</button></div>');
   };
   window.accRoleSave = function (id) {
@@ -161,6 +174,8 @@
     if (id) { var r = byId(roles, id); r.label = label; r.color = color; r.desc = desc; }
     else {
       id = 'r_' + uid(); roles.push({ id: id, label: label, color: color, desc: desc, created: nowTs(), by: currentUser().name });
+      var picked = Array.prototype.slice.call(document.querySelectorAll('.ar-st:checked')).map(function (x) { return x.value; });
+      var rsAll = store('role_stations').all(); rsAll.push({ role: id, stations: picked }); store('role_stations').save(rsAll);
       var base = document.getElementById('ar-b').value;
       var rp = store('role_perms').all();
       PERM_KEYS.forEach(function (pk) { rp.push({ role: id, key: pk[0], allowed: base ? rolePerm(base, pk[0]) : false }); });
@@ -179,6 +194,7 @@
     store('roles_custom').save(customRoles().filter(function (x) { return x.id !== id; }));
     store('role_perms').save(store('role_perms').all().filter(function (x) { return x.role !== id; }));
     store('page_access').save(store('page_access').all().filter(function (x) { return !(x.scope === 'role' && x.who === id); }));
+    store('role_stations').save(store('role_stations').all().filter(function (x) { return x.role !== id; }));
     ROLES.splice(ROLES.indexOf(id), 1); delete ROLE_META[id];
     logAct('Users', 'role deleted', r.label); render();
   };

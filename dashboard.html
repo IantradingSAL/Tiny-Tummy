@@ -284,6 +284,12 @@ dialog:has(.iv-grid) { max-width:1180px; width:96vw; }
 .kb-next li .stp-av { width:18px; height:18px; font-size:.52rem; }
 .kb-next-h { font-size:.62rem; font-weight:800; letter-spacing:.06em; text-transform:uppercase; color:#a3b1b8; margin-top:2px; }
 .ocol-h small { font-weight:600; color:var(--soft); font-size:.7rem; }
+.kb-rail { display:grid; grid-auto-flow:column; grid-auto-columns:minmax(250px,270px); gap:12px; overflow-x:auto; padding:10px 10px 14px; align-items:start; background:#efe9dc; border-radius:14px; border-top:6px solid #c9bfa8; }
+.kb-slot { min-width:0; border-radius:14px; transition:outline-color .1s; outline:3px dashed transparent; outline-offset:3px; } .kb-slot .ocol-h { padding:2px 4px 8px; }
+.kb-slot.kb-later { opacity:.75; } .kb-slot.kb-first-later { position:relative; margin-top:22px; } .kb-slot.kb-first-later::before { content:attr(data-cm); position:absolute; top:-22px; left:0; right:-6px; font-size:.66rem; font-weight:800; letter-spacing:.06em; text-transform:uppercase; color:#8a979e; border-top:2px dashed #c9bfa8; padding-top:3px; } .kb-slot.kb-first-later { box-shadow:-8px 0 0 -6px #c9bfa8; }
+.kb-slot[draggable="true"] .ocol-h { cursor:grab; } .kb-slot.kb-drag { opacity:.45; } .kb-slot.kb-over { outline-color:var(--sc); }
+.kb-slot .ocol-h .kb-grip { color:#a3b1b8; display:flex; margin:0; background:none; padding:0; } .kb-slot .ocol-h .kb-mv { margin-left:auto; display:flex; gap:2px; background:none; padding:0; } .kb-mv .u-ib { width:24px; height:24px; font-size:1.05rem; font-weight:800; line-height:1; } .kb-mv .u-ib[disabled] { opacity:.3; cursor:default; }
+@media (max-width:640px){ .kb-rail { grid-auto-flow:row; grid-auto-columns:auto; overflow:visible; } }
 @media (max-width:640px){ .oboard { grid-auto-flow:row; grid-auto-columns:auto; overflow:visible; } .otile { flex:0 0 92px; padding:8px 4px; } .otile b { font-size:1.15rem; } .otile small { font-size:.58rem; } }
 /* ── Kitchen step cards ── */
 .stp-head { display:flex; align-items:center; gap:12px; flex-wrap:wrap; font-size:.84rem; margin-bottom:10px; }
@@ -792,12 +798,34 @@ function stepStation(name) {
   if (n.indexOf('prep') >= 0 || n.indexOf('wash') >= 0) return 'prep';
   return 'assembly';
 }
-/* Station access: super admin & manager always; otherwise the person must
-   hold the station grant from Users · Roles. */
-function canStation(kind) {
-  var u = normStaff(currentUser());
-  if (u.role === 'super_admin' || u.role === 'manager') return true;
-  return (u.stations || []).indexOf(kind) >= 0;
+/* Station access. A role carries kitchen stations (Team & Access → Roles:
+   e.g. a Chef role with every station, a Prep cook role with Prep only);
+   super admin always has all, manager has all unless changed. A person gets
+   the stations of their role plus any extra given on their own card. */
+var ALL_STATIONS = ['prep', 'cook', 'assembly', 'portion', 'chill', 'pack', 'qc'];
+function roleStationsSet(role) { return store('role_stations').all().filter(function (x) { return x.role === role; })[0] || null; }
+function roleStations(role) {
+  if (role === 'super_admin') return ALL_STATIONS.slice();
+  var r = roleStationsSet(role);
+  if (r) return r.stations.slice();
+  return role === 'manager' ? ALL_STATIONS.slice() : [];
+}
+function userStations(u) {
+  if (!u) return [];
+  var own = (normStaff(u).stations || []), rs = roleStations(u.role);
+  return ALL_STATIONS.filter(function (k) { return rs.indexOf(k) >= 0 || own.indexOf(k) >= 0; });
+}
+function canStation(kind) { return userStations(currentUser()).indexOf(kind) >= 0; }
+function roleStationToggle(role, station) {
+  if (!can('users_manage')) { alert('Only a person who manages users can change role stations.'); return; }
+  if (role === 'super_admin') return;
+  var rows = store('role_stations').all(), r = rows.filter(function (x) { return x.role === role; })[0];
+  if (!r) { r = { role: role, stations: roleStations(role) }; rows.push(r); }
+  var i = r.stations.indexOf(station);
+  if (i >= 0) r.stations.splice(i, 1); else r.stations.push(station);
+  store('role_stations').save(rows);
+  logAct('Users', i >= 0 ? 'role station removed' : 'role station given', roleMeta(role).l + ' · ' + stLabel(station));
+  render(); uToast(stLabel(station) + (i >= 0 ? ' removed from the role ' : ' given to the role ') + roleMeta(role).l);
 }
 var PERM_KEYS = [
   ['orders_manage', 'Manage orders & dispatch'],
@@ -1849,9 +1877,7 @@ function stepControls(o) {
     } else if (done) {
       timer = '<span class="chip done">' + ic('check') + ' ' + esc((st.at || '').split(',').pop().trim() || 'done') + '</span>';
     } else timer = '<span class="stp-wait">Waiting</span>';
-    var eligible = staff.filter(function (u) {
-      return u.role === 'super_admin' || u.role === 'manager' || (u.stations || []).indexOf(station) >= 0;
-    });
+    var eligible = staff.filter(function (u) { return userStations(u).indexOf(station) >= 0; });
     var who = done ? (st.by || st.assigned) : (st && st.assigned);
     var whoSel = done ? '<span class="stp-meta">' + (who ? 'Completed by <b style="color:var(--ink)">' + esc(who) + '</b>' : 'Completed') + (st.closed ? ' · <i>' + esc(st.closed) + '</i>' : '') + '</span>' : '<select class="stp-sel" title="Change who does this step" onchange="stepAssign(\'' + o.id + '\',' + i + ',this.value)"' + (done ? ' disabled' : '') + '>' +
       '<option value="">Unassigned</option>' +
@@ -1900,13 +1926,13 @@ function autoAssignCore(o, staff, loads) {
     var st = o.steps.find(function (x) { return x.s === def.name; });
     if (st && (st.done || st.assigned)) return;
     var station = stepStation(def.name);
-    var eligible = staff.filter(function (u) { return (u.stations || []).indexOf(station) >= 0 && u.role !== 'super_admin'; });
+    var eligible = staff.filter(function (u) { return userStations(u).indexOf(station) >= 0 && u.role !== 'super_admin'; });
     if (!eligible.length) eligible = staff.filter(function (u) { return u.role === 'manager'; });
     if (!eligible.length) eligible = staff.filter(function (u) { return u.role === 'super_admin'; });
     if (!eligible.length) return;
     eligible.sort(function (a, b) {
       var ra = (a.role === 'kitchen' ? 0 : 1) - (b.role === 'kitchen' ? 0 : 1);
-      return ra || (loads[a.name] || 0) - (loads[b.name] || 0) || (a.stations || []).length - (b.stations || []).length;
+      return ra || (loads[a.name] || 0) - (loads[b.name] || 0) || userStations(a).length - userStations(b).length;
     });
     var pick = eligible[0];
     if (!st) { st = { s: def.name, done: false }; o.steps.push(st); }
@@ -2798,9 +2824,12 @@ document.addEventListener('pointerdown', function () {
   try { _audio = _audio || new (window.AudioContext || window.webkitAudioContext)(); if (_audio.resume) _audio.resume(); } catch (e) {}
 }, { once: true });
 /* Kitchen · Board / List — the list is one row per production step */
-var KV = { view: (function () { try { return localStorage.getItem('ttops_kitchen_view') || 'board'; } catch (e) { return 'board'; } })(),
-  show: 'todo', who: 'all', station: 'all', q: '' };
-function kvSet(k, v) { KV[k] = v; if (k === 'view') { try { localStorage.setItem('ttops_kitchen_view', v); } catch (e) {} } render(); }
+/* the layout (Board / Tickets / List / Detail) is remembered per person */
+function kvViewKey() { return 'ttops_kitchen_view_' + (localStorage.getItem('ttops_whoami') || 'u1'); }
+function kvSavedView() { try { return localStorage.getItem(kvViewKey()) || localStorage.getItem('ttops_kitchen_view') || 'board'; } catch (e) { return 'board'; } }
+var KV = { view: kvSavedView(), show: 'todo', who: 'all', station: 'all', q: '' };
+var KV_FOR = null; // whose layout KV.view holds — switching user (act as) loads theirs
+function kvSet(k, v) { KV[k] = v; if (k === 'view') { try { localStorage.setItem(kvViewKey(), v); } catch (e) {} } render(); }
 function kvWho() { return KV.who === 'me' ? currentUser().name : KV.who; }
 function kvMine(st) { // is this (not done) step the selected person's work?
   if (KV.who === 'all' || !st || st.done) return false;
@@ -2809,6 +2838,7 @@ function kvMine(st) { // is this (not done) step the selected person's work?
 function kvBar() {
   var staff = store('staff').all().map(normStaff), me = currentUser().name;
   return '<div class="u-bar"><div class="u-tabs" style="margin:0"><button class="' + (KV.view === 'board' ? 'on' : '') + '" onclick="kvSet(\'view\',\'board\')">' + ic('grid') + ' Board</button>' +
+    '<button class="' + (KV.view === 'tickets' ? 'on' : '') + '" title="One ticket per order, side by side in arrival order" onclick="kvSet(\'view\',\'tickets\')">' + ic('receipt') + ' Tickets</button>' +
     '<button class="' + (KV.view === 'list' ? 'on' : '') + '" onclick="kvSet(\'view\',\'list\')">' + ic('clipboard') + ' List</button>' +
     '<button class="' + (KV.view === 'detail' ? 'on' : '') + '" title="One full panel per order: timeline, clocks, CCP readings" onclick="kvSet(\'view\',\'detail\')">' + ic('eye') + ' Detail</button></div>' +
     '<span class="kv-who"><b>Whose work</b><span class="lg-q"><button class="' + (KV.who === 'all' ? 'on' : '') + '" onclick="kvSet(\'who\',\'all\')">Everyone</button>' +
@@ -2859,7 +2889,7 @@ function klListView(active, products) {
   var rows = tasks.map(function (t) {
     var o = t.o, def = t.def, i = t.i;
     sum.n++; if (!t.done) sum.min += Number(def.min) || 0; if (t.running) sum.running++; if (t.late) sum.late++;
-    var eligible = staff.filter(function (u) { return u.role === 'super_admin' || u.role === 'manager' || (u.stations || []).indexOf(t.station) >= 0; });
+    var eligible = staff.filter(function (u) { return userStations(u).indexOf(t.station) >= 0; });
     var person = t.done ? (t.who ? '<span class="stp-av" style="margin-right:6px">' + initials(t.who) + '</span>' + esc(t.who) : '<span class="muted">—</span>')
       : '<select class="stp-sel" onclick="event.stopPropagation()" onchange="stepAssign(\'' + o.id + '\',' + i + ',this.value)"><option value="">Unassigned</option>' +
         eligible.map(function (u) { return '<option' + (t.who === u.name ? ' selected' : '') + ' value="' + esc(u.name) + '">' + esc(u.name) + '</option>'; }).join('') + '</select>' +
@@ -2896,18 +2926,125 @@ function klListView(active, products) {
    current step, oldest first (#1 is handed on next). The ticket shows the
    current task (person, timer, Start / Done) and the coming steps under it. */
 var KB_COLORS = { prep: '#7a4aa8', cook: '#d0622f', assembly: '#2f6fb0', portion: '#c98a1b', chill: '#2b8fb3', pack: '#5d7a3a', qc: '#2e8770' };
+/* One station's page (menu Kitchen → Prep, Cooking…): KV.station is set.
+   An order is "now" at the station when its current step is there, and
+   "coming" when one of its later open steps is. */
+function kbScope() { return KV.station && KV.station !== 'all' ? KV.station : null; }
+function kbRel(t, st) {
+  if (t.ci >= 0 && stepStation(t.defs[t.ci].name) === st) return 'now';
+  for (var i = t.ci + 1; t.ci >= 0 && i < t.defs.length; i++) {
+    var d = t.defs[i], x = (t.o.steps || []).find(function (y) { return y.s === d.name; });
+    if (!(x && x.done) && stepStation(d.name) === st) return 'coming';
+  }
+  return null;
+}
+function kStation(k) { // menu: open the Kitchen page on one station
+  if (current !== 'kitchen') nav('kitchen');
+  KV.station = k || 'all'; render(); window.scrollTo({ top: 0 });
+}
 function kbBoard(active, products) {
-  var arrival = active.slice().sort(function (a, b) { return (a.kitchen_start || 0) - (b.kitchen_start || 0); });
+  var sc = kbScope();
+  if (sc) {
+    var staffS = store('staff').all().map(normStaff), nowL = [], comL = [];
+    kbQueue(active, products).forEach(function (t) {
+      if (KV.who !== 'all' && !(t.o.steps || []).some(kvMine)) return;
+      var r = kbRel(t, sc); if (r === 'now') nowL.push(t); else if (r === 'coming') comL.push(t);
+    });
+    var col = function (title, list, dim) {
+      return '<div class="ocol" style="--sc:' + (dim ? '#8a979e' : KB_COLORS[sc] || '#17455e') + '"><div class="ocol-h">' + ic(dim ? 'hourglass' : STATION_SVG[sc] || 'chef') + ' ' + title + '<span>' + list.length + '</span></div>' +
+        (list.map(function (t) { return kbTicket(t, products, staffS); }).join('') || '<div class="ocol-empty">No orders</div>') + '</div>';
+    };
+    return '<div class="oboard">' + col(esc(stLabel(sc)) + ' — now', nowL) + col('Coming to ' + esc(stLabel(sc)), comL, true) + '</div>';
+  }
   var cols = {}; STATIONS.forEach(function (x) { cols[x[0]] = []; });
-  arrival.forEach(function (o, n) {
-    if (KV.who !== 'all' && !(o.steps || []).some(kvMine)) return;
-    var defs = stepDefs(o), cur = currentStep(o, products), ci = -1;
-    defs.forEach(function (d, i) { if (d.name === cur && ci < 0) ci = i; });
-    var station = ci >= 0 ? stepStation(defs[ci].name) : 'qc';
-    cols[station].push({ o: o, n: n + 1, defs: defs, ci: ci });
+  kbQueue(active, products).forEach(function (t) {
+    if (KV.who !== 'all' && !(t.o.steps || []).some(kvMine)) return;
+    cols[t.ci >= 0 ? stepStation(t.defs[t.ci].name) : 'qc'].push(t);
   });
   var staff = store('staff').all().map(normStaff);
-  function ticket(t, first) {
+  return '<div class="oboard">' + STATIONS.map(function (x) {
+    var k = x[0], list = cols[k];
+    var mins = list.reduce(function (m, t) { return m + (t.ci >= 0 ? Number(t.defs[t.ci].min) || 0 : 0); }, 0);
+    return '<div class="ocol" style="--sc:' + (KB_COLORS[k] || '#17455e') + '"><div class="ocol-h">' + ic(STATION_SVG[k] || 'chef') + ' ' + esc(stLabel(k)) +
+      (mins ? ' <small>' + mins + ' min</small>' : '') + '<span>' + list.length + '</span></div>' +
+      (list.map(function (t) { return kbTicket(t, products, staff); }).join('') || '<div class="ocol-empty">No orders</div>') + '</div>';
+  }).join('') + '</div>';
+}
+/* Queue order: an order moved by hand keeps its place (kitchen_rank),
+   otherwise arrival order (kitchen_start). */
+function kbCmp(a, b) {
+  var ra = a.kitchen_rank != null ? a.kitchen_rank : a.kitchen_start || 0, rb = b.kitchen_rank != null ? b.kitchen_rank : b.kitchen_start || 0;
+  return ra - rb || (a.kitchen_start || 0) - (b.kitchen_start || 0);
+}
+/* Move an order to another order's place in the queue (drag a ticket onto
+   another, or the arrow buttons): the whole queue is renumbered in order. */
+function kbMove(oid, targetId, after) {
+  if (!can('kitchen_manage')) { alert('Only people with the Kitchen permission can change the order of the tickets.'); return; }
+  if (!oid || oid === targetId) return;
+  var orders = store('orders').all();
+  var q = orders.filter(function (o) { return ['kitchen', 'portioning', 'qc'].indexOf(o.status) >= 0; }).sort(kbCmp);
+  var moving = byId(q, oid), target = byId(q, targetId); if (!moving || !target) return;
+  var from = q.indexOf(moving) + 1;
+  q.splice(q.indexOf(moving), 1);
+  q.splice(q.indexOf(target) + (after ? 1 : 0), 0, moving);
+  var to = q.indexOf(moving) + 1;
+  if (from === to) return;
+  q.forEach(function (o, i) { o.kitchen_rank = i + 1; });
+  moving.history.push({ at: nowTs(), what: 'Kitchen queue: moved from #' + from + ' to #' + to + ' — ' + currentUser().name });
+  logAct('Kitchen', 'queue reordered', moving.code + ' · #' + from + ' → #' + to);
+  store('orders').save(orders); render();
+  uToast(moving.code + ' is now #' + to);
+}
+function kbStep(oid, dir) { // ◀ ▶ buttons: swap with the neighbour
+  var q = store('orders').all().filter(function (o) { return ['kitchen', 'portioning', 'qc'].indexOf(o.status) >= 0; }).sort(kbCmp);
+  var i = q.findIndex(function (o) { return o.id === oid; }), j = i + dir;
+  if (i < 0 || j < 0 || j >= q.length) return;
+  kbMove(oid, q[j].id, dir > 0);
+}
+var KB_DRAG = null;
+function kbDragStart(e, oid) { KB_DRAG = oid; e.dataTransfer.effectAllowed = 'move'; try { e.dataTransfer.setData('text/plain', oid); } catch (x) {} e.currentTarget.classList.add('kb-drag'); }
+function kbDragEnd(e) { e.currentTarget.classList.remove('kb-drag'); document.querySelectorAll('.kb-over').forEach(function (el) { el.classList.remove('kb-over'); }); KB_DRAG = null; }
+function kbDragOver(e) { if (!KB_DRAG) return; e.preventDefault(); e.dataTransfer.dropEffect = 'move'; e.currentTarget.classList.add('kb-over'); }
+function kbDragLeave(e) { e.currentTarget.classList.remove('kb-over'); }
+function kbDrop(e, targetId) {
+  e.preventDefault(); var oid = KB_DRAG; e.currentTarget.classList.remove('kb-over'); KB_DRAG = null;
+  var q = store('orders').all().filter(function (o) { return ['kitchen', 'portioning', 'qc'].indexOf(o.status) >= 0; }).sort(kbCmp);
+  var from = q.findIndex(function (o) { return o.id === oid; }), to = q.findIndex(function (o) { return o.id === targetId; });
+  kbMove(oid, targetId, from < to); // dropped on a later ticket → goes after it; on an earlier one → before it
+}
+/* Orders in production in arrival order, each with its position (#n), step
+   definitions and the index of its current step (-1 = all steps done). */
+function kbQueue(active, products) {
+  return active.slice().sort(kbCmp).map(function (o, n) {
+    var defs = stepDefs(o), cur = currentStep(o, products), ci = -1;
+    defs.forEach(function (d, i) { if (d.name === cur && ci < 0) ci = i; });
+    return { o: o, n: n + 1, defs: defs, ci: ci };
+  });
+}
+/* Kitchen · Tickets — the restaurant rail: one ticket per order, side by
+   side from left to right in arrival order (#1 first). */
+function kbTickets(active, products) {
+  var staff = store('staff').all().map(normStaff);
+  var sc = kbScope();
+  var list = kbQueue(active, products).filter(function (t) { return KV.who === 'all' || (t.o.steps || []).some(kvMine); });
+  if (sc) {
+    list.forEach(function (t) { t.rel = kbRel(t, sc); });
+    list = list.filter(function (t) { return t.rel === 'now'; }).concat(list.filter(function (t) { return t.rel === 'coming'; }));
+    if (!list.length) return '<div class="panel"><p class="muted">Nothing at <b>' + esc(stLabel(sc)) + '</b> right now and nothing coming to it.</p></div>';
+  }
+  if (!list.length) return '<div class="panel"><p class="muted">No open step for <b>' + esc(KV.who === '__none__' ? 'unassigned work' : kvWho()) + '</b> right now. <a href="#" onclick="kvSet(\'who\',\'all\');return false">Show everyone</a></p></div>';
+  return '<div class="kb-rail">' + list.map(function (t, i) {
+    var stn = t.ci >= 0 ? stepStation(t.defs[t.ci].name) : 'qc';
+    var mv = can('kitchen_manage'), id = t.o.id, prev = list[i - 1], next = list[i + 1];
+    var firstLater = sc && t.rel === 'coming' && (!prev || prev.rel !== 'coming');
+    return '<div class="kb-slot' + (sc && t.rel === 'coming' ? ' kb-later' : '') + (firstLater ? ' kb-first-later' : '') + '"' + (firstLater ? ' data-cm="Coming to ' + esc(stLabel(sc)) + '"' : '') + ' style="--sc:' + (KB_COLORS[stn] || '#17455e') + '"' +
+      (mv ? ' draggable="true" ondragstart="kbDragStart(event,\'' + id + '\')" ondragend="kbDragEnd(event)" ondragover="kbDragOver(event)" ondragleave="kbDragLeave(event)" ondrop="kbDrop(event,\'' + id + '\')"' : '') + '>' +
+      '<div class="ocol-h">' + (mv ? '<span class="kb-grip" title="Drag to change the order">' + ic('grid') + '</span>' : '') + ic(STATION_SVG[stn] || 'chef') + ' ' + esc(stLabel(stn)) +
+      (mv ? '<span class="kb-mv"><button class="u-ib" title="Move earlier" onclick="kbMove(\'' + id + '\',\'' + (prev ? prev.o.id : '') + '\',false)"' + (prev ? '' : ' disabled') + '>‹</button><button class="u-ib" title="Move later" onclick="kbMove(\'' + id + '\',\'' + (next ? next.o.id : '') + '\',true)"' + (next ? '' : ' disabled') + '>›</button></span>' : '') + '</div>' +
+      kbTicket(t, products, staff) + '</div>';
+  }).join('') + '</div>' + (can('kitchen_manage') ? '<p class="muted" style="margin:8px 2px 0">' + ic('info') + ' Drag a ticket onto another to take its place (or use the arrows). The new order is kept for everyone and recorded on the order.</p>' : '');
+}
+function kbTicket(t, products, staff) {
     var o = t.o, defs = t.defs, ci = t.ci;
     var items = o.items.map(function (it) { var p = byId(products, it.product); return it.qty + '× ' + esc(p ? p.name : '?'); }).join(', ');
     var child = typeof orderChild === 'function' ? orderChild(o) : null, stop = child && typeof orderAllergens === 'function' ? orderAllergens(o, child) : [];
@@ -2917,7 +3054,7 @@ function kbBoard(active, products) {
     if (ci >= 0) {
       var d = defs[ci], st = (o.steps || []).find(function (x) { return x.s === d.name; }) || {}, stn = stepStation(d.name);
       var running = !!(st.started_at && !st.done), over = running && Date.now() > stepDue(st, d);
-      var eligible = staff.filter(function (u) { return u.role === 'super_admin' || u.role === 'manager' || (u.stations || []).indexOf(stn) >= 0; });
+      var eligible = staff.filter(function (u) { return userStations(u).indexOf(stn) >= 0; });
       var person = '<select class="stp-sel" onclick="event.stopPropagation()" onchange="stepAssign(\'' + o.id + '\',' + ci + ',this.value)"><option value="">Unassigned</option>' +
         eligible.map(function (u) { return '<option' + (st.assigned === u.name ? ' selected' : '') + ' value="' + esc(u.name) + '">' + esc(u.name) + '</option>'; }).join('') + '</select>';
       now = '<div class="kb-now"><div class="kb-now-l"><span>' + ic('forward') + ' Now · step ' + (ci + 1) + '/' + defs.length + '</span>' +
@@ -2935,7 +3072,7 @@ function kbBoard(active, products) {
       return '<li>' + ic(STATION_SVG[stepStation(d.name)] || 'chef') + '<b>' + esc(d.name) + '</b>' +
         (st.assigned ? '<span class="stp-av" title="' + esc(st.assigned) + '">' + initials(st.assigned) + '</span>' : '') + '<small>' + (Number(d.min) || 0) + ' min</small></li>';
     }).join('') : '';
-    return '<div class="ocard kb-tk' + (late ? ' late' : '') + (first ? ' first' : '') + '" onclick="openOrder(\'' + o.id + '\')">' +
+    return '<div class="ocard kb-tk' + (late ? ' late' : '') + '" onclick="openOrder(\'' + o.id + '\')">' +
       '<div class="oc-top"><span><span class="kb-n">#' + t.n + '</span><b>' + esc(o.code) + '</b></span>' + (late ? '<span class="chip alarm">' + ic('alarm') + ' late</span>' : due) + '</div>' +
       '<div class="oc-cust">' + ic('user') + ' ' + esc(o.customer) + '</div>' +
       '<div class="oc-items">' + items + '</div>' +
@@ -2944,16 +3081,11 @@ function kbBoard(active, products) {
       (coming ? '<div class="kb-next-h">Coming next</div><ul class="kb-next">' + coming + '</ul>' : '') +
       '<div class="oc-steps"><span class="stp-bar"><i style="width:' + (defs.length ? Math.round(doneN / defs.length * 100) : 0) + '%"></i></span><small>' + doneN + '/' + defs.length + ' steps</small></div>' +
       (NEXT_STEP[o.status] ? '<div class="oc-next">' + nextStepBtn(o) + '</div>' : '') + '</div>';
-  }
-  return '<div class="oboard">' + STATIONS.map(function (x) {
-    var k = x[0], list = cols[k];
-    var mins = list.reduce(function (m, t) { return m + (t.ci >= 0 ? Number(t.defs[t.ci].min) || 0 : 0); }, 0);
-    return '<div class="ocol" style="--sc:' + (KB_COLORS[k] || '#17455e') + '"><div class="ocol-h">' + ic(STATION_SVG[k] || 'chef') + ' ' + esc(stLabel(k)) +
-      (mins ? ' <small>' + mins + ' min</small>' : '') + '<span>' + list.length + '</span></div>' +
-      (list.map(function (t, i) { return ticket(t, i === 0); }).join('') || '<div class="ocol-empty">No orders</div>') + '</div>';
-  }).join('') + '</div>';
 }
 RENDER.kitchen = function () {
+  var who = localStorage.getItem('ttops_whoami') || 'u1';
+  if (KV_FOR !== null && KV_FOR !== who) { KV.view = kvSavedView(); KV.station = 'all'; }
+  KV_FOR = who;
   autoAssignAll();
   kitchenAuto();
   checkKitchenAlarms();
@@ -2980,7 +3112,9 @@ RENDER.kitchen = function () {
   var stationRows = Object.keys(stationMin).map(function (k) { return { label: k, value: stationMin[k] }; })
     .filter(function (r) { return r.value > 0; });
 
-  var cards = active.filter(function (o) { return KV.who === 'all' || (o.steps || []).some(kvMine); }).map(function (o) {
+  var scS = kbScope(), relOf = {};
+  if (scS) kbQueue(active, products).forEach(function (t) { relOf[t.o.id] = kbRel(t, scS); });
+  var cards = active.filter(function (o) { return (KV.who === 'all' || (o.steps || []).some(kvMine)) && (!scS || relOf[o.id]); }).map(function (o) {
     var items = o.items.map(function (it) { var p = byId(products, it.product); return it.qty + '× ' + (p ? p.name : '?'); }).join(', ');
     var defs = normProd(orderProduct(o, products)).steps;
     var doneN = defs.filter(function (d) { var x = o.steps.find(function (y) { return y.s === d.name; }); return x && x.done; }).length;
@@ -3001,13 +3135,15 @@ RENDER.kitchen = function () {
       '</div>';
   }).join('');
 
-  return '<div class="pagehead"><div><h1>👨‍🍳 Kitchen — production floor</h1><div class="sub">Each order carries its full process inline: step timeline sized by the BOM\'s planned minutes, start / due clocks with live countdown, red marker = where time says you should be, and an ⏰ alarm the moment the plan is exceeded. Cook and Blast chill remain CCPs with recorded temperatures.</div></div></div>' +
+  return '<div class="pagehead"><div>' + (scS
+      ? '<h1>👨‍🍳 Kitchen — ' + esc(stLabel(scS)) + '</h1><div class="sub">The orders at the ' + esc(stLabel(scS)) + ' station now, then the ones coming to it, in queue order. <a href="#" onclick="kStation(\'all\');return false">Show all stations</a></div>'
+      : '<h1>👨‍🍳 Kitchen — production floor</h1><div class="sub">Each order carries its full process inline: step timeline sized by the BOM\'s planned minutes, start / due clocks with live countdown, red marker = where time says you should be, and an ⏰ alarm the moment the plan is exceeded. Cook and Blast chill remain CCPs with recorded temperatures.</div>') + '</div></div>' +
     '<div class="kpis">' +
     '<div class="kpi b-navy"><div class="v">' + active.length + '</div><div class="l">Orders in production</div></div>' +
     '<div class="kpi b-blue"><div class="v">' + portions + '</div><div class="l">Portions in production</div></div>' +
     '<div class="kpi b-gold"><div class="v">' + minsQueued + ' min</div><div class="l">Work queued</div></div>' +
     '<div class="kpi ' + (overdueN ? 'bad b-red' : 'good b-green') + '"><div class="v">' + overdueN + '</div><div class="l">⏰ Overdue</div></div></div>' + kitchenWaiting(products) + kvBar() +
-    (KV.view === 'list' ? klListView(active, products) : KV.view === 'board' ? (active.length ? kbBoard(active, products) : '<div class="panel"><p class="muted">Nothing in production. Confirm an order and send it to the kitchen — the production clock starts at that moment.</p></div>') :
+    (KV.view === 'list' ? klListView(active, products) : KV.view === 'tickets' && active.length ? kbTickets(active, products) : KV.view === 'board' || KV.view === 'tickets' ? (active.length ? kbBoard(active, products) : '<div class="panel"><p class="muted">Nothing in production. Confirm an order and send it to the kitchen — the production clock starts at that moment.</p></div>') :
     (stationRows.length ? '<div class="panel" style="padding:14px 18px"><div class="toolbar" style="margin-bottom:8px"><h3 style="font-size:1rem">🏭 Station load</h3><span class="muted">minutes of work remaining per step</span></div>' + hBarChart(stationRows, CHART.blue, function (v) { return v + ' min'; }) + '</div>' : '') +
     (cards || (KV.who !== 'all' && active.length ? '<div class="panel"><p class="muted">No open step for <b>' + esc(KV.who === '__none__' ? 'unassigned work' : kvWho()) + '</b> right now. <a href="#" onclick="kvSet(\'who\',\'all\');return false">Show everyone</a></p></div>' : '') || '<div class="panel"><p class="muted">Nothing in production. Confirm an order and send it to the kitchen — the production clock starts at that moment.</p></div>'));
 };
@@ -4925,26 +5061,26 @@ RENDER.users = function () {
   var cards = list.map(function (u) {
     var m = roleMeta(u.role);
     var isOwner = u.id === 'u1', isMe = u.id === me;
-    var fullKitchen = u.role === 'super_admin' || u.role === 'manager';
+    var rSt = roleStations(u.role), fullKitchen = rSt.length === STATIONS.length;
     var roleOpts = ROLES.map(function (r) {
       var rm = roleMeta(r);
       return '<option value="' + r + '"' + (u.role === r ? ' selected' : '') + '>' + rm.l + '</option>';
     }).join('');
     var st = STATIONS.map(function (s) {
-      var on = fullKitchen || (u.stations || []).indexOf(s[0]) >= 0;
+      var byRole = rSt.indexOf(s[0]) >= 0, on = byRole || (u.stations || []).indexOf(s[0]) >= 0;
       var lbl = stLabel(s[0]);
-      return '<button class="' + (on ? 'on' : '') + '"' + (fullKitchen || !admin ? ' disabled' : '') +
-        ' onclick="stationToggle(\'' + u.id + '\',\'' + s[0] + '\')" title="' + (on ? 'Tap to remove ' : 'Tap to give ') + lbl + '">' +
+      return '<button class="' + (on ? 'on' : '') + '"' + (byRole || !admin ? ' disabled' : '') +
+        ' onclick="stationToggle(\'' + u.id + '\',\'' + s[0] + '\')" title="' + (byRole ? lbl + ' comes with the role ' + esc(m.l) + ' (Roles tab)' : (on ? 'Tap to remove ' : 'Tap to give ') + lbl) + '">' +
         ic(STATION_SVG[s[0]]) + lbl + '</button>';
     }).join('');
-    var nSt = fullKitchen ? STATIONS.length : (u.stations || []).length;
+    var nSt = userStations(u).length;
     return '<div class="u-card' + (isMe ? ' me' : '') + '" style="--rc:' + m.c + ';--rbg:' + m.bg + '" data-s="' + esc((u.name + ' ' + u.email + ' ' + m.l).toLowerCase()) + '">' +
       '<div class="u-top"><div class="u-av">' + initials(u.name) + (isMe ? '<i title="Signed in now"></i>' : '') + '</div>' +
         '<div class="u-id"><b>' + esc(u.name) + '</b><small>' + ic('mail') + ' ' + esc(u.email || '—') + '</small></div>' +
         '<span class="u-role">' + ic(m.e) + ' ' + m.l + '</span></div>' +
       '<div class="u-meter"><span>' + ic('lock') + ' <b>' + rolePermCount(u.role) + '</b>/' + PERM_KEYS.length + ' permissions</span>' +
         '<span>' + ic('grid') + ' <b>' + nSt + '</b>/' + STATIONS.length + ' stations</span></div>' +
-      '<div><div class="u-lbl"><span>Kitchen stations</span><span>' + (fullKitchen ? 'all, by role' : (admin ? 'tap to switch' : '')) + '</span></div>' +
+      '<div><div class="u-lbl"><span>Kitchen stations</span><span>' + (fullKitchen ? 'all, by role' : rSt.length ? rSt.length + ' by role' + (admin ? ' · tap to add more' : '') : (admin ? 'tap to switch' : '')) + '</span></div>' +
         '<div class="u-st" style="margin-top:6px">' + st + '</div></div>' +
       '<div class="u-acts">' +
         (isOwner ? '<select disabled title="The owner always stays super admin"><option>Super admin · owner</option></select>'
