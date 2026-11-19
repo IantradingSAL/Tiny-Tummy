@@ -274,7 +274,13 @@
   var origReq = RENDER.requisitions;
   RENDER.requisitions = function () {
     var reqs = store('requisitions').all().map(normReq), ings = store('ingredients').all().map(normIng);
-    var list = ttList({ id: 'requisitions', page: 'requisitions', rows: reqs.slice().reverse(), ph: 'Search item, note…',
+    // opened from a refused "Send to kitchen": that order's open requisitions first, highlighted
+    var fc = window.REQ_FOCUS && REQ_FOCUS.code;
+    function forFocus(r) { return !!fc && (r.orders || []).indexOf(fc) >= 0 && (r.status === 'pending' || r.status === 'approved'); }
+    var rows = reqs.slice().reverse();
+    if (fc) rows = rows.filter(forFocus).concat(rows.filter(function (r) { return !forFocus(r); }));
+    var list = ttList({ id: 'requisitions', page: 'requisitions', rows: rows, ph: 'Search item, note…',
+      rowClass: function (r) { return forFocus(r) ? 'focus' : ''; },
       search: function (r) { var g = byId(ings, r.ing); return [g ? g.name : '', r.note, r.status].join(' '); },
       filters: [{ k: 'st', l: 'Status', opts: [['pending', 'Pending'], ['approved', 'Approved'], ['received', 'Received'], ['cancelled', 'Cancelled']], test: function (r, v) { return r.status === v; } },
                 { k: 'why', l: 'Origin', all: 'Any origin', opts: [['auto', 'Automatic (below minimum)'], ['order', 'For an order (stock short)'], ['manual', 'Manual']], test: function (r, v) { return v === 'manual' ? (r.reason !== 'auto' && r.reason !== 'order') : r.reason === v; } },
@@ -568,7 +574,7 @@
     '.sv .sv-i{color:#64808e;display:inline-flex}.sv select{border:none;background:none;font:inherit;font-size:.82rem;font-weight:700;color:#17455e;max-width:170px;padding:4px 2px}',
     '.tl-bar select.on{border-color:#17455e;background:#eef4f7;font-weight:700}.tl-n{font-size:.78rem;font-weight:800;color:#64808e;background:#efe9dc;border-radius:999px;padding:4px 10px}',
     '.t.tl th.tl-s{cursor:pointer;user-select:none}.t.tl th.tl-s:hover{color:#f0b64b}.t.tl th.on{color:#f0b64b}',
-    '.t.tl tr[data-c="late"] td{background:#fdf3e3}.tl-wrap{margin-bottom:18px}.tl-h{margin:6px 2px 10px;font-size:1.05rem;color:#17455e}',
+    '.t.tl tr[data-c="late"] td{background:#fdf3e3}.t.tl tr[data-c="focus"] td{background:#fbe9e8}.t.tl tr[data-c="focus"] td:first-child{box-shadow:inset 3px 0 0 #d64541}.tl-wrap{margin-bottom:18px}.tl-h{margin:6px 2px 10px;font-size:1.05rem;color:#17455e}',
     '@media (max-width:700px){.sv{margin-left:0;flex-wrap:wrap}}'
   ].join('\n');
   document.head.appendChild(css);

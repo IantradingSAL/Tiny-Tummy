@@ -248,7 +248,10 @@ Each order, client, recipe or ingredient in the answer is a link to it.
    requisition opens automatically for the missing quantity (marked *for*
    the order), the order shows *Waiting for stock* with what is missing, and
    **Send to kitchen is blocked**; only a super admin can send it anyway
-   (recorded). When the stock is received the order is released by itself
+   (recorded). Pressing Send to kitchen while stock is short opens the
+   **Requisitions** page on that order: a banner with what is missing, its
+   requisitions first and highlighted, ready to approve and receive (a
+   person without access to Requisitions gets the message only). When the stock is received the order is released by itself
    and the kitchen is told.
 3. Entering the kitchen **consumes stock FEFO** (first-expired, first-out)
    from the recipe's ingredient lines, logged lot by lot.
@@ -518,6 +521,8 @@ Each order, client, recipe or ingredient in the answer is a link to it.
 - Supplier file: statement of account with running balance and printable statement, payments with method and reference (partial payments), invoices, items supplied with price change, details, ageing (18/11/2026, #11).
 - Children's names shown only with the permission and a signed GDPR confidentiality agreement; code for everyone else; allergies always visible (18/11/2026, #11).
 - Team & Access: roles can be created; page access per role and per person, every page listed automatically; per-person permissions (18/11/2026, #11).
+
+- Send to kitchen refused for missing stock opens the Requisitions page on that order, its requisitions highlighted first, instead of a message only (19/11/2026, #12).
 
 ### V1.1 — from 01/11/2026 to 18/11/2026 (live on 18/11/2026)
 

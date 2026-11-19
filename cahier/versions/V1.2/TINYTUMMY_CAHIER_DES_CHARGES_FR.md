@@ -275,7 +275,11 @@ Chaque commande, client, recette ou ingrédient de la réponse est un lien.
    une réquisition d'achat s'ouvre automatiquement pour la quantité manquante
    (marquée *pour* la commande), la commande affiche *En attente de stock*
    avec ce qui manque, et **l'envoi en cuisine est bloqué** ; seul un super
-   administrateur peut l'envoyer quand même (tracé). À la réception du stock,
+   administrateur peut l'envoyer quand même (tracé). Un clic sur Envoyer en
+   cuisine alors que le stock manque ouvre la page **Réquisitions** sur cette
+   commande : un bandeau avec ce qui manque, ses réquisitions en tête et
+   surlignées, prêtes à approuver et à réceptionner (une personne sans accès
+   aux Réquisitions reçoit seulement le message). À la réception du stock,
    la commande est libérée d'elle-même et la cuisine est prévenue.
 3. L'entrée en cuisine **sort le stock en FEFO** (premier périmé, premier
    sorti) selon les lignes d'ingrédients de la recette, lot par lot, avec
@@ -577,6 +581,8 @@ Chaque commande, client, recette ou ingrédient de la réponse est un lien.
 - Fiche fournisseur : relevé de compte avec solde progressif et relevé imprimable, paiements avec mode et référence (paiements partiels), factures, articles fournis avec évolution des prix, coordonnées, ancienneté (18/11/2026, #11).
 - Noms des enfants visibles seulement avec la permission et l'engagement de confidentialité RGPD signé ; code pour les autres ; allergies toujours visibles (18/11/2026, #11).
 - Équipe & accès : création de rôles ; accès aux pages par rôle et par personne, chaque page listée automatiquement ; permissions par personne (18/11/2026, #11).
+
+- Envoi en cuisine refusé faute de stock : ouvre la page Réquisitions sur cette commande, ses réquisitions surlignées en tête, au lieu d'un simple message (19/11/2026, #12).
 
 ### V1.1 — du 01/11/2026 au 18/11/2026 (mise en service le 18/11/2026)
 
