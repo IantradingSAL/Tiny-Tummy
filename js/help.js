@@ -173,7 +173,7 @@
   function esc(s) { var d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
 
   var css = '' +
-    '.tth-btn{position:fixed;right:18px;bottom:18px;z-index:900;display:flex;align-items:center;gap:8px;background:#123c56;color:#fff;border:none;border-radius:999px;padding:12px 18px 12px 14px;font:700 14px Quicksand,system-ui,sans-serif;box-shadow:0 10px 28px rgba(14,51,69,.35);cursor:pointer;transition:transform .15s}' +
+    '.tth-btn{position:fixed;right:18px;bottom:18px;z-index:900;display:flex;align-items:center;gap:8px;background:#123c56;color:#fff;border:none;border-radius:999px;padding:12px 20px;font:700 14px Quicksand,system-ui,sans-serif;box-shadow:0 10px 28px rgba(14,51,69,.35);cursor:pointer;transition:transform .15s}' +
     '.tth-btn:hover{transform:translateY(-2px)}.tth-btn svg{font-size:20px;color:#f0b64b}' +
     '.tth-panel{position:fixed;right:18px;bottom:78px;z-index:901;width:370px;max-width:calc(100vw - 24px);height:min(560px,calc(100vh - 110px));background:#fff;border-radius:20px;box-shadow:0 20px 60px rgba(14,51,69,.35);display:none;flex-direction:column;overflow:hidden;font:14px/1.5 Quicksand,system-ui,sans-serif;color:#17455e}' +
     '.tth-panel.on{display:flex}' +
@@ -191,7 +191,7 @@
     '.tth-f input{flex:1;border:1.5px solid #e7e1d2;border-radius:999px;padding:9px 14px;font:14px Quicksand,system-ui,sans-serif;color:#17455e;min-width:0}' +
     '.tth-f input:focus{outline:2px solid #17455e;border-color:#17455e}' +
     '.tth-f button{width:40px;height:40px;border-radius:50%;border:none;background:#f0b64b;color:#123c56;display:grid;place-items:center;font-size:17px;cursor:pointer;flex-shrink:0}' +
-    '@media (max-width:640px){.tth-btn span{display:none}.tth-btn{padding:13px}.tth-panel{right:8px;left:8px;width:auto;max-width:none;bottom:74px;height:min(70vh,560px)}}' +
+    '@media (max-width:640px){.tth-btn{padding:11px 16px;font-size:13.5px}.tth-panel{right:8px;left:8px;width:auto;max-width:none;bottom:74px;height:min(70vh,560px)}}' +
     '@media print{.tth-btn,.tth-panel{display:none!important}}';
 
   var panel, body, lastId = null;
@@ -199,7 +199,7 @@
     var st = document.createElement('style'); st.textContent = css; document.head.appendChild(st);
     var btn = document.createElement('button');
     btn.className = 'tth-btn'; btn.type = 'button'; btn.setAttribute('aria-label', 'Ask me'); btn.setAttribute('aria-expanded', 'false');
-    btn.innerHTML = svg('help') + '<span>Ask me</span>';
+    btn.innerHTML = '<span>Ask me</span>';
     panel = document.createElement('div'); panel.className = 'tth-panel'; panel.setAttribute('role', 'dialog'); panel.setAttribute('aria-label', 'Ask me');
     document.body.appendChild(btn); document.body.appendChild(panel);
     btn.addEventListener('click', function () {
