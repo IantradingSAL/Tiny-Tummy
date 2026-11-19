@@ -285,7 +285,9 @@ dialog:has(.iv-grid) { max-width:1180px; width:96vw; }
 .kb-next-h { font-size:.62rem; font-weight:800; letter-spacing:.06em; text-transform:uppercase; color:#a3b1b8; margin-top:2px; }
 .ocol-h small { font-weight:600; color:var(--soft); font-size:.7rem; }
 .kb-rail { display:grid; grid-auto-flow:column; grid-auto-columns:minmax(250px,270px); gap:12px; overflow-x:auto; padding:10px 10px 14px; align-items:start; background:#efe9dc; border-radius:14px; border-top:6px solid #c9bfa8; }
-.kb-slot { min-width:0; } .kb-slot .ocol-h { padding:2px 4px 8px; }
+.kb-slot { min-width:0; border-radius:14px; transition:outline-color .1s; outline:3px dashed transparent; outline-offset:3px; } .kb-slot .ocol-h { padding:2px 4px 8px; }
+.kb-slot[draggable="true"] .ocol-h { cursor:grab; } .kb-slot.kb-drag { opacity:.45; } .kb-slot.kb-over { outline-color:var(--sc); }
+.kb-slot .ocol-h .kb-grip { color:#a3b1b8; display:flex; margin:0; background:none; padding:0; } .kb-slot .ocol-h .kb-mv { margin-left:auto; display:flex; gap:2px; background:none; padding:0; } .kb-mv .u-ib { width:24px; height:24px; font-size:1.05rem; font-weight:800; line-height:1; } .kb-mv .u-ib[disabled] { opacity:.3; cursor:default; }
 @media (max-width:640px){ .kb-rail { grid-auto-flow:row; grid-auto-columns:auto; overflow:visible; } }
 @media (max-width:640px){ .oboard { grid-auto-flow:row; grid-auto-columns:auto; overflow:visible; } .otile { flex:0 0 92px; padding:8px 4px; } .otile b { font-size:1.15rem; } .otile small { font-size:.58rem; } }
 /* ── Kitchen step cards ── */
@@ -2918,10 +2920,52 @@ function kbBoard(active, products) {
       (list.map(function (t) { return kbTicket(t, products, staff); }).join('') || '<div class="ocol-empty">No orders</div>') + '</div>';
   }).join('') + '</div>';
 }
+/* Queue order: an order moved by hand keeps its place (kitchen_rank),
+   otherwise arrival order (kitchen_start). */
+function kbCmp(a, b) {
+  var ra = a.kitchen_rank != null ? a.kitchen_rank : a.kitchen_start || 0, rb = b.kitchen_rank != null ? b.kitchen_rank : b.kitchen_start || 0;
+  return ra - rb || (a.kitchen_start || 0) - (b.kitchen_start || 0);
+}
+/* Move an order to another order's place in the queue (drag a ticket onto
+   another, or the arrow buttons): the whole queue is renumbered in order. */
+function kbMove(oid, targetId, after) {
+  if (!can('kitchen_manage')) { alert('Only people with the Kitchen permission can change the order of the tickets.'); return; }
+  if (!oid || oid === targetId) return;
+  var orders = store('orders').all();
+  var q = orders.filter(function (o) { return ['kitchen', 'portioning', 'qc'].indexOf(o.status) >= 0; }).sort(kbCmp);
+  var moving = byId(q, oid), target = byId(q, targetId); if (!moving || !target) return;
+  var from = q.indexOf(moving) + 1;
+  q.splice(q.indexOf(moving), 1);
+  q.splice(q.indexOf(target) + (after ? 1 : 0), 0, moving);
+  var to = q.indexOf(moving) + 1;
+  if (from === to) return;
+  q.forEach(function (o, i) { o.kitchen_rank = i + 1; });
+  moving.history.push({ at: nowTs(), what: 'Kitchen queue: moved from #' + from + ' to #' + to + ' — ' + currentUser().name });
+  logAct('Kitchen', 'queue reordered', moving.code + ' · #' + from + ' → #' + to);
+  store('orders').save(orders); render();
+  uToast(moving.code + ' is now #' + to);
+}
+function kbStep(oid, dir) { // ◀ ▶ buttons: swap with the neighbour
+  var q = store('orders').all().filter(function (o) { return ['kitchen', 'portioning', 'qc'].indexOf(o.status) >= 0; }).sort(kbCmp);
+  var i = q.findIndex(function (o) { return o.id === oid; }), j = i + dir;
+  if (i < 0 || j < 0 || j >= q.length) return;
+  kbMove(oid, q[j].id, dir > 0);
+}
+var KB_DRAG = null;
+function kbDragStart(e, oid) { KB_DRAG = oid; e.dataTransfer.effectAllowed = 'move'; try { e.dataTransfer.setData('text/plain', oid); } catch (x) {} e.currentTarget.classList.add('kb-drag'); }
+function kbDragEnd(e) { e.currentTarget.classList.remove('kb-drag'); document.querySelectorAll('.kb-over').forEach(function (el) { el.classList.remove('kb-over'); }); KB_DRAG = null; }
+function kbDragOver(e) { if (!KB_DRAG) return; e.preventDefault(); e.dataTransfer.dropEffect = 'move'; e.currentTarget.classList.add('kb-over'); }
+function kbDragLeave(e) { e.currentTarget.classList.remove('kb-over'); }
+function kbDrop(e, targetId) {
+  e.preventDefault(); var oid = KB_DRAG; e.currentTarget.classList.remove('kb-over'); KB_DRAG = null;
+  var q = store('orders').all().filter(function (o) { return ['kitchen', 'portioning', 'qc'].indexOf(o.status) >= 0; }).sort(kbCmp);
+  var from = q.findIndex(function (o) { return o.id === oid; }), to = q.findIndex(function (o) { return o.id === targetId; });
+  kbMove(oid, targetId, from < to); // dropped on a later ticket → goes after it; on an earlier one → before it
+}
 /* Orders in production in arrival order, each with its position (#n), step
    definitions and the index of its current step (-1 = all steps done). */
 function kbQueue(active, products) {
-  return active.slice().sort(function (a, b) { return (a.kitchen_start || 0) - (b.kitchen_start || 0); }).map(function (o, n) {
+  return active.slice().sort(kbCmp).map(function (o, n) {
     var defs = stepDefs(o), cur = currentStep(o, products), ci = -1;
     defs.forEach(function (d, i) { if (d.name === cur && ci < 0) ci = i; });
     return { o: o, n: n + 1, defs: defs, ci: ci };
@@ -2933,10 +2977,15 @@ function kbTickets(active, products) {
   var staff = store('staff').all().map(normStaff);
   var list = kbQueue(active, products).filter(function (t) { return KV.who === 'all' || (t.o.steps || []).some(kvMine); });
   if (!list.length) return '<div class="panel"><p class="muted">No open step for <b>' + esc(KV.who === '__none__' ? 'unassigned work' : kvWho()) + '</b> right now. <a href="#" onclick="kvSet(\'who\',\'all\');return false">Show everyone</a></p></div>';
-  return '<div class="kb-rail">' + list.map(function (t) {
+  return '<div class="kb-rail">' + list.map(function (t, i) {
     var stn = t.ci >= 0 ? stepStation(t.defs[t.ci].name) : 'qc';
-    return '<div class="kb-slot" style="--sc:' + (KB_COLORS[stn] || '#17455e') + '"><div class="ocol-h">' + ic(STATION_SVG[stn] || 'chef') + ' ' + esc(stLabel(stn)) + '</div>' + kbTicket(t, products, staff) + '</div>';
-  }).join('') + '</div>';
+    var mv = can('kitchen_manage'), id = t.o.id;
+    return '<div class="kb-slot" style="--sc:' + (KB_COLORS[stn] || '#17455e') + '"' +
+      (mv ? ' draggable="true" ondragstart="kbDragStart(event,\'' + id + '\')" ondragend="kbDragEnd(event)" ondragover="kbDragOver(event)" ondragleave="kbDragLeave(event)" ondrop="kbDrop(event,\'' + id + '\')"' : '') + '>' +
+      '<div class="ocol-h">' + (mv ? '<span class="kb-grip" title="Drag to change the order">' + ic('grid') + '</span>' : '') + ic(STATION_SVG[stn] || 'chef') + ' ' + esc(stLabel(stn)) +
+      (mv ? '<span class="kb-mv"><button class="u-ib" title="Move earlier" onclick="kbStep(\'' + id + '\',-1)"' + (i ? '' : ' disabled') + '>‹</button><button class="u-ib" title="Move later" onclick="kbStep(\'' + id + '\',1)"' + (i < list.length - 1 ? '' : ' disabled') + '>›</button></span>' : '') + '</div>' +
+      kbTicket(t, products, staff) + '</div>';
+  }).join('') + '</div>' + (can('kitchen_manage') ? '<p class="muted" style="margin:8px 2px 0">' + ic('info') + ' Drag a ticket onto another to take its place (or use the arrows). The new order is kept for everyone and recorded on the order.</p>' : '');
 }
 function kbTicket(t, products, staff) {
     var o = t.o, defs = t.defs, ci = t.ci;
