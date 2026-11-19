@@ -206,6 +206,14 @@ Each order, client, recipe or ingredient in the answer is a link to it.
 
 ## 4 bis. Working in the dashboard
 
+- **On a phone or small tablet** (up to 900 px wide) the dashboard becomes an
+  app: a top bar with the page name, the menu button and a small *demo · who*
+  pill (tap it for the demo notice); the full menu (search, favourites,
+  groups) opens as a drawer and closes when a page is picked; a bottom bar
+  holds the person's favourite pages (up to 4) and *Menu*. Page
+  descriptions are hidden (Ask me explains each page), stage tiles scroll
+  sideways, the top boxes sit two per row, windows open full screen with
+  *Close* always at the top, and Ask me sits above the bottom bar.
 - **Menu.** Grouped by trade — Sales; Kitchen & stock; Delivery; Money;
   Quality; Team; System — with Overview on top. Groups fold; the group of the
   page in use stays open, and the others keep the state each person left
@@ -512,6 +520,7 @@ Each order, client, recipe or ingredient in the answer is a link to it.
 
 ### V1.2 — 18/11/2026 (live on 18/11/2026)
 
+- Phone and tablet layout: top bar, drawer menu, bottom bar of favourite pages, compact pages and full-screen windows (19/11/2026).
 - Activity Log: every click, every field changed and every page opened is recorded with the person, date and time, alongside the actions; filters by person, page, type and period; latest 5,000 entries kept (18/11/2026).
 - List view on every page with records (Recipes, Age programs, ISO 22000, Team added; Requisitions, Suppliers, Notifications and Activity Log rebuilt) with search, filters, sortable columns, counts, totals and CSV (18/11/2026).
 - Inventory: filters by category, location, stock level and auto reorder (18/11/2026).

@@ -228,6 +228,16 @@ Chaque commande, client, recette ou ingrédient de la réponse est un lien.
 
 ## 4 bis. Travailler dans le tableau de bord
 
+- **Sur téléphone ou petite tablette** (jusqu'à 900 px de large), le tableau
+  de bord devient une application : une barre en haut avec le nom de la page,
+  le bouton du menu et une petite pastille *démo · qui* (la toucher affiche
+  l'avis de démonstration) ; le menu complet (recherche, favoris, groupes)
+  s'ouvre en tiroir et se ferme dès qu'une page est choisie ; une barre en bas
+  porte les pages favorites de la personne (jusqu'à 4) et *Menu*. Les
+  descriptions de page sont masquées (Ask me explique chaque page), les
+  étapes défilent de côté, les indicateurs sont deux par ligne, les fenêtres
+  s'ouvrent en plein écran avec *Fermer* toujours en haut, et Ask me se place
+  au-dessus de la barre du bas.
 - **Menu.** Regroupé par métier — Ventes ; Cuisine & stock ; Livraison ;
   Argent ; Qualité ; Équipe ; Système — avec la Vue d'ensemble en tête. Les
   groupes se replient ; le groupe de la page en cours reste ouvert, les autres
@@ -573,6 +583,7 @@ Chaque commande, client, recette ou ingrédient de la réponse est un lien.
 
 ### V1.2 — 18/11/2026 (mise en service le 18/11/2026)
 
+- Affichage téléphone et tablette : barre en haut, menu en tiroir, barre du bas des pages favorites, pages compactes et fenêtres plein écran (19/11/2026).
 - Journal d'activité : chaque clic, chaque champ modifié et chaque page ouverte sont enregistrés avec la personne, la date et l'heure, à côté des actions ; filtres par personne, page, type et période ; 5 000 dernières entrées conservées (18/11/2026).
 - Vue Liste sur chaque page d'enregistrements (Recettes, Programmes par âge, ISO 22000, Équipe ajoutés ; Réquisitions, Fournisseurs, Notifications et Journal d'activité refaits) avec recherche, filtres, colonnes triables, nombres, totaux et CSV (18/11/2026).
 - Stock : filtres par catégorie, emplacement, niveau de stock et réapprovisionnement automatique (18/11/2026).
