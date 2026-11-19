@@ -177,7 +177,7 @@ The menu is grouped by trade:
 | — | Overview | Today across the operation, advisor tips, records waiting for me |
 | Sales | Orders | Order pipeline: stage tiles, Board, and List (search, period, driver, sort; customer, child and allergy STOP, items, stage, kitchen progress, batch lot, driver and ETA, value, cost, margin; totals; CSV; link to the stock the order used) |
 | Sales | Age Programs | Programmes by age of the child |
-| Production | Kitchen | Board (one card per order: timeline, clocks, steps) and List (one row per step of every order in production: order and items, allergy STOP, step and CCP, station, person, planned minutes, status and timer; filters to do / running / overdue / done, person or *my steps*, station; Start, Done and Undo on the row; totals: steps, running, overdue, minutes still to do) |
+| Production | Kitchen | Board (like the Orders board, a ticket rail: one column per station in process order — Prep, Cooking, Assembly, Portioning, Chilling, Packaging, QC — with the minutes queued; each order is one ticket in the column of its current step, numbered by arrival so they are handed on one by one; the ticket shows the current task with its person, timer, Start / Done / Snooze, then the coming steps with their person and minutes, progress and the next-step button), Detail (one full panel per order: timeline, clocks, CCP readings) and List (one row per step of every order in production: order and items, allergy STOP, step and CCP, station, person, planned minutes, status and timer; filters to do / running / overdue / done, person or *my steps*, station; Start, Done and Undo on the row; totals: steps, running, overdue, minutes still to do) |
 | Production | Recipes · BOM | Ingredients, process steps, full cost |
 | Production | Inventory · Lots | Stock as lots, FEFO, expiry, reorder |
 | Production | Requisitions | Purchase requests |
@@ -523,6 +523,8 @@ Each order, client, recipe or ingredient in the answer is a link to it.
 - Team & Access: roles can be created; page access per role and per person, every page listed automatically; per-person permissions (18/11/2026, #11).
 
 - Send to kitchen refused for missing stock opens the Requisitions page on that order, its requisitions highlighted first, instead of a message only (19/11/2026, #12).
+
+- Kitchen: Board rebuilt as a station ticket rail in the style of the Orders board — each order a numbered ticket in the column of its current step, current task on top (person, timer, Start / Done), coming steps under it; the previous full panels move to a Detail view (19/11/2026, #13).
 
 ### V1.1 — from 01/11/2026 to 18/11/2026 (live on 18/11/2026)
 
